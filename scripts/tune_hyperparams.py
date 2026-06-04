@@ -208,7 +208,7 @@ def objective(trial, data):
     ])
 
     meta = LogisticRegressionCV(
-        Cs=meta_Cs, cv=3, multi_class="multinomial",
+        Cs=meta_Cs, cv=3,
         max_iter=2000, random_state=42, n_jobs=-1,
     )
     meta.fit(val_stacked, y_val)

@@ -33,7 +33,7 @@ class CatBoostOutcomeClassifier:
             return self
 
         defaults = {
-            "iterations": 600,
+            "iterations": 200,
             "depth": 6,
             "learning_rate": 0.05,
             "l2_leaf_reg": 3.0,

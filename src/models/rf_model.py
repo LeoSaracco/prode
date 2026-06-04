@@ -28,7 +28,7 @@ class RFOutcomeClassifier:
         from sklearn.ensemble import RandomForestClassifier
 
         defaults = {
-            "n_estimators": 500,
+            "n_estimators": 300,
             "max_depth": 12,
             "min_samples_split": 15,
             "min_samples_leaf": 6,

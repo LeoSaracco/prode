@@ -70,7 +70,6 @@ class EnsemblePredictor:
         self.meta_learner = LogisticRegressionCV(
             Cs=10,
             cv=3,
-            multi_class="multinomial",
             max_iter=2000,
             random_state=42,
             n_jobs=-1,

@@ -28,7 +28,7 @@ class XGBOutcomeClassifier:
             return self
 
         defaults = {
-            "n_estimators": 600,
+            "n_estimators": 300,
             "max_depth": 5,
             "learning_rate": 0.05,
             "subsample": 0.8,
@@ -60,6 +60,13 @@ class XGBOutcomeClassifier:
         proba = self.model_.predict_proba(x2d)[0]
         # Orden: 0=Loss, 1=Draw, 2=Win
         return float(proba[2]), float(proba[1]), float(proba[0])
+
+    def predict_proba_batch(self, X: np.ndarray) -> np.ndarray:
+        if not self.is_fitted_ or self.model_ is None:
+            n = len(X)
+            return np.tile([0.38, 0.24, 0.38], (n, 1))
+        raw = self.model_.predict_proba(X)
+        return raw[:, [2, 1, 0]]
 
     def explain(self, x: np.ndarray) -> list[tuple[str, float]]:
         """Retorna los top-5 features más influyentes usando SHAP."""

@@ -144,11 +144,15 @@ class StatsBombShotsCollector:
             except ImportError:
                 logger.warning("Install `datasets` or place StatsBomb shots files in %s", self.directory)
                 return pd.DataFrame()
-            dataset = load_dataset(self.dataset_name)
-            raw = pd.concat(
-                [dataset[split].to_pandas() for split in dataset.keys()],
-                ignore_index=True,
-            )
+            try:
+                dataset = load_dataset(self.dataset_name)
+                raw = pd.concat(
+                    [dataset[split].to_pandas() for split in dataset.keys()],
+                    ignore_index=True,
+                )
+            except Exception as e:
+                logger.warning("StatsBomb HF dataset error: %s", e)
+                return pd.DataFrame()
         team_col = _first_present(raw.columns, ["team"])
         date_col = _first_present(raw.columns, ["match_date", "date"])
         xg_col = _first_present(raw.columns, ["xg_statsbomb", "xg"])

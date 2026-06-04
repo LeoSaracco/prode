@@ -280,8 +280,8 @@ class ModelTrainer:
             x_val=x_val, y_val=y_val,
             x_test=x_test, y_test=y_test,
             poisson_match_df=train_matches,
-            train_matches_df=train_matches,
-            test_matches_df=test_matches,
+            train_matches_df=train_df,
+            test_matches_df=test_df,
             metadata_extra={
                 "training_source": "+".join(training_sources),
                 "n_source_matches": len(match_df),
@@ -437,8 +437,8 @@ class ModelTrainer:
         meta_Cs = best_params.get("meta_Cs", 8)
         from sklearn.linear_model import LogisticRegressionCV
         meta = LogisticRegressionCV(
-            Cs=meta_Cs, cv=3, multi_class="multinomial",
-            max_iter=2000, random_state=42, n_jobs=-1,
+            Cs=meta_Cs, cv=3, max_iter=2000,
+            random_state=42, n_jobs=-1,
         )
         meta.fit(val_stacked, y_val)
 
