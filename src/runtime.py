@@ -11,10 +11,12 @@ from config.settings import MODELS_DIR
 from config.team_aliases import TEAM_ALIASES, resolve_team_name
 from src.data.cache_manager import CacheManager
 from src.features.feature_builder import FeatureBuilder
+from src.models.catboost_model import CatBoostOutcomeClassifier
 from src.models.elo_model import EloModel
 from src.models.ensemble import EnsemblePredictor
 from src.models.lgbm_model import LGBMOutcomeClassifier
 from src.models.poisson_model import PoissonGoalModel
+from src.models.rf_model import RFOutcomeClassifier
 from src.models.xgb_model import XGBOutcomeClassifier
 
 
@@ -34,22 +36,29 @@ def load_prediction_runtime() -> PredictionRuntime:
     scaler = joblib.load(scaler_path) if scaler_path.exists() else None
 
     poisson = PoissonGoalModel().load()
+    rf = RFOutcomeClassifier().load()
     xgb = XGBOutcomeClassifier().load()
     lgbm = LGBMOutcomeClassifier().load()
+    catboost = CatBoostOutcomeClassifier().load()
     elo_model = EloModel(elo_df=elo_df)
+
     ensemble = EnsemblePredictor(
+        rf_model=rf,
         xgb_model=xgb,
         lgbm_model=lgbm,
+        catboost_model=catboost,
         elo_model=elo_model,
         poisson_model=poisson,
         scaler=scaler,
     )
+    ensemble.load_meta()
+
     return PredictionRuntime(
         ensemble=ensemble,
         feature_builder=FeatureBuilder(elo_df=elo_df),
         poisson=poisson,
         elo_df=elo_df,
-        models_loaded=bool(xgb.is_fitted_ or lgbm.is_fitted_ or poisson.is_fitted_),
+        models_loaded=bool(rf.is_fitted_ or xgb.is_fitted_ or lgbm.is_fitted_ or catboost.is_fitted_),
     )
 
 

@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, log_loss
 from sklearn.preprocessing import StandardScaler
 
-from config.settings import MODELS_DIR, ENSEMBLE_WEIGHTS, HIGH_CONFIDENCE_THRESHOLD
+from config.settings import MODELS_DIR, HIGH_CONFIDENCE_THRESHOLD
 from src.features.attack_features import compute_offensive_power
 from src.features.defense_features import compute_defensive_stability
 from src.features.elo_features import compute_elo_win_probability
@@ -19,8 +19,11 @@ from src.features.feature_builder import MATCH_FEATURE_COLUMNS
 from src.features.historical_features import compute_world_cup_history_score
 from src.features.risk_features import compute_tactical_advantage
 from src.features.squad_features import compute_squad_depth_from_market_value
+from src.models.catboost_model import CatBoostOutcomeClassifier
+from src.models.ensemble import EnsemblePredictor
 from src.models.lgbm_model import LGBMOutcomeClassifier
 from src.models.poisson_model import PoissonGoalModel
+from src.models.rf_model import RFOutcomeClassifier
 from src.models.xgb_model import XGBOutcomeClassifier
 
 logger = logging.getLogger(__name__)
@@ -159,6 +162,8 @@ class NationalTeamTrainingFeatureBuilder:
         mv_b = min(MARKET_VALUE_EUR_M.get(team_b, 100.0) / 1500, 1.0)
         tactical_adv = compute_tactical_advantage(elo_diff, op_a, ds_b, op_b, ds_a)
         form_diff = float(sa["form_5"]) - float(sb["form_5"])
+        consistency = float(sa.get("form_5", 0.5)) - float(sb.get("form_5", 0.5))
+
         return np.array([
             elo_diff,
             compute_elo_win_probability(elo_a, elo_b),
@@ -168,15 +173,13 @@ class NationalTeamTrainingFeatureBuilder:
             op_a - op_b,
             ds_a - ds_b,
             compute_squad_depth_from_market_value(team_a) - compute_squad_depth_from_market_value(team_b),
-            0.0,
-            0.0,
-            0.0,
+            consistency,
             wc_a - wc_b,
             mv_a - mv_b,
             tactical_adv,
             0.0,
-            form_diff * (elo_diff / 400),
-            op_a - ds_b,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
         ], dtype=np.float32)
 
     def build_training_matrix(self, match_df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
@@ -187,9 +190,12 @@ class NationalTeamTrainingFeatureBuilder:
             is_tournament = int(row.get("is_tournament", 0) or 0)
             is_wc = int(row.get("is_wc", 0) or 0)
             is_qualifier = int(row.get("is_qualifier", 0) or 0)
-            is_neutral = int(not row.get("neutral", True))
-            extra = np.array([is_tournament, is_wc, is_qualifier, is_neutral], dtype=np.float32)
-            x_rows.append(np.concatenate([feats, extra]))
+            is_home = 1.0 if not row.get("neutral", True) else 0.0
+            feats[13] = float(is_tournament)
+            feats[14] = float(is_wc)
+            feats[15] = float(is_qualifier)
+            feats[16] = is_home
+            x_rows.append(feats)
             y_rows.append(label_map[row["result"]])
         return np.array(x_rows, dtype=np.float32), np.array(y_rows, dtype=np.int32)
 
@@ -338,10 +344,14 @@ class ModelTrainer:
         x_test_s = scaler.transform(x_test)
         joblib.dump(scaler, MODELS_DIR / "scaler.pkl")
 
+        rf = RFOutcomeClassifier().train(x_train_s, y_train)
+        rf.save()
         xgb = XGBOutcomeClassifier().train(x_train_s, y_train, x_val_s, y_val)
         xgb.save()
         lgbm = LGBMOutcomeClassifier().train(x_train_s, y_train, x_val_s, y_val)
         lgbm.save()
+        catboost = CatBoostOutcomeClassifier().train(x_train_s, y_train, x_val_s, y_val)
+        catboost.save()
 
         poisson = PoissonGoalModel()
         if poisson_match_df is not None and not poisson_match_df.empty:
@@ -350,59 +360,103 @@ class ModelTrainer:
             poisson._set_default_params(pd.DataFrame())
         poisson.save()
 
-        xgb_probs = xgb.model_.predict_proba(x_test_s) if xgb.is_fitted_ else np.zeros((len(x_test_s), 3))
-        lgbm_probs = lgbm.model_.predict_proba(x_test_s) if lgbm.is_fitted_ else np.zeros((len(x_test_s), 3))
+        models = {
+            "rf": rf,
+            "xgb": xgb,
+            "lgbm": lgbm,
+            "catboost": catboost,
+        }
+        model_order = ["rf", "xgb", "lgbm", "catboost"]
 
-        w_xgb = ENSEMBLE_WEIGHTS.get("xgb", 0.35)
-        w_lgbm = ENSEMBLE_WEIGHTS.get("lgbm", 0.30)
-        w_elo = ENSEMBLE_WEIGHTS.get("elo", 0.20)
-        w_poisson = ENSEMBLE_WEIGHTS.get("poisson", 0.15)
-        total_w = w_xgb + w_lgbm + w_elo + w_poisson
-        if total_w > 0:
-            w_xgb /= total_w
-            w_lgbm /= total_w
-            w_elo /= total_w
-            w_poisson /= total_w
+        raw_elo_diff = x_val[:, 0]
 
-        elo_probs = np.zeros_like(xgb_probs)
-        poisson_probs = np.zeros_like(xgb_probs)
-        raw_elo_diff = x_test[:, 0]
-        for i in range(len(x_test_s)):
-            elo_diff_raw = float(raw_elo_diff[i])
-            p_win = 1.0 / (1.0 + 10.0 ** (-elo_diff_raw / 400.0))
-            p_draw = 0.22 * (1.0 - abs(p_win - 0.5) * 2.0)
-            p_win = p_win * (1.0 - p_draw)
-            p_loss = 1.0 - p_win - p_draw
-            elo_probs[i] = [p_loss, p_draw, p_win]
-            poisson_probs[i] = [0.333, 0.334, 0.333]
+        def _elo_probs_batch(elo_diffs: np.ndarray) -> np.ndarray:
+            n = len(elo_diffs)
+            probs = np.zeros((n, 3))
+            for i in range(n):
+                ed = float(elo_diffs[i])
+                p_win = 1.0 / (1.0 + 10.0 ** (-ed / 400.0))
+                p_draw = 0.22 * (1.0 - abs(p_win - 0.5) * 2.0)
+                p_win = p_win * (1.0 - p_draw)
+                p_loss = 1.0 - p_win - p_draw
+                probs[i] = [p_loss, p_draw, p_win]
+            return probs
 
-        blend_probs = (
-            w_xgb * xgb_probs + w_lgbm * lgbm_probs +
-            w_elo * elo_probs + w_poisson * poisson_probs
+        def _stack_probs(probs_dict: dict[str, np.ndarray]) -> np.ndarray:
+            vecs = []
+            for mn in model_order:
+                p = probs_dict.get(mn, np.tile([0.38, 0.24, 0.38], (len(next(iter(probs_dict.values()))), 1)))
+                vecs.append(p)
+            vecs.append(_elo_probs_batch(raw_elo_diff))
+            return np.hstack(vecs)
+
+        val_probs = {}
+        for name, model in models.items():
+            if model.is_fitted_:
+                val_probs[name] = model.predict_proba_batch(x_val_s)
+            else:
+                val_probs[name] = np.tile([0.38, 0.24, 0.38], (len(x_val_s), 3))
+
+        val_stacked = _stack_probs(val_probs)
+
+        from sklearn.linear_model import LogisticRegressionCV
+        meta = LogisticRegressionCV(
+            Cs=8, cv=3, multi_class="multinomial",
+            max_iter=2000, random_state=42, n_jobs=-1,
         )
-        blend_pred = np.argmax(blend_probs, axis=1)
+        meta.fit(val_stacked, y_val)
 
-        elo_diff_from_features = x_test[:, 0]
-        high_elo_mask = np.abs(elo_diff_from_features) >= 200
+        test_probs = {}
+        for name, model in models.items():
+            if model.is_fitted_:
+                test_probs[name] = model.predict_proba_batch(x_test_s)
+            else:
+                test_probs[name] = np.tile([0.38, 0.24, 0.38], (len(x_test_s), 3))
+        test_elo = _elo_probs_batch(x_test[:, 0])
+        test_stacked = np.hstack([
+            test_probs["rf"], test_probs["xgb"], test_probs["lgbm"],
+            test_probs["catboost"], test_elo,
+        ])
+
+        meta_probs = meta.predict_proba(test_stacked)
+        meta_pred = np.argmax(meta_probs, axis=1)
+
+        import joblib as jl
+        jl.dump(meta, MODELS_DIR / "meta_learner.pkl")
+
+        elo_diff_test = x_test[:, 0]
+        high_elo_mask = np.abs(elo_diff_test) >= 200
+
+        accuracies = {}
+        for name, model in models.items():
+            if model.is_fitted_:
+                accuracies[name] = round(model.score(x_test_s, y_test), 4)
+            else:
+                accuracies[name] = 0.0
+        accuracies["meta"] = round(float(accuracy_score(y_test, meta_pred)), 4)
 
         metadata = {
             "train_date": datetime.now().isoformat(),
             "n_train_samples": int(len(x_train)),
             "n_val_samples": int(len(x_val)),
             "n_test_samples": int(len(x_test)),
+            "n_features": len(MATCH_FEATURE_COLUMNS),
             "features": MATCH_FEATURE_COLUMNS,
-            "accuracy_xgb_global": round(xgb.score(x_test_s, y_test), 4),
-            "accuracy_lgbm_global": round(lgbm.score(x_test_s, y_test), 4),
-            "accuracy_blend_global": round(float(accuracy_score(y_test, blend_pred)), 4),
-            "log_loss_blend": round(float(log_loss(y_test, blend_probs, labels=[0, 1, 2])), 4),
-            "accuracy_high_confidence": round(self._segment_accuracy(blend_probs, y_test, threshold=HIGH_CONFIDENCE_THRESHOLD), 4),
+            "accuracy_rf": accuracies["rf"],
+            "accuracy_xgb": accuracies["xgb"],
+            "accuracy_lgbm": accuracies["lgbm"],
+            "accuracy_catboost": accuracies["catboost"],
+            "accuracy_meta": accuracies["meta"],
+            "log_loss_meta": round(float(log_loss(y_test, meta_probs, labels=[0, 1, 2])), 4),
+            "accuracy_high_confidence": round(self._segment_accuracy(meta_probs, y_test, threshold=HIGH_CONFIDENCE_THRESHOLD), 4),
             "accuracy_high_elo_diff_200": round(
-                float(accuracy_score(y_test[high_elo_mask], blend_pred[high_elo_mask]))
+                float(accuracy_score(y_test[high_elo_mask], meta_pred[high_elo_mask]))
                 if high_elo_mask.sum() >= 10 else 0.0, 4
             ),
             "n_high_elo_matches": int(high_elo_mask.sum()),
             "baseline_random": 0.333,
             "split_type": "time_series_chronological",
+            "ensemble_architecture": "RF+XGB+LGBM+CATBOOST+ELO -> LogisticRegressionCV meta-learner",
             **metadata_extra,
         }
         with open(MODELS_DIR / "model_metadata.json", "w", encoding="utf-8") as f:

@@ -67,18 +67,28 @@ El split train/val/test es estrictamente cronologico (70/15/15):
 `_add_reverse_perspective` se aplica SOLO al train set para evitar data leakage.
 El metadata ahora incluye `split_type: time_series_chronological` y `accuracy_high_elo_diff_200`.
 
-## Ensemble
+## Ensemble (Fase B)
 
-Blend actual:
+Arquitectura de stacking con meta-learner:
 
 ```text
-XGBoost: 35%
-LightGBM: 30%
-Elo: 20%
-Poisson: 15%
+Layer 1 — Base models:
+├── RandomForest (500 trees, OOB)
+├── XGBoost (600 iter, max_depth=5)
+├── LightGBM (600 iter, num_leaves=31)
+├── CatBoost (600 iter, depth=6)
+└── Elo (baseline estadistico)
+
+Layer 2 — Meta-learner:
+└── LogisticRegressionCV (Cs=8, multinomial)
+    Entrenado sobre predicciones base en val set.
+
+Layer 3 — Calibracion:
+└── IsotonicRegression (3-fold CV)
 ```
 
-El modelo Poisson tambien se usa para goles esperados, marcadores probables y simulaciones Monte Carlo.
+El peso de cada modelo base es aprendido por el meta-learner,
+no hardcodeado. El modelo Poisson solo se usa para xG y scorelines.
 
 ## Simulacion de Grupos
 

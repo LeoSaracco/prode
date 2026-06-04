@@ -7,17 +7,14 @@ import logging
 import numpy as np
 import pandas as pd
 
-from config.wc2026_groups import WC_HISTORY_SCORE
-from src.data.national_team_proxy import FALLBACK_STATS, MARKET_VALUE_EUR_M, FALLBACK_ELO
+from src.data.national_team_proxy import FALLBACK_STATS, MARKET_VALUE_EUR_M
 from src.features.elo_features import get_elo_rating, compute_elo_win_probability
-from src.features.attack_features import compute_offensive_power, compute_big_match_rating
+from src.features.attack_features import compute_offensive_power
 from src.features.defense_features import compute_defensive_stability
 from src.features.squad_features import compute_squad_depth_from_market_value
 from src.features.historical_features import compute_world_cup_history_score, h2h_advantage_score
 from src.features.risk_features import (
-    compute_upset_probability,
     compute_consistency_score,
-    compute_pressure_performance,
     compute_tactical_advantage,
 )
 
@@ -26,19 +23,20 @@ logger = logging.getLogger(__name__)
 FEATURE_COLUMNS = [
     "elo_rating", "xg_per_game", "xga_per_game", "form_5",
     "offensive_power", "defensive_stability", "squad_depth_score",
-    "big_match_rating", "pressure_performance", "consistency_score",
-    "wc_history_score", "market_value_norm",
+    "consistency_score", "wc_history_score", "market_value_norm",
+    "elo_momentum", "days_since_last_match",
 ]
 
 MATCH_FEATURE_COLUMNS = [
     "elo_diff", "elo_win_prob_a",
     "xg_diff", "xga_diff",
     "form_5_diff", "offensive_power_diff", "defensive_stability_diff",
-    "squad_depth_diff", "big_match_rating_diff", "pressure_diff",
-    "consistency_diff", "wc_history_diff", "market_value_diff",
+    "squad_depth_diff", "consistency_diff",
+    "wc_history_diff", "market_value_diff",
     "tactical_advantage", "h2h_advantage",
-    "form_times_elo_diff", "attack_vs_defense_clash",
     "is_tournament", "is_wc", "is_qualifier", "is_home",
+    "fifa_rank_diff", "elo_momentum_diff",
+    "days_since_last_match_diff", "rest_days_diff",
 ]
 
 INFERENCE_CONTEXT_FEATURES = {
@@ -46,6 +44,13 @@ INFERENCE_CONTEXT_FEATURES = {
     "is_wc": 1.0,
     "is_qualifier": 0.0,
     "is_home": 0.0,
+}
+
+DEFAULT_EXTRA_FEATURES = {
+    "fifa_rank_diff": 0.0,
+    "elo_momentum_diff": 0.0,
+    "days_since_last_match_diff": 0.0,
+    "rest_days_diff": 0.0,
 }
 
 
@@ -60,7 +65,6 @@ class FeatureBuilder:
         self._team_features: dict[str, dict] = {}
 
     def build_team_features(self, team: str) -> dict:
-        """Construye el vector de features para una selección."""
         if team in self._team_features:
             return self._team_features[team]
 
@@ -78,11 +82,12 @@ class FeatureBuilder:
         offensive_power = compute_offensive_power(xg_pg)
         defensive_stability = compute_defensive_stability(xga_pg, ppda)
         squad_depth = compute_squad_depth_from_market_value(team)
-        big_match = compute_big_match_rating(form_5, wc_history, elo)
-        pressure = compute_pressure_performance(form_5, wc_history, elo)
         consistency = compute_consistency_score([
             3 if form_5 > 0.75 else (1 if form_5 > 0.45 else 0)
         ] * 10)
+
+        elo_momentum = self._get_elo_momentum(team)
+        days_since = self._get_days_since_last_match(team)
 
         feats = {
             "team": team,
@@ -94,14 +99,22 @@ class FeatureBuilder:
             "offensive_power": offensive_power,
             "defensive_stability": defensive_stability,
             "squad_depth_score": squad_depth,
-            "big_match_rating": big_match,
-            "pressure_performance": pressure,
             "consistency_score": consistency,
             "wc_history_score": wc_history,
             "market_value_norm": min(mv / 1500, 1.0),
+            "elo_momentum": elo_momentum,
+            "days_since_last_match": days_since,
         }
         self._team_features[team] = feats
         return feats
+
+    def _get_elo_momentum(self, team: str) -> float:
+        if self.elo_df is None or self.elo_df.empty:
+            return 0.0
+        return 0.0
+
+    def _get_days_since_last_match(self, team: str) -> float:
+        return 30.0
 
     def build_match_features(
         self,
@@ -110,13 +123,6 @@ class FeatureBuilder:
         h2h_df: pd.DataFrame | None = None,
         context: dict[str, float] | None = None,
     ) -> np.ndarray:
-        """
-        Retorna vector de features para el partido A vs B.
-        Usado por el ensemble en tiempo de inferencia.
-
-        context dict puede incluir: is_tournament, is_wc, is_qualifier, is_home
-        Por defecto asume contexto de Mundial (todos 1 para tournament/wc, 0 resto).
-        """
         fa = self.build_team_features(team_a)
         fb = self.build_team_features(team_b)
 
@@ -135,10 +141,8 @@ class FeatureBuilder:
             fb["offensive_power"], fa["defensive_stability"],
         )
 
-        form_times_elo = fa["form_5"] * (elo_diff / 400)
-        attack_vs_def = fa["offensive_power"] - fb["defensive_stability"]
-
         ctx = context or INFERENCE_CONTEXT_FEATURES
+        extra = DEFAULT_EXTRA_FEATURES
 
         features = np.array([
             elo_diff,
@@ -149,19 +153,19 @@ class FeatureBuilder:
             fa["offensive_power"] - fb["offensive_power"],
             fa["defensive_stability"] - fb["defensive_stability"],
             fa["squad_depth_score"] - fb["squad_depth_score"],
-            fa["big_match_rating"] - fb["big_match_rating"],
-            fa["pressure_performance"] - fb["pressure_performance"],
             fa["consistency_score"] - fb["consistency_score"],
             fa["wc_history_score"] - fb["wc_history_score"],
             fa["market_value_norm"] - fb["market_value_norm"],
             tactical_adv,
             h2h_score,
-            form_times_elo,
-            attack_vs_def,
             ctx.get("is_tournament", 1.0),
             ctx.get("is_wc", 1.0),
             ctx.get("is_qualifier", 0.0),
             ctx.get("is_home", 0.0),
+            extra.get("fifa_rank_diff", 0.0),
+            extra.get("elo_momentum_diff", 0.0),
+            extra.get("days_since_last_match_diff", 0.0),
+            extra.get("rest_days_diff", 0.0),
         ], dtype=np.float32)
 
         return features

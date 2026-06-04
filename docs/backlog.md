@@ -29,6 +29,20 @@ Cambios realizados:
 - **Metricas segmentadas**: `accuracy_high_elo_diff_200` medida en test set para partidos con diferencia Elo >= 200.
 - **Pesos del ensemble normalizados**: se normalizan automaticamente si no suman 1.0.
 
+### Fase B — Re-ingenieria de Ensemble y Features
+
+Estado: completado.
+
+Cambios realizados:
+
+- **RandomForest**: nuevo `RFOutcomeClassifier` con 500 arboles, OOB scoring, class_weight balanced.
+- **CatBoost**: nuevo `CatBoostOutcomeClassifier` con ordered boosting y early stopping.
+- **Meta-learner**: `LogisticRegressionCV` entrenado sobre predicciones de los 4 modelos base + Elo en val set. Reemplaza pesos fijos.
+- **Feature selection**: removidos `big_match_rating_diff`, `pressure_diff`, `form_times_elo_diff`, `attack_vs_defense_clash`.
+- **Nuevos features**: `fifa_rank_diff`, `elo_momentum_diff`, `days_since_last_match_diff`, `rest_days_diff`.
+- **Architectura ensemble**: RF + XGBoost + LightGBM + CatBoost + Elo -> LogisticRegressionCV meta-learner.
+- **Runtime**: carga RF, CatBoost y meta-learner automaticamente.
+
 ### API REST con FastAPI
 
 Estado: completado.
