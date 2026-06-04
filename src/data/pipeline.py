@@ -147,7 +147,7 @@ class DataPipeline:
         return results
 
     def run_fast(self, force_refresh: bool = False) -> dict[str, pd.DataFrame]:
-        logger.info("Running fast pipeline (international + Elo + Kaggle fallback)...")
+        logger.info("Running fast pipeline (international + Elo)...")
         results: dict[str, pd.DataFrame] = {}
 
         try:
@@ -157,32 +157,6 @@ class DataPipeline:
         except Exception as e:
             logger.warning("International results failed: %s", e)
             results["international_matches"] = pd.DataFrame()
-
-        try:
-            results["kaggle_international_elo"] = self.kaggle_elo_collector.collect()
-        except Exception as e:
-            logger.warning("Kaggle international Elo failed: %s", e)
-            results["kaggle_international_elo"] = pd.DataFrame()
-
-        try:
-            results["kaggle_match_features"] = self.kaggle_match_features_collector.collect()
-        except Exception as e:
-            logger.warning("Kaggle match features failed: %s", e)
-            results["kaggle_match_features"] = pd.DataFrame()
-
-        try:
-            results["statsbomb_team_xg"] = self.statsbomb_shots_collector.collect_team_xg_profiles()
-            if not results["statsbomb_team_xg"].empty:
-                self.cache.save(results["statsbomb_team_xg"], "statsbomb_team_xg")
-        except Exception as e:
-            logger.warning("StatsBomb shots failed: %s", e)
-            results["statsbomb_team_xg"] = pd.DataFrame()
-
-        try:
-            results["kaggle_matches"] = self.kaggle_collector.collect_match_history()
-        except Exception as e:
-            logger.warning("Kaggle failed: %s", e)
-            results["kaggle_matches"] = pd.DataFrame()
 
         try:
             results["elo_ratings"] = self.elo_collector.collect_current_ratings(force_refresh)
@@ -199,12 +173,6 @@ class DataPipeline:
         except Exception as e:
             logger.warning("Elo history failed: %s", e)
             results["elo_history"] = pd.DataFrame()
-
-        try:
-            results["fifa_rankings"] = FIFARankingsCollector().collect()
-        except Exception as e:
-            logger.warning("FIFA rankings failed: %s", e)
-            results["fifa_rankings"] = pd.DataFrame()
 
         profiles = self.proxy.build_team_profiles(elo_df=results.get("elo_ratings"))
         self.cache.save(profiles, "team_profiles")
