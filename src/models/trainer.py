@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, log_loss
 from sklearn.preprocessing import StandardScaler
 
-from config.settings import MODELS_DIR
+from config.settings import MODELS_DIR, ENSEMBLE_WEIGHTS, HIGH_CONFIDENCE_THRESHOLD
 from src.features.attack_features import compute_offensive_power
 from src.features.defense_features import compute_defensive_stability
 from src.features.elo_features import compute_elo_win_probability
@@ -183,7 +183,13 @@ class NationalTeamTrainingFeatureBuilder:
         label_map = {"W": 2, "D": 1, "L": 0}
         x_rows, y_rows = [], []
         for _, row in match_df.iterrows():
-            x_rows.append(self.build_match_features(row["team_a"], row["team_b"]))
+            feats = self.build_match_features(row["team_a"], row["team_b"])
+            is_tournament = int(row.get("is_tournament", 0) or 0)
+            is_wc = int(row.get("is_wc", 0) or 0)
+            is_qualifier = int(row.get("is_qualifier", 0) or 0)
+            is_neutral = int(not row.get("neutral", True))
+            extra = np.array([is_tournament, is_wc, is_qualifier, is_neutral], dtype=np.float32)
+            x_rows.append(np.concatenate([feats, extra]))
             y_rows.append(label_map[row["result"]])
         return np.array(x_rows, dtype=np.float32), np.array(y_rows, dtype=np.int32)
 
@@ -245,18 +251,34 @@ class ModelTrainer:
             team_stats.setdefault(team, {})["elo"] = float(elo)
         _apply_statsbomb_xg(team_stats, statsbomb_xg_df)
 
-        train_df = _add_reverse_perspective(match_df)
+        n = len(match_df)
+        train_end = int(n * 0.70)
+        val_end = int(n * 0.85)
+        train_matches = match_df.iloc[:train_end].copy()
+        val_matches = match_df.iloc[train_end:val_end].copy()
+        test_matches = match_df.iloc[val_end:].copy()
+
+        train_df = _add_reverse_perspective(train_matches)
+        val_df = train_matches.copy()
+        test_df = test_matches.copy()
+
         feature_builder = NationalTeamTrainingFeatureBuilder(team_stats)
-        x, y = feature_builder.build_training_matrix(train_df)
+        x_train, y_train = feature_builder.build_training_matrix(train_df)
+        x_val, y_val = feature_builder.build_training_matrix(val_df)
+        x_test, y_test = feature_builder.build_training_matrix(test_df)
+
         return self._fit_models(
-            x=x,
-            y=y,
-            poisson_match_df=match_df,
+            x_train=x_train, y_train=y_train,
+            x_val=x_val, y_val=y_val,
+            x_test=x_test, y_test=y_test,
+            poisson_match_df=train_matches,
             metadata_extra={
                 "training_source": "+".join(training_sources),
                 "n_source_matches": len(match_df),
                 "date_min": str(match_df["date"].min().date()) if match_df["date"].notna().any() else None,
                 "date_max": str(match_df["date"].max().date()) if match_df["date"].notna().any() else None,
+                "val_date_min": str(val_matches["date"].min().date()) if len(val_matches) > 0 and val_matches["date"].notna().any() else None,
+                "test_date_min": str(test_matches["date"].min().date()) if len(test_matches) > 0 and test_matches["date"].notna().any() else None,
                 "statsbomb_xg_teams": 0 if statsbomb_xg_df is None else int(len(statsbomb_xg_df)),
                 "elo_history_rows": 0 if elo_history_df is None else int(len(elo_history_df)),
             },
@@ -276,26 +298,39 @@ class ModelTrainer:
         df = _standardize_training_matches(df, "kaggle_club_fallback")
         if len(df) < 50:
             return self._train_default_models()
-        train_df = _add_reverse_perspective(df)
+        df = df.sort_values("date").reset_index(drop=True)
+        n = len(df)
+        train_end = int(n * 0.70)
+        val_end = int(n * 0.85)
+        train_df = _add_reverse_perspective(df.iloc[:train_end])
+        val_df = df.iloc[train_end:val_end].copy()
+        test_df = df.iloc[val_end:].copy()
         club_stats = build_club_stats_from_history(train_df)
-        x, y = KaggleFeatureBuilder(club_stats=club_stats, elo_df=self.elo_df).build_training_matrix(train_df)
+        fb = KaggleFeatureBuilder(club_stats=club_stats, elo_df=self.elo_df)
+        x_train, y_train = fb.build_training_matrix(train_df)
+        x_val, y_val = fb.build_training_matrix(val_df)
+        x_test, y_test = fb.build_training_matrix(test_df)
         return self._fit_models(
-            x=x,
-            y=y,
+            x_train=x_train, y_train=y_train,
+            x_val=x_val, y_val=y_val,
+            x_test=x_test, y_test=y_test,
             poisson_match_df=pd.DataFrame(),
             metadata_extra={"training_source": "kaggle_club_fallback", "n_source_matches": len(df)},
         )
 
-    def _fit_models(self, x: np.ndarray, y: np.ndarray, poisson_match_df: pd.DataFrame, metadata_extra: dict) -> dict:
-        if len(x) < 50:
+    def _fit_models(
+        self,
+        x_train: np.ndarray,
+        y_train: np.ndarray,
+        x_val: np.ndarray,
+        y_val: np.ndarray,
+        x_test: np.ndarray,
+        y_test: np.ndarray,
+        poisson_match_df: pd.DataFrame,
+        metadata_extra: dict,
+    ) -> dict:
+        if len(x_train) < 50:
             return self._train_default_models()
-
-        n = len(x)
-        train_end = int(n * 0.70)
-        val_end = int(n * 0.85)
-        x_train, y_train = x[:train_end], y[:train_end]
-        x_val, y_val = x[train_end:val_end], y[train_end:val_end]
-        x_test, y_test = x[val_end:], y[val_end:]
 
         scaler = StandardScaler()
         x_train_s = scaler.fit_transform(x_train)
@@ -317,20 +352,57 @@ class ModelTrainer:
 
         xgb_probs = xgb.model_.predict_proba(x_test_s) if xgb.is_fitted_ else np.zeros((len(x_test_s), 3))
         lgbm_probs = lgbm.model_.predict_proba(x_test_s) if lgbm.is_fitted_ else np.zeros((len(x_test_s), 3))
-        blend_probs = (xgb_probs + lgbm_probs) / 2
+
+        w_xgb = ENSEMBLE_WEIGHTS.get("xgb", 0.35)
+        w_lgbm = ENSEMBLE_WEIGHTS.get("lgbm", 0.30)
+        w_elo = ENSEMBLE_WEIGHTS.get("elo", 0.20)
+        w_poisson = ENSEMBLE_WEIGHTS.get("poisson", 0.15)
+        total_w = w_xgb + w_lgbm + w_elo + w_poisson
+        if total_w > 0:
+            w_xgb /= total_w
+            w_lgbm /= total_w
+            w_elo /= total_w
+            w_poisson /= total_w
+
+        elo_probs = np.zeros_like(xgb_probs)
+        poisson_probs = np.zeros_like(xgb_probs)
+        raw_elo_diff = x_test[:, 0]
+        for i in range(len(x_test_s)):
+            elo_diff_raw = float(raw_elo_diff[i])
+            p_win = 1.0 / (1.0 + 10.0 ** (-elo_diff_raw / 400.0))
+            p_draw = 0.22 * (1.0 - abs(p_win - 0.5) * 2.0)
+            p_win = p_win * (1.0 - p_draw)
+            p_loss = 1.0 - p_win - p_draw
+            elo_probs[i] = [p_loss, p_draw, p_win]
+            poisson_probs[i] = [0.333, 0.334, 0.333]
+
+        blend_probs = (
+            w_xgb * xgb_probs + w_lgbm * lgbm_probs +
+            w_elo * elo_probs + w_poisson * poisson_probs
+        )
         blend_pred = np.argmax(blend_probs, axis=1)
+
+        elo_diff_from_features = x_test[:, 0]
+        high_elo_mask = np.abs(elo_diff_from_features) >= 200
 
         metadata = {
             "train_date": datetime.now().isoformat(),
             "n_train_samples": int(len(x_train)),
+            "n_val_samples": int(len(x_val)),
             "n_test_samples": int(len(x_test)),
             "features": MATCH_FEATURE_COLUMNS,
             "accuracy_xgb_global": round(xgb.score(x_test_s, y_test), 4),
             "accuracy_lgbm_global": round(lgbm.score(x_test_s, y_test), 4),
             "accuracy_blend_global": round(float(accuracy_score(y_test, blend_pred)), 4),
             "log_loss_blend": round(float(log_loss(y_test, blend_probs, labels=[0, 1, 2])), 4),
-            "accuracy_high_confidence": round(self._segment_accuracy(blend_probs, y_test, threshold=0.65), 4),
+            "accuracy_high_confidence": round(self._segment_accuracy(blend_probs, y_test, threshold=HIGH_CONFIDENCE_THRESHOLD), 4),
+            "accuracy_high_elo_diff_200": round(
+                float(accuracy_score(y_test[high_elo_mask], blend_pred[high_elo_mask]))
+                if high_elo_mask.sum() >= 10 else 0.0, 4
+            ),
+            "n_high_elo_matches": int(high_elo_mask.sum()),
             "baseline_random": 0.333,
+            "split_type": "time_series_chronological",
             **metadata_extra,
         }
         with open(MODELS_DIR / "model_metadata.json", "w", encoding="utf-8") as f:

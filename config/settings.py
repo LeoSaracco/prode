@@ -33,6 +33,18 @@ STATSBOMB_SHOTS_DATASET = os.getenv(
     "ClementeH/statsbomb-open-data-shots",
 )
 
+ELO_HISTORY_DIR = Path(
+    os.getenv("ELO_HISTORY_DIR", str(DATA_RAW / "eloratings"))
+)
+ELO_HISTORY_URL = os.getenv(
+    "ELO_HISTORY_URL",
+    "https://raw.githubusercontent.com/jalapic/engsoccerdata/master/data-raw/eloratings",
+)
+MATCH_HISTORY_START_YEAR = int(os.getenv("MATCH_HISTORY_START_YEAR", "2000"))
+FIFA_RANKINGS_DIR = Path(
+    os.getenv("FIFA_RANKINGS_DIR", str(DATA_RAW / "fifa_rankings"))
+)
+
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 # Ligas para recolección de datos de clubes (proxy para selecciones nacionales)
@@ -82,3 +94,9 @@ WC2026_BEST_THIRDS = 8
 WC2026_TOTAL_TEAMS = 48
 WC2026_GROUPS = 12
 WC2026_TEAMS_PER_GROUP = 4
+
+# Ajustes de entrenamiento
+TRAIN_YEARS_BACK = int(os.getenv("TRAIN_YEARS_BACK", "24"))
+TEST_SPLIT_RATIO = 0.15
+VAL_SPLIT_RATIO = 0.15
+TRAIN_SPLIT_RATIO = 0.70

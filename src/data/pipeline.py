@@ -16,8 +16,12 @@ from src.data.collectors.international_results_collector import InternationalRes
 from src.data.collectors.kaggle_collector import KaggleCollector
 from src.data.collectors.sofifa_collector import SoFIFACollector
 from src.data.collectors.understat_collector import UnderstatCollector
+from src.data.collectors.elo_history_collector import EloHistoryCollector
+from src.data.collectors.fifa_rankings_collector import FIFARankingsCollector
 from src.data.national_team_proxy import NationalTeamProxy
 from src.data.validators import report_coverage
+
+from config.settings import MATCH_HISTORY_START_YEAR
 
 logger = logging.getLogger(__name__)
 
@@ -44,28 +48,30 @@ class DataPipeline:
         logger.info("=" * 60)
         results: dict[str, pd.DataFrame] = {}
 
-        logger.info("[1/9] International national-team results...")
+        logger.info("[1/10] International national-team results...")
         try:
-            results["international_matches"] = self.international_collector.collect_match_history()
+            results["international_matches"] = self.international_collector.collect_match_history(
+                start_year=MATCH_HISTORY_START_YEAR
+            )
         except Exception as e:
             logger.warning("International results failed: %s", e)
             results["international_matches"] = pd.DataFrame()
 
-        logger.info("[2/9] Kaggle international Elo...")
+        logger.info("[2/10] Kaggle international Elo...")
         try:
             results["kaggle_international_elo"] = self.kaggle_elo_collector.collect()
         except Exception as e:
             logger.warning("Kaggle international Elo failed: %s", e)
             results["kaggle_international_elo"] = pd.DataFrame()
 
-        logger.info("[3/9] Kaggle international match features...")
+        logger.info("[3/10] Kaggle international match features...")
         try:
             results["kaggle_match_features"] = self.kaggle_match_features_collector.collect()
         except Exception as e:
             logger.warning("Kaggle match features failed: %s", e)
             results["kaggle_match_features"] = pd.DataFrame()
 
-        logger.info("[4/9] StatsBomb shot xG...")
+        logger.info("[4/10] StatsBomb shot xG...")
         try:
             results["statsbomb_team_xg"] = self.statsbomb_shots_collector.collect_team_xg_profiles()
             if not results["statsbomb_team_xg"].empty:
@@ -74,14 +80,14 @@ class DataPipeline:
             logger.warning("StatsBomb shots failed: %s", e)
             results["statsbomb_team_xg"] = pd.DataFrame()
 
-        logger.info("[5/9] Kaggle club history fallback...")
+        logger.info("[5/10] Kaggle club history fallback...")
         try:
             results["kaggle_matches"] = self.kaggle_collector.collect_match_history()
         except Exception as e:
             logger.warning("Kaggle failed: %s", e)
             results["kaggle_matches"] = pd.DataFrame()
 
-        logger.info("[6/9] National Elo ratings...")
+        logger.info("[6/10] National Elo ratings...")
         try:
             results["elo_ratings"] = self.elo_collector.collect_current_ratings(force_refresh)
             if not results["elo_ratings"].empty:
@@ -90,7 +96,7 @@ class DataPipeline:
             logger.warning("Elo ratings failed: %s", e)
             results["elo_ratings"] = pd.DataFrame()
 
-        logger.info("[7/9] FBref club stats...")
+        logger.info("[7/10] FBref club stats...")
         try:
             results["fbref_schedule"] = self.fbref_collector.collect_match_schedule(
                 force_refresh=force_refresh
@@ -99,7 +105,7 @@ class DataPipeline:
             logger.warning("FBref failed: %s", e)
             results["fbref_schedule"] = pd.DataFrame()
 
-        logger.info("[8/9] Understat xG data...")
+        logger.info("[8/10] Understat xG data...")
         try:
             results["understat"] = self.understat_collector.collect_team_match_stats(
                 force_refresh=force_refresh
@@ -108,7 +114,7 @@ class DataPipeline:
             logger.warning("Understat failed: %s", e)
             results["understat"] = pd.DataFrame()
 
-        logger.info("[9/9] SoFIFA squad ratings...")
+        logger.info("[9/10] SoFIFA squad ratings...")
         try:
             results["sofifa_teams"] = self.sofifa_collector.collect_team_ratings(
                 force_refresh=force_refresh
@@ -116,6 +122,17 @@ class DataPipeline:
         except Exception as e:
             logger.warning("SoFIFA failed (optional): %s", e)
             results["sofifa_teams"] = pd.DataFrame()
+
+        logger.info("[10/10] Computing Elo history from match results...")
+        try:
+            elo_hist = EloHistoryCollector()
+            intl_matches = results.get("international_matches", pd.DataFrame())
+            results["elo_history"] = elo_hist.compute_from_matches(intl_matches) if not intl_matches.empty else pd.DataFrame()
+            results["fifa_rankings"] = FIFARankingsCollector().collect()
+        except Exception as e:
+            logger.warning("Elo history / FIFA rankings failed: %s", e)
+            results["elo_history"] = pd.DataFrame()
+            results["fifa_rankings"] = pd.DataFrame()
 
         logger.info("Building national-team profiles...")
         profiles = self.proxy.build_team_profiles(
@@ -134,7 +151,9 @@ class DataPipeline:
         results: dict[str, pd.DataFrame] = {}
 
         try:
-            results["international_matches"] = self.international_collector.collect_match_history()
+            results["international_matches"] = self.international_collector.collect_match_history(
+                start_year=MATCH_HISTORY_START_YEAR
+            )
         except Exception as e:
             logger.warning("International results failed: %s", e)
             results["international_matches"] = pd.DataFrame()
@@ -172,6 +191,20 @@ class DataPipeline:
         except Exception as e:
             logger.warning("Elo failed: %s", e)
             results["elo_ratings"] = pd.DataFrame()
+
+        try:
+            elo_hist = EloHistoryCollector()
+            intl_matches = results.get("international_matches", pd.DataFrame())
+            results["elo_history"] = elo_hist.compute_from_matches(intl_matches) if not intl_matches.empty else pd.DataFrame()
+        except Exception as e:
+            logger.warning("Elo history failed: %s", e)
+            results["elo_history"] = pd.DataFrame()
+
+        try:
+            results["fifa_rankings"] = FIFARankingsCollector().collect()
+        except Exception as e:
+            logger.warning("FIFA rankings failed: %s", e)
+            results["fifa_rankings"] = pd.DataFrame()
 
         profiles = self.proxy.build_team_profiles(elo_df=results.get("elo_ratings"))
         self.cache.save(profiles, "team_profiles")

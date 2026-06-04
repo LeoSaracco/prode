@@ -37,9 +37,16 @@ MATCH_FEATURE_COLUMNS = [
     "squad_depth_diff", "big_match_rating_diff", "pressure_diff",
     "consistency_diff", "wc_history_diff", "market_value_diff",
     "tactical_advantage", "h2h_advantage",
-    # Features de interacción
     "form_times_elo_diff", "attack_vs_defense_clash",
+    "is_tournament", "is_wc", "is_qualifier", "is_home",
 ]
+
+INFERENCE_CONTEXT_FEATURES = {
+    "is_tournament": 1.0,
+    "is_wc": 1.0,
+    "is_qualifier": 0.0,
+    "is_home": 0.0,
+}
 
 
 class FeatureBuilder:
@@ -97,11 +104,18 @@ class FeatureBuilder:
         return feats
 
     def build_match_features(
-        self, team_a: str, team_b: str, h2h_df: pd.DataFrame | None = None
+        self,
+        team_a: str,
+        team_b: str,
+        h2h_df: pd.DataFrame | None = None,
+        context: dict[str, float] | None = None,
     ) -> np.ndarray:
         """
         Retorna vector de features para el partido A vs B.
         Usado por el ensemble en tiempo de inferencia.
+
+        context dict puede incluir: is_tournament, is_wc, is_qualifier, is_home
+        Por defecto asume contexto de Mundial (todos 1 para tournament/wc, 0 resto).
         """
         fa = self.build_team_features(team_a)
         fb = self.build_team_features(team_b)
@@ -121,9 +135,10 @@ class FeatureBuilder:
             fb["offensive_power"], fa["defensive_stability"],
         )
 
-        # Features de interacción
         form_times_elo = fa["form_5"] * (elo_diff / 400)
         attack_vs_def = fa["offensive_power"] - fb["defensive_stability"]
+
+        ctx = context or INFERENCE_CONTEXT_FEATURES
 
         features = np.array([
             elo_diff,
@@ -143,6 +158,10 @@ class FeatureBuilder:
             h2h_score,
             form_times_elo,
             attack_vs_def,
+            ctx.get("is_tournament", 1.0),
+            ctx.get("is_wc", 1.0),
+            ctx.get("is_qualifier", 0.0),
+            ctx.get("is_home", 0.0),
         ], dtype=np.float32)
 
         return features

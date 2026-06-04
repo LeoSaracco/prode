@@ -11,8 +11,23 @@ Este archivo resume el estado actual y lo que queda pendiente.
 - Grupos oficiales WC2026: implementados en `config/wc2026_groups.py`.
 - Simulacion de grupos: implementada con tabla de clasificacion probable y marcador mas probable por fixture.
 - Automatizacion local Bash: implementada en `scripts/run_full_stack.sh`.
+- Fase A completada: pipeline de datos robusto, split temporal corregido, features contextuales.
 
 ## Completado
+
+### Fase A — Pipeline de Datos y Split Temporal
+
+Estado: completado.
+
+Cambios realizados:
+
+- **Fix data leakage**: el split train/val/test ahora es estrictamente temporal (70/15/15 cronologico). Antes `_add_reverse_perspective` contaminaba el test con datos de train.
+- **Elo historico computacional**: nuevo `EloHistoryCollector` que calcula Elo rolling desde resultados historicos sin depender de datasets externos.
+- **FIFA Rankings collector**: `FIFARankingsCollector` descarga rankings historicos FIFA desde GitHub.
+- **Features contextuales**: `is_tournament`, `is_wc`, `is_qualifier`, `is_home` agregados a la matriz de features (21 features total, antes 17).
+- **Rango de datos ampliado**: `MATCH_HISTORY_START_YEAR=2000` en settings. El colector de resultados internacionales ahora preserva info de torneo y neutral.
+- **Metricas segmentadas**: `accuracy_high_elo_diff_200` medida en test set para partidos con diferencia Elo >= 200.
+- **Pesos del ensemble normalizados**: se normalizan automaticamente si no suman 1.0.
 
 ### API REST con FastAPI
 

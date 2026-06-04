@@ -12,23 +12,24 @@ Estado actual:
 - Modelos entrenados en `models/`.
 - Grupos oficiales en `config/wc2026_groups.py`.
 - Simulacion de grupos con tabla de clasificacion probable y marcador mas probable por fixture.
+- Fase A completada: pipeline robusto, split temporal cronologico, Elo computacional, features contextuales.
 
 ## Arquitectura
 
 Componentes principales:
 
 - `config/`: settings, aliases, grupos oficiales y pesos de features.
-- `src/data/`: collectors, cache, pipeline y validadores.
-- `src/features/`: construccion de features para prediccion.
-- `src/models/`: Poisson, XGBoost, LightGBM, Elo y ensemble.
+- `src/data/`: collectors, cache, pipeline, validadores, Elo historico y FIFA rankings.
+- `src/features/`: construccion de features para prediccion (21 features).
+- `src/models/`: Poisson, XGBoost, LightGBM, Elo y ensemble con split temporal.
 - `src/simulation/`: simulacion de partidos, grupos y torneo.
 - `src/output/`: formateadores de consola.
 - `api/`: FastAPI, schemas, routers y carga de runtime.
 - `frontend/`: UI web para consumir la API.
 
-## Features del Modelo
+## Features del Modelo (21 features)
 
-El modelo usa 17 variables diferenciales por partido:
+Features base (17):
 
 - `elo_diff`
 - `elo_win_prob_a`
@@ -47,6 +48,24 @@ El modelo usa 17 variables diferenciales por partido:
 - `h2h_advantage`
 - `form_times_elo_diff`
 - `attack_vs_defense_clash`
+
+Features contextuales (4, agregadas en Fase A):
+
+- `is_tournament`: partido de torneo oficial (1) vs amistoso (0)
+- `is_wc`: partido de Mundial (1) o no (0)
+- `is_qualifier`: clasificatorio (1) o no (0)
+- `is_home`: localia (1) o neutral/visitante (0)
+
+## Split Temporal (Fase A)
+
+El split train/val/test es estrictamente cronologico (70/15/15):
+
+- Train: partidos mas antiguos (70%)
+- Val: partidos intermedios (15%)
+- Test: partidos mas recientes (15%)
+
+`_add_reverse_perspective` se aplica SOLO al train set para evitar data leakage.
+El metadata ahora incluye `split_type: time_series_chronological` y `accuracy_high_elo_diff_200`.
 
 ## Ensemble
 

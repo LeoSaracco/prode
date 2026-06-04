@@ -231,10 +231,16 @@ python scripts/validate_data.py
 
 ## Accuracy
 
-Los targets originales del proyecto eran aspiracionales:
+Los targets del proyecto:
 
 - Global W/D/L: mayor a 55%
-- Alta confianza: mayor a 80%
+- Alta confianza (>65% prob): mayor a 80%
 - Delta Elo mayor a 200: mayor a 85%
 
-El entrenamiento actual funciona y genera modelos, pero las metricas reales deben consultarse en `models/model_metadata.json` antes de tomar decisiones.
+Las metricas reales estan en `models/model_metadata.json` e incluyen:
+- `accuracy_high_elo_diff_200`: accuracy en partidos con diferencia Elo >= 200
+- `split_type`: "time_series_chronological" (sin data leakage)
+- `val_date_min`, `test_date_min`: fechas de corte del split temporal
+
+El entrenamiento usa split cronologico estricto (70/15/15). Las metricas reportadas
+reflejan performance sobre partidos no vistos en el futuro, sin contaminacion.
