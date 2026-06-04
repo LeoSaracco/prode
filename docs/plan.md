@@ -170,13 +170,14 @@ La API expone estos datos en `fixtures` dentro de `GET /api/v1/simulate/group/{g
 
 ## Accuracy
 
-Targets aspiracionales originales:
+Targets aspiracionales:
 
 - Global W/D/L: mayor a 55%.
 - Alta confianza: mayor a 80%.
 - Delta Elo mayor a 200: mayor a 85%.
 
-Estado real: el entrenamiento actual genera modelos funcionales, pero las metricas reales en `models/model_metadata.json` no alcanzan todavia esos targets. La mejora de accuracy queda como backlog activo.
+Estado real (Fase E): weighted voting >=49%, mejor modelo individual CatBoost ~49%.
+Las metricas exactas estan en `models/model_metadata.json`.
 
 ## Operacion
 
@@ -188,19 +189,27 @@ python cli.py simulate-group J
 python cli.py simulate-tournament
 python scripts/run_pipeline.py --fast
 python scripts/train_models.py
+python scripts/generate_report.py
 uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Flujo automatizado recomendado con Bash:
-
-```bash
-bash scripts/run_full_stack.sh --fast
-```
-
-Este script ejecuta pipeline, validacion, entrenamiento, API y frontend en ese orden. Si falla una etapa de datos o entrenamiento, no levanta servicios.
-
-En Windows puede ser necesario:
+Flujo automatizado recomendado:
 
 ```powershell
-$env:PYTHONIOENCODING='utf-8'
+.\run_all.bat
 ```
+
+Este script ejecuta pipeline, validacion, entrenamiento, generacion de PDF,
+API y frontend en ese orden. Si falla el entrenamiento, tiene fallback sin CatBoost.
+
+## Changelog de Arquitectura
+
+| Fase | Commit | Arquitectura |
+|------|--------|-------------|
+| Inicial | `83da947` | XGBoost(35%) + LightGBM(30%) + Elo(20%) + Poisson(15%) — pesos fijos |
+| A | `47a14ed` | Split cronologico sin leakage, Elo computacional, 17→21 features |
+| B | `fba0c5e` | RF + XGB + LGBM + CatBoost + Elo → LogisticRegressionCV meta-learner |
+| C | `7259fd4` | Modelos parametrizables (Optuna), best_params.json |
+| D | `b621c05` | TwoStageClassifier binario + 14 ConfederationModels |
+| E | `b9d12b8` | Weighted voting (accuracy-val), entrenamiento paralelo, pipeline rapido |
+| **Target** | — | >55% global, >80% alta confianza, >85% delta Elo >200 |

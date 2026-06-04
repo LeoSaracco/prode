@@ -1,19 +1,49 @@
 # prode-ML - FIFA World Cup 2026 Predictor
 
 Sistema de predicciones para el Mundial FIFA 2026. Combina Elo ratings,
-modelos Poisson, XGBoost, LightGBM y simulaciones Monte Carlo.
+modelos Poisson, RandomForest, XGBoost, LightGBM, CatBoost, TwoStage,
+Confederation y simulaciones Monte Carlo.
 
 ## Estado Actual
 
-- Modelos entrenados y guardados en `models/`.
-- Ultimo entrenamiento registrado en `models/model_metadata.json`.
-- CLI interactivo disponible en `cli.py`.
-- API REST FastAPI implementada en `api/`.
-- Frontend React/Vite implementado en `frontend/`.
-- Grupos oficiales configurados en `config/wc2026_groups.py`.
-- La simulacion de grupos muestra tabla de clasificacion probable y el marcador exacto mas probable de cada partido del grupo.
+- **5 modelos base**: RandomForest, XGBoost, LightGBM, CatBoost, Elo
+- **Ensemble**: accuracy-weighted voting (aprende pesos del val set)
+- **TwoStage**: prediccion draw/no-draw binaria (8 features especificas)
+- **Confederation**: 14 modelos RF por par de confederaciones
+- **21 features** con features contextuales (torneo, WC, localia)
+- **3,198 partidos** de entrenamiento (2000-2026, 47 selecciones)
+- **Split cronologico** 70/15/15 sin data leakage
+- **Pipeline rapido**: `run_all.bat` (~2-3 min total)
+- **Reportes PDF**: predicciones, simulaciones, ranking de campeones
+- **API REST** FastAPI en `api/`
+- **Frontend** React/Vite en `frontend/`
+- **CLI** interactivo en `cli.py`
 
-Nota: las metricas actuales del entrenamiento no alcanzan todavia los targets aspiracionales originales. Ver `models/model_metadata.json` para las metricas reales.
+Metricas reales en `models/model_metadata.json`.
+
+## Histórico de Versiones
+
+| Fase | Commit | Qué cambió | Métrica clave |
+|------|--------|-----------|---------------|
+| **Inicial** | `83da947` | XGB+LGBM+Elo, 17 features, pesos fijos, 1,413 matches, split con leakage | Blend: **42.0%** |
+| **A** | `47a14ed` | Split cronologico sin leakage, Elo computacional (6,396 filas), FIFA rankings, features contextuales (21), 3,198 matches, metricas segmentadas | — |
+| **B** | `fba0c5e` | RandomForest + CatBoost, meta-learner LogisticRegressionCV, feature selection, 21 features refinados | Mejor modelo: **CatBoost 49.0%** |
+| **C** | `7259fd4` | Optuna 30+ params, modelos parametrizables, best_params.json, study SQLite | — |
+| **D** | `b621c05` | TwoStageClassifier binario, 14 ConfederationModels por par de confederacion | — |
+| **E** | `b9d12b8` | Weighted voting reemplaza LR, entrenamiento paralelo (ThreadPool), Poisson maxiter=200, TwoStage 8-feature mask, pipeline sin StatsBomb/Kaggle rotos | Voting: **>=49%** |
+
+### Comparativa inicial vs actual
+
+| | Inicial | Actual |
+|---|---|---|
+| Partidos training | 1,413 | **3,198** |
+| Split | Aleatorio con leakage | **Cronologico sin leakage** |
+| Features | 17 | **21** |
+| Modelos base | 2 (XGB, LGBM) | **4 (RF, XGB, LGBM, CatBoost)** |
+| Ensemble | Pesos fijos (42%) | **Weighted voting (>=49%)** |
+| Entrenamiento | Secuencial, ~4 min (colgado) | **Paralelo, ~2 min** |
+| Pipeline | ~3 min (StatsBomb colgado) | **~20s** |
+| Reportes | No | **PDF automatico** |
 
 ## Instalacion
 
@@ -25,7 +55,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-En Windows, si aparecen errores de encoding al imprimir tablas, ejecutar los comandos con:
+En Windows, si aparecen errores de encoding:
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
@@ -33,79 +63,42 @@ $env:PYTHONIOENCODING='utf-8'
 
 ## Uso Rapido
 
-### Ejecutar pipeline completo, entrenar y levantar app
+### Pipeline completo (recomendado)
 
-Desde Git Bash, WSL o una terminal con Bash:
-
-```bash
-bash scripts/run_full_stack.sh --fast
+```powershell
+.\run_all.bat
 ```
 
-Ese comando ejecuta el flujo completo:
+El script ejecuta 7 pasos:
+1. Activar venv + instalar dependencias
+2. Pipeline de datos (~20s)
+3. Validar datos
+4. Entrenar modelos (paralelo, ~90s)
+5. Generar PDF de predicciones en `reports/`
+6. Levantar API en `http://127.0.0.1:8000`
+7. Levantar frontend en `http://127.0.0.1:5173`
 
-1. Instala dependencias si faltan.
-2. Corre `scripts/run_pipeline.py` para actualizar datos.
-3. Corre `scripts/validate_data.py`.
-4. Corre `scripts/train_models.py` para regenerar los modelos en `models/`.
-5. Levanta la API en `http://127.0.0.1:8000`.
-6. Levanta el frontend en `http://127.0.0.1:5173`.
+Si CatBoost se cuelga, el script tiene fallback automatico sin el.
 
-Opciones utiles:
+### Solo reentrenar modelos
 
-```bash
-bash scripts/run_full_stack.sh --fast --force
-bash scripts/run_full_stack.sh --skip-pipeline --skip-train
-bash scripts/run_full_stack.sh --api-port 8001 --front-port 5174
-bash scripts/run_full_stack.sh --no-install
+```powershell
+python scripts/train_models.py
 ```
 
-El script falla antes de levantar servicios si falla el pipeline, la validacion o el entrenamiento. Asi se evita que el backend consuma modelos viejos por accidente.
+### Solo generar reporte PDF
+
+```powershell
+python scripts/generate_report.py
+```
+
+El PDF incluye: predicciones de los 72 partidos, simulacion de grupos, ranking de campeones.
 
 ### Prediccion de un partido
 
 ```powershell
 python cli.py predict "Argentina" "Portugal"
 python cli.py predict "Brazil" "France"
-python cli.py predict "Espana" "Alemania"
-```
-
-### Simular fase de grupos
-
-```powershell
-python cli.py simulate-group J
-```
-
-Ejemplo de salida esperada para el Grupo J:
-
-```text
-GRUPO J | 100,000 simulaciones
-Argentina   1ro 38.3%  2do 26.0%  Clasifica 64.3%
-Austria     1ro 29.3%  2do 30.2%  Clasifica 59.5%
-Algeria     1ro 16.6%  2do 23.0%  Clasifica 39.6%
-Jordan      1ro 15.8%  2do 20.8%  Clasifica 36.6%
-
-RESULTADOS MAS PROBABLES - GRUPO J
-Argentina vs Austria      1-0  (12.8%)
-Argentina vs Algeria      2-0  (11.4%)
-Argentina vs Jordan       2-0  (13.1%)
-Austria vs Algeria        1-1  (10.6%)
-Austria vs Jordan         1-0  (11.2%)
-Algeria vs Jordan         1-1  (11.0%)
-```
-
-Los porcentajes exactos pueden variar segun los modelos entrenados y `n_sims`.
-
-### Simular torneo completo
-
-```powershell
-python cli.py simulate-tournament
-python cli.py simulate-tournament --top 10
-```
-
-### Ver equipos disponibles
-
-```powershell
-python cli.py list-teams
 ```
 
 ### Modo interactivo
@@ -114,104 +107,82 @@ python cli.py list-teams
 python cli.py
 ```
 
-Comandos disponibles:
+Comandos: `predict A B`, `group J`, `tournament`, `top 10`, `list`, `quit`
 
-```text
-predict Argentina Portugal
-group J
-tournament
-top 10
-list
-quit
+## Arquitectura
+
+```
+┌─────────────────────────────────────────────────────┐
+│                21 FEATURES                          │
+│  elo_diff, xg_diff, form_5_diff, wc_history_diff,  │
+│  tactical_advantage, is_tournament, is_wc, ...      │
+└──────────┬──────────────────┬──────────────────────┘
+           │                  │
+    ┌──────▼──────┐    ┌──────▼──────┐    ┌──────────┐
+    │  TWO-STAGE  │    │  ENSEMBLE   │    │  CONFED  │
+    │  Draw?→Win? │    │  VOTING     │    │  14 RF   │
+    │  (8+21 feat)│    │  RF    30%  │    │  pairs   │
+    └──────┬──────┘    │  XGB   20%  │    └────┬─────┘
+           │           │  LGBM  20%  │         │
+           │           │  CB    20%  │         │
+           │           │  Elo   10%  │         │
+           │           └──────┬──────┘         │
+           └──────────────────┼────────────────┘
+                              ▼
+                   ┌──────────────────┐
+                   │  PREDICCION      │
+                   │  + xG + confianza│
+                   │  + upset risk    │
+                   └──────────────────┘
 ```
 
-## API REST
+### Como funciona el weighted voting
 
-Iniciar la API:
+Cada modelo se evalua en el validation set. El peso se calcula como:
+
+```
+peso = max(0.05, accuracy_val - 0.33)
+```
+
+Luego se normalizan para que sumen 1.0. Elo siempre pesa 0.10 fijo como baseline.
+Los pesos se guardan en `models/voting_weights.json` y se recalculan en cada entrenamiento.
+
+## API REST
 
 ```powershell
 uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Endpoints principales:
+Endpoints: `GET /health`, `GET /api/v1/teams`, `GET /api/v1/groups`,
+`POST /api/v1/predict`, `GET /api/v1/simulate/group/{group_name}`,
+`GET /api/v1/simulate/tournament`
 
-- `GET /health`
-- `GET /api/v1/teams`
-- `GET /api/v1/groups`
-- `POST /api/v1/predict`
-- `GET /api/v1/simulate/group/{group_name}?n_sims=10000`
-- `GET /api/v1/simulate/tournament?n_sims=5000&top_n=20`
+## Accuracy
 
-La respuesta de `GET /api/v1/simulate/group/J` incluye:
+Targets del proyecto:
+
+| Metrica | Target |
+|---------|--------|
+| Global W/D/L | >55% |
+| Alta confianza (>65% prob) | >80% |
+| Delta Elo >200 | >85% |
+
+Metricas actuales en `models/model_metadata.json`:
 
 ```json
 {
-  "group": "J",
-  "n_sims": 10000,
-  "results": [
-    {
-      "team": "Argentina",
-      "group": "J",
-      "prob_1st": 0.383,
-      "prob_2nd": 0.260,
-      "prob_3rd": 0.198,
-      "prob_4th": 0.159,
-      "qualify_direct_prob": 0.643,
-      "avg_pts": 4.89,
-      "avg_gd": 1.18
-    }
-  ],
-  "fixtures": [
-    {
-      "team_a": "Argentina",
-      "team_b": "Austria",
-      "expected_goals": {"team_a": 1.42, "team_b": 1.08},
-      "most_likely_scoreline": {"goals_a": 1, "goals_b": 0, "probability": 0.128}
-    }
-  ]
+  "accuracy_rf": 0.xxx,
+  "accuracy_xgb": 0.xxx,
+  "accuracy_lgbm": 0.xxx,
+  "accuracy_catboost": 0.xxx,
+  "accuracy_voting": 0.xxx,
+  "accuracy_two_stage": 0.xxx,
+  "accuracy_confederation": 0.xxx,
+  "accuracy_high_elo_diff_200": 0.xxx,
+  "log_loss_voting": 0.xxx,
+  "split_type": "time_series_chronological",
+  "ensemble_architecture": "RF+XGB+LGBM+CB+Elo -> accuracy-weighted voting"
 }
-```
-
-## Frontend
-
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
-Build de produccion:
-
-```powershell
-npm run build
-```
-
-La vista de grupos muestra los equipos del grupo, la tabla de simulacion y los 6 partidos con su marcador mas probable.
-
-## Datos y Entrenamiento
-
-Pipeline rapido:
-
-```powershell
-python scripts/run_pipeline.py --fast
-```
-
-Pipeline completo:
-
-```powershell
-python scripts/run_pipeline.py
-```
-
-Entrenamiento:
-
-```powershell
-python scripts/train_models.py
-```
-
-Validacion de datos:
-
-```powershell
-python scripts/validate_data.py
 ```
 
 ## Grupos Oficiales 2026
@@ -228,19 +199,3 @@ python scripts/validate_data.py
 - J: Argentina, Austria, Algeria, Jordan
 - K: Portugal, Colombia, Uzbekistan, DR Congo
 - L: England, Croatia, Ghana, Panama
-
-## Accuracy
-
-Los targets del proyecto:
-
-- Global W/D/L: mayor a 55%
-- Alta confianza (>65% prob): mayor a 80%
-- Delta Elo mayor a 200: mayor a 85%
-
-Las metricas reales estan en `models/model_metadata.json` e incluyen:
-- `accuracy_high_elo_diff_200`: accuracy en partidos con diferencia Elo >= 200
-- `split_type`: "time_series_chronological" (sin data leakage)
-- `val_date_min`, `test_date_min`: fechas de corte del split temporal
-
-El entrenamiento usa split cronologico estricto (70/15/15). Las metricas reportadas
-reflejan performance sobre partidos no vistos en el futuro, sin contaminacion.

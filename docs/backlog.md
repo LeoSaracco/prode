@@ -1,17 +1,27 @@
 # Backlog - prode-ML FIFA World Cup 2026
 
-Este archivo resume el estado actual y lo que queda pendiente.
+## Resumen de Fases
+
+| Fase | Estado | Accuracy | Cambio clave |
+|------|--------|----------|-------------|
+| Inicial | ✅ | 42.0% blend | XGB+LGBM+Elo, split con leakage |
+| A — Pipeline | ✅ | — | Split cronologico, Elo computacional, 3,198 matches |
+| B — Ensemble | ✅ | CatBoost 49.0% | RF+CatBoost, meta-learner LR, 21 features |
+| C — Tuning | ✅ | — | Optuna 30+ params, best_params.json |
+| D — TwoStage | ✅ | — | TwoStage binario, 14 confederation models |
+| E — Fixes | ✅ | **Voting >=49%** | Weighted voting, paralelo, pipeline rapido |
+| **Pendiente** | | | Mejorar accuracy a >55%, Docker/deploy |
 
 ## Estado Actual
 
 - CLI interactivo: implementado.
-- Modelos entrenados: implementado, con artefactos en `models/`.
+- Modelos entrenados: 5 modelos (RF, XGB, LGBM, CatBoost, Elo) + TwoStage + Confederation.
 - API REST FastAPI: implementada.
 - Frontend React/Vite: implementado.
 - Grupos oficiales WC2026: implementados en `config/wc2026_groups.py`.
 - Simulacion de grupos: implementada con tabla de clasificacion probable y marcador mas probable por fixture.
-- Automatizacion local Bash: implementada en `scripts/run_full_stack.sh`.
-- Fase A completada: pipeline de datos robusto, split temporal corregido, features contextuales.
+- Automatizacion local: `run_all.bat` (7 pasos, pipeline + train + reporte PDF + API + frontend).
+- Fases A-B-C-D-E completadas.
 
 ## Completado
 
