@@ -230,10 +230,7 @@ class ModelTrainer:
             match_df = pd.concat(frames, ignore_index=True).drop_duplicates(
                 subset=["date", "team_a", "team_b", "goals_a", "goals_b"]
             )
-            if match_df["date"].notna().sum() > 0:
-                recent = match_df[match_df["date"] >= pd.Timestamp("2014-01-01")]
-                if len(recent) >= 300:
-                    match_df = recent
+            match_df = match_df.sort_values("date").reset_index(drop=True)
             return self._train_from_national_matches(
                 match_df=match_df,
                 training_sources=training_sources,
