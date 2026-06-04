@@ -13,9 +13,10 @@ logger = logging.getLogger(__name__)
 class CatBoostOutcomeClassifier:
     """3-class W/D/L classifier using CatBoost with ordered boosting."""
 
-    def __init__(self):
+    def __init__(self, params: dict | None = None):
         self.model_ = None
         self.is_fitted_ = False
+        self.params = params or {}
 
     def train(
         self,
@@ -31,10 +32,12 @@ class CatBoostOutcomeClassifier:
             self.is_fitted_ = False
             return self
 
-        params = {
+        defaults = {
             "iterations": 600,
             "depth": 6,
             "learning_rate": 0.05,
+            "l2_leaf_reg": 3.0,
+            "border_count": 128,
             "loss_function": "MultiClass",
             "eval_metric": "MultiClass",
             "random_seed": 42,
@@ -42,7 +45,8 @@ class CatBoostOutcomeClassifier:
             "verbose": False,
             "allow_writing_files": False,
         }
-        self.model_ = CatBoostClassifier(**params)
+        defaults.update(self.params)
+        self.model_ = CatBoostClassifier(**defaults)
         eval_set = (X_val, y_val) if X_val is not None and y_val is not None else None
         self.model_.fit(
             X, y,

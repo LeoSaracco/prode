@@ -324,6 +324,23 @@ class ModelTrainer:
             metadata_extra={"training_source": "kaggle_club_fallback", "n_source_matches": len(df)},
         )
 
+    def _load_best_params(self) -> dict:
+        path = MODELS_DIR / "best_params.json"
+        if path.exists():
+            try:
+                with open(path) as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return {}
+
+    def _extract_model_params(self, best_params: dict, prefix: str) -> dict:
+        result = {}
+        for key, val in best_params.items():
+            if key.startswith(prefix + "_"):
+                result[key[len(prefix) + 1:]] = val
+        return result
+
     def _fit_models(
         self,
         x_train: np.ndarray,
@@ -338,19 +355,29 @@ class ModelTrainer:
         if len(x_train) < 50:
             return self._train_default_models()
 
+        best_params = self._load_best_params()
+        tuned = bool(best_params)
+        if tuned:
+            logger.info("Loading tuned hyperparameters from best_params.json")
+
         scaler = StandardScaler()
         x_train_s = scaler.fit_transform(x_train)
         x_val_s = scaler.transform(x_val)
         x_test_s = scaler.transform(x_test)
         joblib.dump(scaler, MODELS_DIR / "scaler.pkl")
 
-        rf = RFOutcomeClassifier().train(x_train_s, y_train)
+        rf_params = self._extract_model_params(best_params, "rf")
+        xgb_params = self._extract_model_params(best_params, "xgb")
+        lgbm_params = self._extract_model_params(best_params, "lgbm")
+        cb_params = self._extract_model_params(best_params, "cb")
+
+        rf = RFOutcomeClassifier(params=rf_params).train(x_train_s, y_train)
         rf.save()
-        xgb = XGBOutcomeClassifier().train(x_train_s, y_train, x_val_s, y_val)
+        xgb = XGBOutcomeClassifier(params=xgb_params).train(x_train_s, y_train, x_val_s, y_val)
         xgb.save()
-        lgbm = LGBMOutcomeClassifier().train(x_train_s, y_train, x_val_s, y_val)
+        lgbm = LGBMOutcomeClassifier(params=lgbm_params).train(x_train_s, y_train, x_val_s, y_val)
         lgbm.save()
-        catboost = CatBoostOutcomeClassifier().train(x_train_s, y_train, x_val_s, y_val)
+        catboost = CatBoostOutcomeClassifier(params=cb_params).train(x_train_s, y_train, x_val_s, y_val)
         catboost.save()
 
         poisson = PoissonGoalModel()
@@ -399,9 +426,10 @@ class ModelTrainer:
 
         val_stacked = _stack_probs(val_probs)
 
+        meta_Cs = best_params.get("meta_Cs", 8)
         from sklearn.linear_model import LogisticRegressionCV
         meta = LogisticRegressionCV(
-            Cs=8, cv=3, multi_class="multinomial",
+            Cs=meta_Cs, cv=3, multi_class="multinomial",
             max_iter=2000, random_state=42, n_jobs=-1,
         )
         meta.fit(val_stacked, y_val)
@@ -457,6 +485,8 @@ class ModelTrainer:
             "baseline_random": 0.333,
             "split_type": "time_series_chronological",
             "ensemble_architecture": "RF+XGB+LGBM+CATBOOST+ELO -> LogisticRegressionCV meta-learner",
+            "tuned_hyperparameters": tuned,
+            "meta_Cs": meta_Cs,
             **metadata_extra,
         }
         with open(MODELS_DIR / "model_metadata.json", "w", encoding="utf-8") as f:

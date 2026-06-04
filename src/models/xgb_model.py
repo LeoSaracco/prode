@@ -14,9 +14,10 @@ logger = logging.getLogger(__name__)
 class XGBOutcomeClassifier:
     """W/D/L classifier usando XGBoost. Clase 2=Win, 1=Draw, 0=Loss (perspectiva team_a)."""
 
-    def __init__(self):
+    def __init__(self, params: dict | None = None):
         self.model_ = None
         self.is_fitted_ = False
+        self.params = params or {}
 
     def train(self, X: np.ndarray, y: np.ndarray, X_val: np.ndarray | None = None,
               y_val: np.ndarray | None = None) -> "XGBOutcomeClassifier":
@@ -26,27 +27,27 @@ class XGBOutcomeClassifier:
             logger.error("xgboost no instalado")
             return self
 
-        params = {
+        defaults = {
             "n_estimators": 600,
             "max_depth": 5,
             "learning_rate": 0.05,
             "subsample": 0.8,
             "colsample_bytree": 0.8,
+            "min_child_weight": 1,
+            "gamma": 0,
+            "reg_alpha": 0,
+            "reg_lambda": 1,
             "objective": "multi:softprob",
             "num_class": 3,
             "eval_metric": "mlogloss",
-            "use_label_encoder": False,
             "random_state": 42,
             "n_jobs": -1,
         }
+        defaults.update(self.params)
 
-        eval_set = [(X_val, y_val)] if X_val is not None else None
-        self.model_ = xgb.XGBClassifier(**params)
-        self.model_.fit(
-            X, y,
-            eval_set=eval_set,
-            verbose=False,
-        )
+        self.model_ = xgb.XGBClassifier(**defaults)
+        eval_set = [(X_val, y_val)] if X_val is not None and y_val is not None else None
+        self.model_.fit(X, y, eval_set=eval_set, verbose=False)
         self.is_fitted_ = True
         logger.info("XGBoost entrenado.")
         return self

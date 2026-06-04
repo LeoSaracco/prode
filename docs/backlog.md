@@ -43,6 +43,20 @@ Cambios realizados:
 - **Architectura ensemble**: RF + XGBoost + LightGBM + CatBoost + Elo -> LogisticRegressionCV meta-learner.
 - **Runtime**: carga RF, CatBoost y meta-learner automaticamente.
 
+### Fase C — Hyperparameter Tuning con Optuna
+
+Estado: completado.
+
+Cambios realizados:
+
+- **Optuna integrado**: `scripts/tune_hyperparams.py` con 30+ parametros tuneables en 5 modelos.
+- **Modelos parametrizables**: RF, XGB, LGBM, CatBoost aceptan `params dict` para override de defaults.
+- **TimeSeriesSplit implicito**: split cronologico estricto dentro del objective de Optuna.
+- **best_params.json**: guarda los mejores parametros encontrados en `models/best_params.json`.
+- **Trainer auto-tuned**: `_fit_models` carga `best_params.json` automaticamente si existe.
+- **Study persistente**: almacenamiento SQLite en `models/optuna_study.db` para retomar sesiones.
+- **Meta_Cs tuneado**: el numero de C values del LogisticRegressionCV tambien se optimiza.
+
 ### API REST con FastAPI
 
 Estado: completado.

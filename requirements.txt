@@ -18,6 +18,7 @@ lightgbm>=4.3.0
 catboost>=1.2.0
 scipy>=1.12.0
 statsmodels>=0.14.0
+optuna>=3.6.0
 
 # ── Model Interpretability ─────────────────────────────────────────────────
 shap>=0.44.0

@@ -11,15 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class RFOutcomeClassifier:
-    """3-class W/D/L classifier using RandomForest with OOB scoring.
+    """3-class W/D/L classifier using RandomForest with OOB scoring."""
 
-    RandomForest is recommended over gradient boosting for datasets < 5000
-    samples due to natural bagging regularization.
-    """
-
-    def __init__(self):
+    def __init__(self, params: dict | None = None):
         self.model_ = None
         self.is_fitted_ = False
+        self.params = params or {}
 
     def train(
         self,
@@ -30,7 +27,7 @@ class RFOutcomeClassifier:
     ) -> "RFOutcomeClassifier":
         from sklearn.ensemble import RandomForestClassifier
 
-        params = {
+        defaults = {
             "n_estimators": 500,
             "max_depth": 12,
             "min_samples_split": 15,
@@ -42,7 +39,8 @@ class RFOutcomeClassifier:
             "random_state": 42,
             "n_jobs": -1,
         }
-        self.model_ = RandomForestClassifier(**params)
+        defaults.update(self.params)
+        self.model_ = RandomForestClassifier(**defaults)
         self.model_.fit(X, y)
         self.is_fitted_ = True
 

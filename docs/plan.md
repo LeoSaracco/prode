@@ -90,6 +90,26 @@ Layer 3 — Calibracion:
 El peso de cada modelo base es aprendido por el meta-learner,
 no hardcodeado. El modelo Poisson solo se usa para xG y scorelines.
 
+## Hyperparameter Tuning (Fase C)
+
+Se usa Optuna con objetivo de minimizar log_loss en test set cronologico.
+
+Espacio de busqueda:
+
+- **RF**: n_estimators (200-800), max_depth (4-20), min_samples_split (5-30),
+  min_samples_leaf (2-15), max_features (sqrt/log2/None)
+- **XGBoost**: n_estimators (300-900), max_depth (3-9), lr (0.01-0.15 log),
+  subsample/colsample (0.6-1.0), min_child_weight (1-10),
+  gamma (0-2.0), reg_alpha/lambda (log)
+- **LightGBM**: n_estimators (300-900), num_leaves (15-63), lr (0.01-0.15 log),
+  subsample/colsample (0.6-1.0), min_child_samples (10-50), reg_alpha/lambda (log)
+- **CatBoost**: iterations (300-900), depth (3-9), lr (0.01-0.15 log),
+  l2_leaf_reg (0.5-10.0), border_count (32-255)
+- **Meta**: Cs (5-15)
+
+Resultados guardados en `models/best_params.json` y cargados automaticamente
+por `trainer.py` en el proximo entrenamiento.
+
 ## Simulacion de Grupos
 
 Para cada grupo A-L:

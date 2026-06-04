@@ -10,9 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class LGBMOutcomeClassifier:
-    def __init__(self):
+    def __init__(self, params: dict | None = None):
         self.model_ = None
         self.is_fitted_ = False
+        self.params = params or {}
 
     def train(self, X: np.ndarray, y: np.ndarray, X_val: np.ndarray | None = None,
               y_val: np.ndarray | None = None) -> "LGBMOutcomeClassifier":
@@ -22,12 +23,15 @@ class LGBMOutcomeClassifier:
             logger.error("lightgbm no instalado")
             return self
 
-        params = {
+        defaults = {
             "n_estimators": 600,
             "num_leaves": 31,
             "learning_rate": 0.05,
             "subsample": 0.8,
             "colsample_bytree": 0.8,
+            "min_child_samples": 20,
+            "reg_alpha": 0.0,
+            "reg_lambda": 0.0,
             "objective": "multiclass",
             "num_class": 3,
             "metric": "multi_logloss",
@@ -35,10 +39,11 @@ class LGBMOutcomeClassifier:
             "n_jobs": -1,
             "verbose": -1,
         }
+        defaults.update(self.params)
+        self.model_ = lgb.LGBMClassifier(**defaults)
 
         callbacks = [lgb.early_stopping(50, verbose=False)] if X_val is not None else []
         eval_set = [(X_val, y_val)] if X_val is not None else None
-        self.model_ = lgb.LGBMClassifier(**params)
         fit_kwargs = {"callbacks": callbacks}
         if eval_set:
             fit_kwargs["eval_set"] = eval_set
