@@ -1,0 +1,73 @@
+"""Shared runtime helpers for CLI/API prediction."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+import joblib
+import pandas as pd
+
+from config.settings import MODELS_DIR
+from config.team_aliases import TEAM_ALIASES, resolve_team_name
+from src.data.cache_manager import CacheManager
+from src.features.feature_builder import FeatureBuilder
+from src.models.elo_model import EloModel
+from src.models.ensemble import EnsemblePredictor
+from src.models.lgbm_model import LGBMOutcomeClassifier
+from src.models.poisson_model import PoissonGoalModel
+from src.models.xgb_model import XGBOutcomeClassifier
+
+
+@dataclass
+class PredictionRuntime:
+    ensemble: EnsemblePredictor
+    feature_builder: FeatureBuilder
+    poisson: PoissonGoalModel
+    elo_df: pd.DataFrame | None
+    models_loaded: bool
+
+
+def load_prediction_runtime() -> PredictionRuntime:
+    cache = CacheManager()
+    elo_df = cache.load("elo_ratings")
+    scaler_path = MODELS_DIR / "scaler.pkl"
+    scaler = joblib.load(scaler_path) if scaler_path.exists() else None
+
+    poisson = PoissonGoalModel().load()
+    xgb = XGBOutcomeClassifier().load()
+    lgbm = LGBMOutcomeClassifier().load()
+    elo_model = EloModel(elo_df=elo_df)
+    ensemble = EnsemblePredictor(
+        xgb_model=xgb,
+        lgbm_model=lgbm,
+        elo_model=elo_model,
+        poisson_model=poisson,
+        scaler=scaler,
+    )
+    return PredictionRuntime(
+        ensemble=ensemble,
+        feature_builder=FeatureBuilder(elo_df=elo_df),
+        poisson=poisson,
+        elo_df=elo_df,
+        models_loaded=bool(xgb.is_fitted_ or lgbm.is_fitted_ or poisson.is_fitted_),
+    )
+
+
+def resolve_team_or_raise(name: str) -> str:
+    resolved = resolve_team_name(name)
+    if resolved is not None:
+        return resolved
+    lower = name.lower()
+    for canonical in TEAM_ALIASES:
+        if lower in canonical.lower():
+            return canonical
+    raise ValueError(f"Unknown team: {name}")
+
+
+def predict_match(runtime: PredictionRuntime, team_a_raw: str, team_b_raw: str) -> tuple[dict, list[tuple[str, float]]]:
+    team_a = resolve_team_or_raise(team_a_raw)
+    team_b = resolve_team_or_raise(team_b_raw)
+    x = runtime.feature_builder.build_match_features(team_a, team_b)
+    result = runtime.ensemble.predict(team_a, team_b, x, elo_df=runtime.elo_df)
+    shap_features = runtime.ensemble.get_shap_explanation(x)
+    return result, shap_features
