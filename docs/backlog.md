@@ -1,155 +1,156 @@
 # Backlog - prode-ML FIFA World Cup 2026
 
-## Resumen de Fases
+## Resumen De Fases
 
-| Fase | Estado | Accuracy | Cambio clave |
-|------|--------|----------|-------------|
-| Inicial | ✅ | 42.0% blend | XGB+LGBM+Elo, split con leakage |
-| A — Pipeline | ✅ | — | Split cronologico, Elo computacional, 3,198 matches |
-| B — Ensemble | ✅ | CatBoost 49.0% | RF+CatBoost, meta-learner LR, 21 features |
-| C — Tuning | ✅ | — | Optuna 30+ params, best_params.json |
-| D — TwoStage | ✅ | — | TwoStage binario, 14 confederation models |
-| E — Fixes | ✅ | **Voting >=49%** | Weighted voting, paralelo, pipeline rapido |
-| **Pendiente** | | | Mejorar accuracy a >55%, Docker/deploy |
+| Fase | Estado | Resultado | Cambio clave |
+|---|---|---:|---|
+| Inicial | Completado | 42.0% blend | XGB+LGBM+Elo, split con leakage. |
+| A - Pipeline | Completado | - | Split cronologico, Elo computacional, 3,199 partidos. |
+| B - Ensemble | Completado | CatBoost ~49% | RF+CatBoost y features refinadas. |
+| C - Tuning | Completado | - | Optuna y `best_params.json`. |
+| D - Auxiliares | Completado | - | TwoStage y ConfederationModels. |
+| E - Performance | Completado | Voting ~49% | Weighted voting, entrenamiento paralelo, Windows mas rapido. |
+| F - Validacion ML | Completado | Voting 50.21% | Features rolling sin leakage, rankings FIFA, confianza calibrada. |
+| G - Calibracion y Recencia | Completado | Voting 50.62% | Temperature scaling, sample_weight por recencia, TwoStage fuera del reporte, Optuna con objetivo compuesto, Kaggle credentials. |
+| H - Features y Datos | En curso | Target >52% | Arreglar h2h/consistency, fix Kaggle match features collector, Poisson al ensemble. |
 
 ## Estado Actual
 
 - CLI interactivo: implementado.
-- Modelos entrenados: 5 modelos (RF, XGB, LGBM, CatBoost, Elo) + TwoStage + Confederation.
 - API REST FastAPI: implementada.
 - Frontend React/Vite: implementado.
-- Grupos oficiales WC2026: implementados en `config/wc2026_groups.py`.
-- Simulacion de grupos: implementada con tabla de clasificacion probable y marcador mas probable por fixture.
-- Automatizacion local: `run_all.bat` (7 pasos, pipeline + train + reporte PDF + API + frontend).
-- Fases A-B-C-D-E completadas.
+- Grupos oficiales WC2026: implementados.
+- Reporte PDF: implementado.
+- Automatizacion local: `run_all.bat`.
+- Entrenamiento rolling sin leakage: implementado.
+- FIFA rankings historicos: collector reparado y cacheado.
+- Confidence thresholds: implementados.
 
-## Completado
+Artefactos relevantes:
 
-### Fase A — Pipeline de Datos y Split Temporal
+- `models/model_metadata.json`
+- `models/voting_weights.json`
+- `models/confidence_thresholds.json`
+- `models/inference_team_profiles.json`
 
-Estado: completado.
+## Metricas Actuales
 
-Cambios realizados:
+| Metrica | Valor | Que significa |
+|---|---:|---|
+| `accuracy_voting` | 50.21% | Acierto general del ensemble principal. |
+| `accuracy_catboost` | 51.04% | Acierto del mejor modelo individual actual. |
+| `accuracy_lgbm` | 49.58% | Acierto de LightGBM. |
+| `accuracy_rf` | 48.96% | Acierto de RandomForest. |
+| `accuracy_xgb` | 46.67% | Acierto de XGBoost. |
+| `accuracy_confederation` | 48.33% | Acierto del modelo por confederaciones. |
+| `accuracy_two_stage` | 35.42% | Acierto del modelo auxiliar de dos etapas. |
+| `accuracy_high_confidence` | 69.70% | Acierto cuando el sistema marca `ALTO`. |
+| `accuracy_high_elo_diff_200` | 57.75% | Acierto cuando la diferencia Elo es >= 200. |
+| `log_loss_voting` | 1.0396 | Calidad de probabilidades; menor es mejor. |
 
-- **Fix data leakage**: el split train/val/test ahora es estrictamente temporal (70/15/15 cronologico). Antes `_add_reverse_perspective` contaminaba el test con datos de train.
-- **Elo historico computacional**: nuevo `EloHistoryCollector` que calcula Elo rolling desde resultados historicos sin depender de datasets externos.
-- **FIFA Rankings collector**: `FIFARankingsCollector` descarga rankings historicos FIFA desde GitHub.
-- **Features contextuales**: `is_tournament`, `is_wc`, `is_qualifier`, `is_home` agregados a la matriz de features (21 features total, antes 17).
-- **Rango de datos ampliado**: `MATCH_HISTORY_START_YEAR=2000` en settings. El colector de resultados internacionales ahora preserva info de torneo y neutral.
-- **Metricas segmentadas**: `accuracy_high_elo_diff_200` medida en test set para partidos con diferencia Elo >= 200.
-- **Pesos del ensemble normalizados**: se normalizan automaticamente si no suman 1.0.
+Notas:
 
-### Fase B — Re-ingenieria de Ensemble y Features
+- `accuracy_voting` es la metrica principal global.
+- `accuracy_high_confidence` depende de `n_high_confidence_matches`; hoy son 33 casos.
+- Las metricas actuales son mas honestas que versiones anteriores porque usan features rolling sin mirar el futuro.
 
-Estado: completado.
+## Completado Reciente
 
-Cambios realizados:
-
-- **RandomForest**: nuevo `RFOutcomeClassifier` con 500 arboles, OOB scoring, class_weight balanced.
-- **CatBoost**: nuevo `CatBoostOutcomeClassifier` con ordered boosting y early stopping.
-- **Meta-learner**: `LogisticRegressionCV` entrenado sobre predicciones de los 4 modelos base + Elo en val set. Reemplaza pesos fijos.
-- **Feature selection**: removidos `big_match_rating_diff`, `pressure_diff`, `form_times_elo_diff`, `attack_vs_defense_clash`.
-- **Nuevos features**: `fifa_rank_diff`, `elo_momentum_diff`, `days_since_last_match_diff`, `rest_days_diff`.
-- **Architectura ensemble**: RF + XGBoost + LightGBM + CatBoost + Elo -> LogisticRegressionCV meta-learner.
-- **Runtime**: carga RF, CatBoost y meta-learner automaticamente.
-
-### Fase C — Hyperparameter Tuning con Optuna
-
-Estado: completado.
-
-Cambios realizados:
-
-- **Optuna integrado**: `scripts/tune_hyperparams.py` con 30+ parametros tuneables en 5 modelos.
-- **Modelos parametrizables**: RF, XGB, LGBM, CatBoost aceptan `params dict` para override de defaults.
-- **TimeSeriesSplit implicito**: split cronologico estricto dentro del objective de Optuna.
-- **best_params.json**: guarda los mejores parametros encontrados en `models/best_params.json`.
-- **Trainer auto-tuned**: `_fit_models` carga `best_params.json` automaticamente si existe.
-- **Study persistente**: almacenamiento SQLite en `models/optuna_study.db` para retomar sesiones.
-- **Meta_Cs tuneado**: el numero de C values del LogisticRegressionCV tambien se optimiza.
-
-### Fase E — Fixes y Optimizaciones
-
-Estado: completado.
+### Fase F - Validacion ML Y Confianza
 
 Cambios realizados:
 
-- **Weighted voting reemplaza meta-learner LR**: los pesos se calculan como `accuracy_val - 0.33` por modelo, normalizados. Elo siempre pesa base 0.10. Resultado: ensemble supera al mejor modelo individual.
-- **Poisson con timeout**: `maxiter=200`, `ftol=1e-4`. Si no converge usa default params.
-- **TwoStage con feature mask**: stage1 (draw) usa solo 8 features: elo_diff, elo_win_prob, xg_diff, xga_diff, form_5_diff, defensive_stability_diff, consistency_diff, is_tournament.
-- **Entrenamiento paralelo**: ThreadPoolExecutor(4) entrena RF, XGB, LGBM, CatBoost simultaneamente.
-- **CatBoost opcional**: si falla o timeout (120s), se skipea y el ensemble sigue con los otros 3.
-- **Pipeline rapido simplificado**: run_fast solo baja international results + Elo (sin StatsBomb/Kaggle/FIFA rotos).
+- **Rolling features sin leakage**: cada partido usa solo informacion anterior a su fecha.
+- **FIFA rankings reproducibles**: collector actualizado a una fuente GitHub activa y ranking derivado por puntos cuando no viene columna `rank`.
+- **Features activas**: `fifa_rank_diff`, `elo_momentum_diff`, `days_since_last_match_diff`, `rest_days_diff`.
+- **Perfiles de inferencia**: se guarda `models/inference_team_profiles.json` para que CLI/API usen el mismo snapshot del entrenamiento.
+- **Confianza calibrada**: se guarda `models/confidence_thresholds.json`.
+- **Umbral ALTO conservador**: minimo `high_prob = 0.70`.
+- **Tuning alineado**: `scripts/tune_hyperparams.py` ya optimiza weighted voting, no meta-learner viejo.
 
-### API REST con FastAPI
+### Fase E - Performance Local
 
-Estado: completado.
+Cambios realizados:
 
-Endpoints disponibles:
+- Entrenamiento base paralelo: RF, XGB, LGBM, CatBoost.
+- Threads parametrizables con `TRAIN_MODEL_JOBS`.
+- ConfederationModels parametrizable con `CONFED_N_ESTIMATORS` y `CONFED_MODEL_JOBS`.
+- Poisson empirico rapido por defecto; optimizacion pesada disponible con `POISSON_OPTIMIZE=1`.
+- `run_all.bat` mas descriptivo y con salida sin buffer.
 
-- `GET /health`
-- `GET /api/v1/teams`
-- `GET /api/v1/groups`
-- `POST /api/v1/predict`
-- `GET /api/v1/simulate/group/{group_name}`
-- `GET /api/v1/simulate/tournament`
+## Explicacion De Accuracy
 
-`GET /api/v1/simulate/group/{group_name}` devuelve `results` para la tabla de grupo y `fixtures` con el marcador mas probable de cada partido.
+El problema predice tres resultados posibles:
 
-### Frontend Web
+1. gana equipo A
+2. empate
+3. gana equipo B
 
-Estado: completado.
+Por eso, acertar al azar seria aproximadamente 33.3%.
 
-Incluye:
+Ejemplo:
 
-- Vista de prediccion de partido.
-- Vista de simulacion de grupos.
-- Vista de simulacion de torneo.
-- Render de resultados mas probables por partido en la vista de grupos.
+```text
+accuracy_voting = 50.21%
+```
 
-### Grupos Oficiales
+Significa que el ensemble acerto 50.21 de cada 100 partidos del test historico.
 
-Estado: completado.
+No significa que vaya a acertar exactamente 50.21% en el Mundial real. El Mundial
+tiene menos partidos, contexto distinto, planteles concretos y eliminacion directa.
 
-Los grupos oficiales del Mundial 2026 estan en `config/wc2026_groups.py`.
+## Completado Reciente
 
-### Automatizacion Local Bash
+### Fase G - Calibracion, Recencia y Calidad (2026-06-04)
 
-Estado: completado.
+- **Temperature scaling**: reemplaza isotonic regression (que inflaba log_loss). T=1.0447 ajustado en val. Mejora log_loss calibrado a 1.0337 vs 1.0364 sin calibrar.
+- **Sample weight por recencia**: entrenamiento con decaimiento exponencial (half-life 3 anos). Partidos recientes pesan mas. CatBoost sube de 49.59% a 51.65%.
+- **TwoStage fuera del reporte**: marcado como "diagnostic only" en el PDF. Sigue entrenandose pero no contamina las predicciones mostradas.
+- **Optuna objetivo compuesto**: `log_loss - 0.3 * high_conf_acc`, guarda tambien `high_conf_acc` y `n_high_conf` como user attrs.
+- **Kaggle credentials**: `~/.kaggle/kaggle.json` configurado. Dos datasets descargados (Elo: 1991 filas, match features: descargado pero collector pendiente de fix).
 
-`scripts/run_full_stack.sh` ejecuta pipeline, validacion, entrenamiento, API y frontend en orden. Incluye flags para modo rapido, refresh forzado, puertos custom, saltar etapas y evitar instalacion de dependencias.
+## Pendiente Prioritario (Fase H)
 
-## Pendiente
-
-### Mejorar Accuracy del Modelo
+### Bugs Con Impacto Directo En Features
 
 Prioridad: alta.
 
-El sistema entrena y predice, pero las metricas actuales no alcanzan los targets aspiracionales originales. Acciones recomendadas:
+- **`h2h_advantage` siempre es 0.0**: hardcodeado en `trainer.py`. Computar historial directo desde datos de entrenamiento rolling (sin leakage).
+- **`consistency_diff` duplica `form_5_diff`**: ambos calculan `sa["form_5"] - sb["form_5"]`. Reemplazar `consistency_diff` con desviacion estandar de ultimos 5 resultados.
 
-- Integrar mas partidos recientes de selecciones nacionales.
-- Mejorar features de localia, lesiones y forma reciente.
-- Calibrar probabilidades del ensemble.
-- Evaluar pesos adaptativos o meta-learner.
-- Medir por segmento: global, alta confianza y delta Elo alto.
+### Fix Collector Kaggle Match Features
 
-### Docker y Deploy
+Prioridad: alta.
 
-Prioridad: baja.
+El dataset `lchikry/international-football-match-features-and-statistics` se descargo (3.67MB) pero el collector no puede parsearlo. Las columnas reales son `_home_team`, `_away_team`, `_date`, `home_goals`, `away_goals`. Arreglarlo sumaria ~8k partidos con features de Elo, forma y ratings de planteles.
 
-Pendiente crear:
+### Optuna 50 Trials
 
-- `Dockerfile.api`
-- `Dockerfile.frontend`
-- `docker-compose.yml`
+Prioridad: media. Ya implementado con objetivo compuesto. Solo ejecutar: `python scripts/tune_hyperparams.py --trials 50`.
 
-### Robustez Windows
+### Poisson Al Ensemble
 
 Prioridad: media.
 
-Pendiente evitar errores de encoding en Windows sin depender de `PYTHONIOENCODING=utf-8`.
+Las probabilidades implicitas W/D/L derivadas del xG Poisson son una senal ortogonal al ML. Incorporar como modelo 6 del voting con peso inicial bajo (0.05-0.10).
+
+### Datos Y Robustez
+
+Prioridad: media.
+
+- Valor de mercado dinamico por fecha de partido (no dato estatico).
+- Pruebas de no-leakage automatizadas.
+- Tests que validen que probabilidades suman 1.
+
+### Docker Y Deploy
+
+Prioridad: baja.
+
+- `Dockerfile.api`, `Dockerfile.frontend`, `docker-compose.yml`.
 
 ## Notas Operativas
 
-- No reentrenar modelos salvo que haya nuevos datos o cambios en features.
 - Consultar siempre `models/model_metadata.json` para metricas reales.
-- Mantener `docs/README.md` alineado con endpoints y comandos reales.
+- No comparar metricas antiguas con leakage contra metricas nuevas rolling como si fueran equivalentes.
+- Reentrenar despues de cambios en features, collector de datos o pesos.
+- Mantener `docs/README.md`, `docs/plan.md` y `docs/backlog.md` alineados con metadata real.

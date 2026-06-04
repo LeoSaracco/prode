@@ -8,6 +8,7 @@ fallback for rare matchups.
 """
 
 import logging
+import os
 from pathlib import Path
 
 import joblib
@@ -20,6 +21,20 @@ from config.settings import MODELS_DIR
 from config.wc2026_groups import CONFEDERATION
 
 logger = logging.getLogger(__name__)
+
+
+def _model_jobs(default: int = 1) -> int:
+    try:
+        return max(1, int(os.getenv("CONFED_MODEL_JOBS", os.getenv("TRAIN_MODEL_JOBS", str(default)))))
+    except ValueError:
+        return default
+
+
+def _n_estimators(default: int = 150) -> int:
+    try:
+        return max(50, int(os.getenv("CONFED_N_ESTIMATORS", str(default))))
+    except ValueError:
+        return default
 
 CONFED_GROUPS = {
     "UEFA": ["Austria", "Belgium", "Bosnia and Herzegovina", "Croatia", "Czechia",
@@ -96,10 +111,10 @@ class ConfederationModels:
             self.scaler[key] = scaler
 
             clf = RandomForestClassifier(
-                n_estimators=300, max_depth=10,
+                n_estimators=_n_estimators(), max_depth=10,
                 min_samples_split=15, min_samples_leaf=6,
                 class_weight="balanced_subsample",
-                random_state=42, n_jobs=-1,
+                random_state=42, n_jobs=_model_jobs(),
             )
             clf.fit(X_s, y_pair)
             self.models[key] = clf
@@ -108,10 +123,10 @@ class ConfederationModels:
         self.global_scaler = StandardScaler()
         X_global_s = self.global_scaler.fit_transform(X)
         self.global_model = RandomForestClassifier(
-            n_estimators=300, max_depth=10,
+            n_estimators=_n_estimators(), max_depth=10,
             min_samples_split=15, min_samples_leaf=6,
             class_weight="balanced_subsample",
-            random_state=42, n_jobs=-1,
+            random_state=42, n_jobs=_model_jobs(),
         )
         self.global_model.fit(X_global_s, y)
 

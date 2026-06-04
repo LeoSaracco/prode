@@ -5,6 +5,7 @@ Simulador de fase de grupos del Mundial 2026.
 import numpy as np
 import pandas as pd
 from itertools import combinations
+from math import factorial
 from config.settings import MC_ITERATIONS
 from config.wc2026_groups import GROUPS
 from src.simulation.match_simulator import simulate_match
@@ -12,15 +13,21 @@ from src.simulation.match_simulator import simulate_match
 
 def _simulate_single_group(
     teams: list[str],
-    lambdas: dict[tuple[str, str], tuple[float, float]],
+    match_models: dict[tuple[str, str], dict],
     rng: np.random.Generator,
 ) -> dict[str, dict]:
     """Simula los 6 partidos de un grupo. Retorna tabla con pts, gd, gf."""
     table = {t: {"pts": 0, "gd": 0, "gf": 0, "ga": 0} for t in teams}
     for team_a, team_b in combinations(teams, 2):
-        lam_a, lam_b = lambdas.get((team_a, team_b), (1.2, 1.0))
-        ga = int(rng.poisson(lam_a))
-        gb = int(rng.poisson(lam_b))
+        model = match_models.get((team_a, team_b), {})
+        lam_a, lam_b = model.get("lambdas", (1.2, 1.0))
+        outcome_probs = model.get("outcome_probs")
+        if outcome_probs is None:
+            ga = int(rng.poisson(lam_a))
+            gb = int(rng.poisson(lam_b))
+        else:
+            outcome = int(rng.choice(3, p=outcome_probs))
+            ga, gb = _sample_scoreline_for_outcome(lam_a, lam_b, outcome, rng)
         table[team_a]["gf"] += ga
         table[team_a]["ga"] += gb
         table[team_b]["gf"] += gb
@@ -37,6 +44,38 @@ def _simulate_single_group(
     return table
 
 
+def _sample_scoreline_for_outcome(
+    lam_a: float,
+    lam_b: float,
+    outcome: int,
+    rng: np.random.Generator,
+    max_goals: int = 8,
+) -> tuple[int, int]:
+    """Samples a plausible scoreline conditional on A/D/B outcome."""
+    candidates = []
+    weights = []
+    for ga in range(max_goals + 1):
+        for gb in range(max_goals + 1):
+            if outcome == 0 and ga <= gb:
+                continue
+            if outcome == 1 and ga != gb:
+                continue
+            if outcome == 2 and ga >= gb:
+                continue
+            # Recursive import avoidance; poisson pmf is cheap enough through numpy formula.
+            weight = np.exp(-lam_a) * (lam_a ** ga) / max(factorial(ga), 1)
+            weight *= np.exp(-lam_b) * (lam_b ** gb) / max(factorial(gb), 1)
+            candidates.append((ga, gb))
+            weights.append(weight)
+    if not candidates or sum(weights) <= 0:
+        ga = int(rng.poisson(lam_a))
+        gb = int(rng.poisson(lam_b))
+        return ga, gb
+    probs = np.array(weights, dtype=float)
+    probs /= probs.sum()
+    return candidates[int(rng.choice(len(candidates), p=probs))]
+
+
 def _rank_group(table: dict[str, dict]) -> list[str]:
     """Ordena equipos por pts > gd > gf (desempate FIFA simplificado)."""
     return sorted(
@@ -47,9 +86,10 @@ def _rank_group(table: dict[str, dict]) -> list[str]:
 
 
 class GroupSimulator:
-    def __init__(self, poisson_model=None, elo_df: pd.DataFrame | None = None):
+    def __init__(self, poisson_model=None, elo_df: pd.DataFrame | None = None, predictor=None):
         self.poisson = poisson_model
         self.elo_df = elo_df
+        self.predictor = predictor
 
     def _get_lambdas(self, team_a: str, team_b: str) -> tuple[float, float]:
         if self.poisson is not None:
@@ -59,6 +99,24 @@ class GroupSimulator:
             FALLBACK_STATS.get(team_a, {"xg_pg": 1.2})["xg_pg"],
             FALLBACK_STATS.get(team_b, {"xg_pg": 1.0})["xg_pg"],
         )
+
+    def _get_outcome_probs(self, team_a: str, team_b: str) -> tuple[float, float, float] | None:
+        if self.predictor is None:
+            return None
+        try:
+            result = self.predictor(team_a, team_b)
+            probs = np.array([
+                float(result["p_win_a"]),
+                float(result["p_draw"]),
+                float(result["p_win_b"]),
+            ])
+            total = probs.sum()
+            if total <= 0:
+                return None
+            probs = probs / total
+            return float(probs[0]), float(probs[1]), float(probs[2])
+        except Exception:
+            return None
 
     def simulate_group(
         self,
@@ -75,11 +133,14 @@ class GroupSimulator:
         if not teams:
             return pd.DataFrame()
 
-        # Pre-calcular lambdas para todos los emparejamientos
-        lambdas = {}
+        # Pre-calcular xG y probabilidades W/D/L para todos los emparejamientos.
+        match_models = {}
         for ta, tb in combinations(teams, 2):
-            lambdas[(ta, tb)] = self._get_lambdas(ta, tb)
-            lambdas[(tb, ta)] = (lambdas[(ta, tb)][1], lambdas[(ta, tb)][0])
+            lambdas = self._get_lambdas(ta, tb)
+            outcome_probs = self._get_outcome_probs(ta, tb)
+            match_models[(ta, tb)] = {"lambdas": lambdas, "outcome_probs": outcome_probs}
+            reverse_probs = None if outcome_probs is None else (outcome_probs[2], outcome_probs[1], outcome_probs[0])
+            match_models[(tb, ta)] = {"lambdas": (lambdas[1], lambdas[0]), "outcome_probs": reverse_probs}
 
         positions = {t: [0, 0, 0, 0] for t in teams}  # [1st, 2nd, 3rd, 4th]
         pts_accum = {t: 0 for t in teams}
@@ -87,7 +148,7 @@ class GroupSimulator:
         rng = np.random.default_rng(seed=2026)
 
         for _ in range(n_sims):
-            table = _simulate_single_group(teams, lambdas, rng)
+            table = _simulate_single_group(teams, match_models, rng)
             ranked = _rank_group(table)
             for pos, team in enumerate(ranked):
                 positions[team][pos] += 1

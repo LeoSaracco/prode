@@ -1,5 +1,7 @@
 """Canonical team names and source-specific aliases."""
 
+import unicodedata
+
 from config.wc2026_groups import GROUPS
 
 
@@ -144,10 +146,15 @@ CANONICAL_NAMES.update({
 })
 
 
+def _normalize_key(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.strip().lower())
+    return "".join(ch for ch in normalized if not unicodedata.combining(ch))
+
+
 def resolve_team_name(input_name: str) -> str | None:
     """Resolve a user/source name to the canonical WC2026 team name."""
-    normalized = input_name.strip().lower()
+    normalized = _normalize_key(input_name)
     for canonical in TEAM_ALIASES:
-        if canonical.lower() == normalized:
+        if _normalize_key(canonical) == normalized:
             return canonical
     return CANONICAL_NAMES.get(normalized)

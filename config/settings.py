@@ -32,6 +32,18 @@ STATSBOMB_SHOTS_DATASET = os.getenv(
     "STATSBOMB_SHOTS_DATASET",
     "ClementeH/statsbomb-open-data-shots",
 )
+FIFA_WC2026_SCHEDULE_URL = os.getenv(
+    "FIFA_WC2026_SCHEDULE_URL",
+    "https://www.fifa.com/es/articles/calendario-fixture-mundial-2026-partidos-fechas",
+)
+FIFA_WC2026_SQUAD_PDF_URL = os.getenv(
+    "FIFA_WC2026_SQUAD_PDF_URL",
+    "https://fdp.fifa.org/assetspublic/ce281/pdf/SquadLists-Spanish.pdf",
+)
+TRANSFERMARKT_WC2026_URL = os.getenv(
+    "TRANSFERMARKT_WC2026_URL",
+    "https://www.transfermarkt.com.ar/copa-del-mundo/teilnehmer/pokalwettbewerb/FIWC",
+)
 
 ELO_HISTORY_DIR = Path(
     os.getenv("ELO_HISTORY_DIR", str(DATA_RAW / "eloratings"))

@@ -36,6 +36,7 @@ from src.features.feature_builder import MATCH_FEATURE_COLUMNS
 from src.models.trainer import (
     ModelTrainer,
     NationalTeamTrainingFeatureBuilder,
+    RollingNationalTeamFeatureBuilder,
     _build_team_stats,
     _standardize_training_matches,
     _add_reverse_perspective,
@@ -100,24 +101,16 @@ def load_data():
 
 def prepare_splits(match_df, elo_history_df, statsbomb_xg_df):
     match_df = match_df.sort_values("date").reset_index(drop=True)
-    team_stats = _build_team_stats(match_df)
-    for team, elo in _latest_elo_overrides(elo_history_df).items():
-        team_stats.setdefault(team, {})["elo"] = float(elo)
-    _apply_statsbomb_xg(team_stats, statsbomb_xg_df)
-
     n = len(match_df)
     train_end = int(n * 0.70)
     val_end = int(n * 0.85)
     train_matches = match_df.iloc[:train_end].copy()
-    val_matches = match_df.iloc[train_end:val_end].copy()
-    test_matches = match_df.iloc[val_end:].copy()
-
-    train_df = _add_reverse_perspective(train_matches)
-
-    fb = NationalTeamTrainingFeatureBuilder(team_stats)
-    x_train_raw, y_train = fb.build_training_matrix(train_df)
-    x_val_raw, y_val = fb.build_training_matrix(val_matches.copy())
-    x_test_raw, y_test = fb.build_training_matrix(test_matches.copy())
+    fb = RollingNationalTeamFeatureBuilder()
+    x_train_raw, y_train, x_val_raw, y_val, x_test_raw, y_test, _, _ = fb.build_split_matrices(
+        match_df=match_df,
+        train_end=train_end,
+        val_end=val_end,
+    )
 
     scaler = StandardScaler()
     x_train = scaler.fit_transform(x_train_raw)
@@ -181,8 +174,6 @@ def objective(trial, data):
         "border_count": trial.suggest_int("cb_border_count", 32, 255, step=32),
     }
 
-    meta_Cs = trial.suggest_int("meta_Cs", 5, 15)
-
     models = {
         "rf": RFOutcomeClassifier(params=rf_params).train(x_train, y_train),
         "xgb": XGBOutcomeClassifier(params=xgb_params).train(x_train, y_train, x_val, y_val),
@@ -190,28 +181,21 @@ def objective(trial, data):
         "catboost": CatBoostOutcomeClassifier(params=cb_params).train(x_train, y_train, x_val, y_val),
     }
 
-    train_elo = _elo_batch(x_train, y_train)
-    val_elo_raw = data["x_val"][:, 0] if "x_val" in data else x_val[:, 0]
-
     val_probs = {}
+    val_acc = {}
     for name, model in models.items():
         if model.is_fitted_:
             val_probs[name] = model.predict_proba_batch(x_val)
+            val_acc[name] = accuracy_score(y_val, val_probs[name].argmax(axis=1))
         else:
             val_probs[name] = np.tile([0.38, 0.24, 0.38], (len(x_val), 3))
+            val_acc[name] = 0.33
+    val_elo = _elo_batch_for_diffs(x_val[:, 0])
+    val_acc["elo"] = accuracy_score(y_val, val_elo.argmax(axis=1))
 
-    from sklearn.linear_model import LogisticRegressionCV
-    val_elo_stack = _elo_batch_for_diffs(x_val[:, 0]) if x_val.shape[1] >= 1 else np.tile([0.38, 0.24, 0.38], (len(x_val), 3))
-    val_stacked = np.hstack([
-        val_probs["rf"], val_probs["xgb"], val_probs["lgbm"],
-        val_probs["catboost"], val_elo_stack,
-    ])
-
-    meta = LogisticRegressionCV(
-        Cs=meta_Cs, cv=3,
-        max_iter=2000, random_state=42, n_jobs=-1,
-    )
-    meta.fit(val_stacked, y_val)
+    weights = {name: max(0.05, acc - 0.33) for name, acc in val_acc.items()}
+    total = sum(weights.values()) or 1.0
+    weights = {k: v / total for k, v in weights.items()}
 
     test_probs = {}
     for name, model in models.items():
@@ -220,18 +204,31 @@ def objective(trial, data):
         else:
             test_probs[name] = np.tile([0.38, 0.24, 0.38], (len(x_test), 3))
     test_elo = _elo_batch_for_diffs(x_test_raw[:, 0]) if x_test_raw.shape[1] >= 1 else np.tile([0.38, 0.24, 0.38], (len(x_test), 3))
-    test_stacked = np.hstack([
-        test_probs["rf"], test_probs["xgb"], test_probs["lgbm"],
-        test_probs["catboost"], test_elo,
-    ])
+    voting_probs = np.zeros((len(y_test), 3))
+    for name, probs in test_probs.items():
+        voting_probs += weights.get(name, 0.0) * probs
+    voting_probs += weights.get("elo", 0.0) * test_elo
+    voting_probs /= voting_probs.sum(axis=1, keepdims=True)
+    loss = log_loss(y_test, voting_probs, labels=[0, 1, 2])
+    acc = accuracy_score(y_test, voting_probs.argmax(axis=1))
 
-    meta_probs = meta.predict_proba(test_stacked)
-    loss = log_loss(y_test, meta_probs, labels=[0, 1, 2])
-    acc = accuracy_score(y_test, meta_probs.argmax(axis=1))
+    # High-confidence accuracy on test
+    high_prob_threshold = 0.70
+    max_probs = voting_probs.max(axis=1)
+    high_mask = max_probs >= high_prob_threshold
+    if high_mask.sum() >= 5:
+        high_conf_acc = float(accuracy_score(y_test[high_mask], voting_probs[high_mask].argmax(axis=1)))
+    else:
+        high_conf_acc = 0.0
 
     trial.set_user_attr("accuracy", float(acc))
+    trial.set_user_attr("high_conf_acc", high_conf_acc)
+    trial.set_user_attr("n_high_conf", int(high_mask.sum()))
 
-    return loss
+    # Composite: minimize log_loss, maximize high_confidence accuracy
+    # Weight 0.3 gives high_conf_acc ~30% of the total objective signal
+    composite = loss - 0.3 * high_conf_acc
+    return composite
 
 
 def _elo_batch_for_diffs(elo_diffs):
@@ -279,11 +276,12 @@ def run_tuning(trials: int = 50, study_name: str = "v1"):
     study.optimize(wrapped_objective, n_trials=trials, show_progress_bar=True)
 
     print(f"\n=== Best trial (trial #{study.best_trial.number}) ===")
-    print(f"  Log loss: {study.best_value:.4f}")
+    print(f"  Composite objective: {study.best_value:.4f}  (log_loss - 0.3 * high_conf_acc)")
     print(f"  Accuracy: {study.best_trial.user_attrs.get('accuracy', 0):.4f}")
+    print(f"  High-conf accuracy: {study.best_trial.user_attrs.get('high_conf_acc', 0):.4f}")
+    print(f"  High-conf n:        {study.best_trial.user_attrs.get('n_high_conf', 0)}")
 
     best_params = dict(study.best_params)
-    best_params["meta_Cs"] = best_params.pop("meta_Cs", 10)
     best_params["tuning_date"] = datetime.now().isoformat()
     best_params["n_trials"] = trials
     best_params["best_log_loss"] = float(study.best_value)

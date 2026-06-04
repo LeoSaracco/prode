@@ -1,188 +1,138 @@
 # prode-ML - FIFA World Cup 2026 Predictor
 
-Sistema de predicciones para el Mundial FIFA 2026. Combina Elo ratings,
-modelos Poisson, RandomForest, XGBoost, LightGBM, CatBoost, TwoStage,
-Confederation y simulaciones Monte Carlo.
+Sistema de prediccion para el Mundial FIFA 2026. Combina resultados
+historicos de selecciones, ratings Elo, rankings FIFA, modelos de ML,
+Poisson para marcadores y simulaciones Monte Carlo.
 
 ## Estado Actual
 
-- **5 modelos base**: RandomForest, XGBoost, LightGBM, CatBoost, Elo
-- **Ensemble**: accuracy-weighted voting (aprende pesos del val set)
-- **TwoStage**: prediccion draw/no-draw binaria (8 features especificas)
-- **Confederation**: 14 modelos RF por par de confederaciones
-- **21 features** con features contextuales (torneo, WC, localia)
-- **3,198 partidos** de entrenamiento (2000-2026, 47 selecciones)
-- **Split cronologico** 70/15/15 sin data leakage
-- **Pipeline rapido**: `run_all.bat` (~2-3 min total)
-- **Reportes PDF**: predicciones, simulaciones, ranking de campeones
-- **API REST** FastAPI en `api/`
-- **Frontend** React/Vite en `frontend/`
-- **CLI** interactivo en `cli.py`
+- **Datos de entrenamiento**: 3,199 partidos internacionales desde 2000 hasta 2026.
+- **Split temporal**: 70% train, 15% validation, 15% test, en orden cronologico.
+- **Features sin mirar el futuro**: `rolling_no_future_leakage`.
+- **21 features**: Elo, forma reciente, goles a favor/en contra, ranking FIFA, descanso, torneo/localia, historia mundialista y valor de mercado.
+- **Modelos base**: RandomForest, XGBoost, LightGBM, CatBoost y Elo.
+- **Ensemble principal**: weighted voting, con pesos aprendidos en validation.
+- **Calibracion probabilistica**: isotonic regression post-ensemble, ajustada en validation.
+- **Pesos de recencia**: partidos recientes pesan mas en el entrenamiento (half-life 3 anos).
+- **Modelos auxiliares**: TwoStage (diagnostico, no integrado al ensemble) y ConfederationModels.
+- **Poisson**: estima xG y marcadores probables.
+- **Runtime**: CLI, API FastAPI, frontend React/Vite y PDF.
 
-Metricas reales en `models/model_metadata.json`.
+Metricas reales: `models/model_metadata.json`.
 
-## Histórico de Versiones
+## Resultado Actual Del Modelo
 
-| Fase | Commit | Qué cambió | Métrica clave |
-|------|--------|-----------|---------------|
-| **Inicial** | `83da947` | XGB+LGBM+Elo, 17 features, pesos fijos, 1,413 matches, split con leakage | Blend: **42.0%** |
-| **A** | `47a14ed` | Split cronologico sin leakage, Elo computacional (6,396 filas), FIFA rankings, features contextuales (21), 3,198 matches, metricas segmentadas | — |
-| **B** | `fba0c5e` | RandomForest + CatBoost, meta-learner LogisticRegressionCV, feature selection, 21 features refinados | Mejor modelo: **CatBoost 49.0%** |
-| **C** | `7259fd4` | Optuna 30+ params, modelos parametrizables, best_params.json, study SQLite | — |
-| **D** | `b621c05` | TwoStageClassifier binario, 14 ConfederationModels por par de confederacion | — |
-| **E** | `b9d12b8` | Weighted voting reemplaza LR, entrenamiento paralelo (ThreadPool), Poisson maxiter=200, TwoStage 8-feature mask, pipeline sin StatsBomb/Kaggle rotos | Voting: **>=49%** |
+Ultimo entrenamiento: `2026-06-04T12:14:51`.
 
-### Comparativa inicial vs actual
+| Metrica | Valor | Lectura rapida |
+|---|---:|---|
+| `accuracy_voting` | **50.62%** | Acierto general del ensemble (probs calibradas con temperature scaling). |
+| `accuracy_catboost` | **51.65%** | Mejor modelo individual en esta corrida. |
+| `accuracy_lgbm` | 49.38% | Acierto de LightGBM solo. |
+| `accuracy_rf` | 47.52% | Acierto de RandomForest solo. |
+| `accuracy_xgb` | 48.14% | Acierto de XGBoost solo. |
+| `accuracy_confederation` | 48.35% | Acierto del modelo por confederaciones. |
+| `accuracy_two_stage` | 33.06% | Diagnostico solamente; por debajo del azar, no integrado al ensemble. |
+| `accuracy_high_confidence` | **70.73%** | Acierto cuando el sistema marca confianza `ALTO`. |
+| `n_high_confidence_matches` | 41 | Cantidad de partidos test que entraron en confianza `ALTO`. |
+| `accuracy_high_elo_diff_200` | 61.95% | Acierto en partidos con diferencia Elo >= 200 (n=113). |
+| `log_loss_voting` | **1.0337** | Calidad de probabilidades calibradas; mas bajo es mejor. |
+| `log_loss_uncalibrated` | 1.0364 | Log-loss sin calibrar, para comparacion. |
+| `temperature_scaling` | T=1.0447 | Factor de calibracion (>1 suaviza probabilidades). |
 
-| | Inicial | Actual |
-|---|---|---|
-| Partidos training | 1,413 | **3,198** |
-| Split | Aleatorio con leakage | **Cronologico sin leakage** |
-| Features | 17 | **21** |
-| Modelos base | 2 (XGB, LGBM) | **4 (RF, XGB, LGBM, CatBoost)** |
-| Ensemble | Pesos fijos (42%) | **Weighted voting (>=49%)** |
-| Entrenamiento | Secuencial, ~4 min (colgado) | **Paralelo, ~2 min** |
-| Pipeline | ~3 min (StatsBomb colgado) | **~20s** |
-| Reportes | No | **PDF automatico** |
+Interpretacion: el modelo ya supera bastante el azar de 33.3% para un problema
+de tres clases (gana A / empate / gana B), pero todavia no alcanza los targets
+aspiracionales originales (>55% global y >80% en alta confianza).
 
-## Instalacion
+## Que Significa Cada Metrica
 
-```powershell
-cd "C:\Users\Leandro\Documents\prode-ML"
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
+- `accuracy_rf`: porcentaje de partidos del test donde RandomForest acerto la clase final.
+- `accuracy_xgb`: porcentaje de aciertos de XGBoost solo.
+- `accuracy_lgbm`: porcentaje de aciertos de LightGBM solo.
+- `accuracy_catboost`: porcentaje de aciertos de CatBoost solo.
+- `accuracy_voting`: porcentaje de aciertos del ensemble principal. Combina RF, XGB, LGBM, CatBoost y Elo con pesos aprendidos en validation.
+- `accuracy_two_stage`: porcentaje de aciertos del modelo auxiliar que primero decide si hay empate y luego decide ganador/perdedor.
+- `accuracy_confederation`: porcentaje de aciertos de los modelos entrenados por pares de confederaciones, por ejemplo UEFA-CONMEBOL o AFC-AFC.
+- `accuracy_high_confidence`: porcentaje de aciertos solo en predicciones donde el sistema dijo `ALTO`.
+- `n_high_confidence_matches`: cuantas predicciones del test fueron consideradas `ALTO`. Si este numero es bajo, la metrica puede variar mucho.
+- `accuracy_high_elo_diff_200`: porcentaje de aciertos en partidos donde una seleccion tenia al menos 200 puntos Elo de diferencia contra la otra.
+- `log_loss_voting`: mide que tan buenas son las probabilidades, no solo la clase ganadora. Penaliza fuerte cuando el modelo esta muy seguro y se equivoca.
+- `val_accuracies`: accuracy de cada modelo en validation. Se usa para calcular los pesos del voting.
+- `voting_weights`: pesos finales del ensemble. Si un modelo valida mejor, pesa mas.
+- `confidence_thresholds`: umbrales usados para decir `BAJO`, `MEDIO` o `ALTO`.
+
+Ejemplo simple: si `accuracy_voting = 50.21%`, significa que de cada 100 partidos
+del conjunto de test, el ensemble acerto aproximadamente 50 resultados W/D/L.
+
+## Confianza BAJO / MEDIO / ALTO
+
+La confianza no significa "certeza absoluta". Es una etiqueta operacional:
+
+- `ALTO`: la probabilidad maxima del modelo supera el umbral calibrado actual (`0.70`).
+- `MEDIO`: supera el umbral medio (`0.65`) o hay senal fuerte de Elo.
+- `BAJO`: el modelo ve el partido como mas parejo o incierto.
+
+Los umbrales se guardan en `models/confidence_thresholds.json`. En el ultimo
+entrenamiento, validation sugeria que `ALTO` podia acertar cerca de 72.73%, y en
+test obtuvo 69.70% sobre 33 partidos. Por eso todavia no debe interpretarse como
+un pronostico garantizado.
+
+## Arquitectura Del Entrenamiento
+
+1. Se ordenan partidos por fecha.
+2. Para cada partido se calculan features usando solo informacion anterior a ese partido.
+3. Solo el train se duplica con perspectiva inversa (A vs B y B vs A).
+4. Se entrenan RF, XGB, LGBM y CatBoost en paralelo.
+5. Se calcula la accuracy de cada modelo en validation.
+6. Se crean pesos del ensemble:
+
+```text
+peso_modelo = max(0.05, accuracy_val - 0.33)
 ```
 
-En Windows, si aparecen errores de encoding:
+7. Los pesos se normalizan para sumar 1.0.
+8. Se evalua una sola vez en test cronologico.
 
-```powershell
-$env:PYTHONIOENCODING='utf-8'
-```
+Artefactos importantes:
+
+- `models/model_metadata.json`: metricas y configuracion de entrenamiento.
+- `models/voting_weights.json`: pesos del ensemble.
+- `models/confidence_thresholds.json`: umbrales de confianza.
+- `models/inference_team_profiles.json`: perfiles rolling usados en inferencia.
 
 ## Uso Rapido
-
-### Pipeline completo (recomendado)
 
 ```powershell
 .\run_all.bat
 ```
 
-El script ejecuta 7 pasos:
-1. Activar venv + instalar dependencias
-2. Pipeline de datos (~20s)
-3. Validar datos
-4. Entrenar modelos (paralelo, ~90s)
-5. Generar PDF de predicciones en `reports/`
-6. Levantar API en `http://127.0.0.1:8000`
-7. Levantar frontend en `http://127.0.0.1:5173`
+El script:
 
-Si CatBoost se cuelga, el script tiene fallback automatico sin el.
+1. Activa el virtualenv.
+2. Verifica dependencias.
+3. Corre pipeline rapido de datos.
+4. Valida datos.
+5. Entrena modelos.
+6. Genera PDF.
+7. Levanta API y frontend.
 
-### Solo reentrenar modelos
+Solo reentrenar:
 
 ```powershell
 python scripts/train_models.py
 ```
 
-### Solo generar reporte PDF
-
-```powershell
-python scripts/generate_report.py
-```
-
-El PDF incluye: predicciones de los 72 partidos, simulacion de grupos, ranking de campeones.
-
-### Prediccion de un partido
+Prediccion puntual:
 
 ```powershell
 python cli.py predict "Argentina" "Portugal"
 python cli.py predict "Brazil" "France"
 ```
 
-### Modo interactivo
-
-```powershell
-python cli.py
-```
-
-Comandos: `predict A B`, `group J`, `tournament`, `top 10`, `list`, `quit`
-
-## Arquitectura
-
-```
-┌─────────────────────────────────────────────────────┐
-│                21 FEATURES                          │
-│  elo_diff, xg_diff, form_5_diff, wc_history_diff,  │
-│  tactical_advantage, is_tournament, is_wc, ...      │
-└──────────┬──────────────────┬──────────────────────┘
-           │                  │
-    ┌──────▼──────┐    ┌──────▼──────┐    ┌──────────┐
-    │  TWO-STAGE  │    │  ENSEMBLE   │    │  CONFED  │
-    │  Draw?→Win? │    │  VOTING     │    │  14 RF   │
-    │  (8+21 feat)│    │  RF    30%  │    │  pairs   │
-    └──────┬──────┘    │  XGB   20%  │    └────┬─────┘
-           │           │  LGBM  20%  │         │
-           │           │  CB    20%  │         │
-           │           │  Elo   10%  │         │
-           │           └──────┬──────┘         │
-           └──────────────────┼────────────────┘
-                              ▼
-                   ┌──────────────────┐
-                   │  PREDICCION      │
-                   │  + xG + confianza│
-                   │  + upset risk    │
-                   └──────────────────┘
-```
-
-### Como funciona el weighted voting
-
-Cada modelo se evalua en el validation set. El peso se calcula como:
-
-```
-peso = max(0.05, accuracy_val - 0.33)
-```
-
-Luego se normalizan para que sumen 1.0. Elo siempre pesa 0.10 fijo como baseline.
-Los pesos se guardan en `models/voting_weights.json` y se recalculan en cada entrenamiento.
-
-## API REST
+API:
 
 ```powershell
 uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-Endpoints: `GET /health`, `GET /api/v1/teams`, `GET /api/v1/groups`,
-`POST /api/v1/predict`, `GET /api/v1/simulate/group/{group_name}`,
-`GET /api/v1/simulate/tournament`
-
-## Accuracy
-
-Targets del proyecto:
-
-| Metrica | Target |
-|---------|--------|
-| Global W/D/L | >55% |
-| Alta confianza (>65% prob) | >80% |
-| Delta Elo >200 | >85% |
-
-Metricas actuales en `models/model_metadata.json`:
-
-```json
-{
-  "accuracy_rf": 0.xxx,
-  "accuracy_xgb": 0.xxx,
-  "accuracy_lgbm": 0.xxx,
-  "accuracy_catboost": 0.xxx,
-  "accuracy_voting": 0.xxx,
-  "accuracy_two_stage": 0.xxx,
-  "accuracy_confederation": 0.xxx,
-  "accuracy_high_elo_diff_200": 0.xxx,
-  "log_loss_voting": 0.xxx,
-  "split_type": "time_series_chronological",
-  "ensemble_architecture": "RF+XGB+LGBM+CB+Elo -> accuracy-weighted voting"
-}
 ```
 
 ## Grupos Oficiales 2026
@@ -199,3 +149,11 @@ Metricas actuales en `models/model_metadata.json`:
 - J: Argentina, Austria, Algeria, Jordan
 - K: Portugal, Colombia, Uzbekistan, DR Congo
 - L: England, Croatia, Ghana, Panama
+
+## Limitaciones Actuales
+
+- El target de >55% global todavia no esta alcanzado.
+- `accuracy_high_confidence` esta debajo del objetivo de 80%.
+- FIFA rankings ayudan, pero no resuelven calibracion por si solos.
+- No hay datos robustos de lesiones, convocatoria final o minutos recientes de jugadores.
+- Las metricas se basan en partidos historicos; el Mundial real tendra condiciones distintas.

@@ -1,5 +1,6 @@
 """Clasificador XGBoost para predicción de resultado (W/D/L) con SHAP."""
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +12,13 @@ from src.features.feature_builder import MATCH_FEATURE_COLUMNS
 logger = logging.getLogger(__name__)
 
 
+def _model_jobs(default: int = 2) -> int:
+    try:
+        return max(1, int(os.getenv("TRAIN_MODEL_JOBS", str(default))))
+    except ValueError:
+        return default
+
+
 class XGBOutcomeClassifier:
     """W/D/L classifier usando XGBoost. Clase 2=Win, 1=Draw, 0=Loss (perspectiva team_a)."""
 
@@ -20,7 +28,8 @@ class XGBOutcomeClassifier:
         self.params = params or {}
 
     def train(self, X: np.ndarray, y: np.ndarray, X_val: np.ndarray | None = None,
-              y_val: np.ndarray | None = None) -> "XGBOutcomeClassifier":
+              y_val: np.ndarray | None = None,
+              sample_weight: np.ndarray | None = None) -> "XGBOutcomeClassifier":
         try:
             import xgboost as xgb
         except ImportError:
@@ -41,13 +50,13 @@ class XGBOutcomeClassifier:
             "num_class": 3,
             "eval_metric": "mlogloss",
             "random_state": 42,
-            "n_jobs": -1,
+            "n_jobs": _model_jobs(),
         }
         defaults.update(self.params)
 
         self.model_ = xgb.XGBClassifier(**defaults)
         eval_set = [(X_val, y_val)] if X_val is not None and y_val is not None else None
-        self.model_.fit(X, y, eval_set=eval_set, verbose=False)
+        self.model_.fit(X, y, eval_set=eval_set, verbose=False, sample_weight=sample_weight)
         self.is_fitted_ = True
         logger.info("XGBoost entrenado.")
         return self
@@ -65,8 +74,7 @@ class XGBOutcomeClassifier:
         if not self.is_fitted_ or self.model_ is None:
             n = len(X)
             return np.tile([0.38, 0.24, 0.38], (n, 1))
-        raw = self.model_.predict_proba(X)
-        return raw[:, [2, 1, 0]]
+        return self.model_.predict_proba(X)
 
     def explain(self, x: np.ndarray) -> list[tuple[str, float]]:
         """Retorna los top-5 features más influyentes usando SHAP."""

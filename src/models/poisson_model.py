@@ -3,6 +3,7 @@ Modelo Dixon-Coles Bivariate Poisson para predicción de marcadores.
 Retorna distribución de probabilidad sobre todos los posibles marcadores.
 """
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
@@ -52,6 +53,9 @@ class PoissonGoalModel:
             self._set_default_params(match_df)
             return self
 
+        if os.getenv("POISSON_OPTIMIZE", "0") != "1":
+            return self._fit_empirical_rates(match_df)
+
         teams = list(set(match_df["team_a"].tolist() + match_df["team_b"].tolist()))
         team_idx = {t: i for i, t in enumerate(teams)}
         n = len(teams)
@@ -99,6 +103,45 @@ class PoissonGoalModel:
         self.home_advantage_ = params[-1]
         self.is_fitted_ = True
         logger.info(f"Poisson ajustado: {n} equipos, rho={self.rho_:.3f}")
+        return self
+
+    def _fit_empirical_rates(self, match_df: pd.DataFrame) -> "PoissonGoalModel":
+        """Fast attack/defense fit from team scoring and conceding rates."""
+        rows = []
+        for _, row in match_df.iterrows():
+            rows.append({
+                "team": row["team_a"],
+                "goals_for": float(row["goals_a"]),
+                "goals_against": float(row["goals_b"]),
+            })
+            rows.append({
+                "team": row["team_b"],
+                "goals_for": float(row["goals_b"]),
+                "goals_against": float(row["goals_a"]),
+            })
+
+        team_df = pd.DataFrame(rows)
+        global_gf = max(float(team_df["goals_for"].mean()), 0.25)
+        grouped = team_df.groupby("team").agg(
+            goals_for=("goals_for", "mean"),
+            goals_against=("goals_against", "mean"),
+            matches=("goals_for", "size"),
+        )
+
+        prior_weight = 8.0
+        for team, row in grouped.iterrows():
+            n_matches = float(row["matches"])
+            gf = (float(row["goals_for"]) * n_matches + global_gf * prior_weight) / (n_matches + prior_weight)
+            ga = (float(row["goals_against"]) * n_matches + global_gf * prior_weight) / (n_matches + prior_weight)
+            self.attack_[team] = float(np.log(max(gf / global_gf, 0.25)))
+            self.defense_[team] = float(np.log(max(global_gf / ga, 0.25)))
+
+        low_score = match_df[(match_df["goals_a"] <= 1) & (match_df["goals_b"] <= 1)]
+        draw_rate = float((low_score["goals_a"] == low_score["goals_b"]).mean()) if len(low_score) else 0.35
+        self.rho_ = float(np.clip(0.35 - draw_rate, -0.2, 0.2))
+        self.home_advantage_ = 0.20
+        self.is_fitted_ = True
+        logger.info("Poisson empirico ajustado: %d equipos, rho=%.3f", len(grouped), self.rho_)
         return self
 
     def _set_default_params(self, match_df: pd.DataFrame) -> None:

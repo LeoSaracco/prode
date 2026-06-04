@@ -1,6 +1,7 @@
 """CatBoost classifier for W/D/L prediction."""
 
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
@@ -8,6 +9,13 @@ import numpy as np
 from config.settings import MODELS_DIR
 
 logger = logging.getLogger(__name__)
+
+
+def _model_jobs(default: int = 2) -> int:
+    try:
+        return max(1, int(os.getenv("TRAIN_MODEL_JOBS", str(default))))
+    except ValueError:
+        return default
 
 
 class CatBoostOutcomeClassifier:
@@ -24,6 +32,7 @@ class CatBoostOutcomeClassifier:
         y: np.ndarray,
         X_val: np.ndarray | None = None,
         y_val: np.ndarray | None = None,
+        sample_weight: np.ndarray | None = None,
     ) -> "CatBoostOutcomeClassifier":
         try:
             from catboost import CatBoostClassifier
@@ -41,7 +50,7 @@ class CatBoostOutcomeClassifier:
             "loss_function": "MultiClass",
             "eval_metric": "MultiClass",
             "random_seed": 42,
-            "thread_count": -1,
+            "thread_count": _model_jobs(),
             "verbose": False,
             "allow_writing_files": False,
         }
@@ -53,6 +62,7 @@ class CatBoostOutcomeClassifier:
             eval_set=eval_set,
             early_stopping_rounds=50,
             verbose=False,
+            sample_weight=sample_weight,
         )
         self.is_fitted_ = True
         logger.info("CatBoost entrenado.")

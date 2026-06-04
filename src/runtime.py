@@ -36,6 +36,8 @@ class PredictionRuntime:
 def load_prediction_runtime() -> PredictionRuntime:
     cache = CacheManager()
     elo_df = cache.load("elo_ratings")
+    profiles_path = MODELS_DIR / "inference_team_profiles.json"
+    team_profiles_df = pd.read_json(profiles_path) if profiles_path.exists() else cache.load("team_profiles")
     scaler_path = MODELS_DIR / "scaler.pkl"
     scaler = joblib.load(scaler_path) if scaler_path.exists() else None
 
@@ -56,13 +58,15 @@ def load_prediction_runtime() -> PredictionRuntime:
         scaler=scaler,
     )
     ensemble.load_weights()
+    ensemble.load_confidence_thresholds()
+    ensemble.load_calibrators()
 
     two_stage = TwoStageClassifier().load()
     confederation = ConfederationModels().load()
 
     return PredictionRuntime(
         ensemble=ensemble,
-        feature_builder=FeatureBuilder(elo_df=elo_df),
+        feature_builder=FeatureBuilder(elo_df=elo_df, team_profiles_df=team_profiles_df),
         poisson=poisson,
         two_stage=two_stage if two_stage.is_fitted_ else None,
         confederation=confederation if confederation.is_fitted_ else None,

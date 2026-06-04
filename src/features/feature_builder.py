@@ -59,23 +59,32 @@ class FeatureBuilder:
         self,
         elo_df: pd.DataFrame | None = None,
         h2h_df: pd.DataFrame | None = None,
+        team_profiles_df: pd.DataFrame | None = None,
     ):
         self.elo_df = elo_df if elo_df is not None else pd.DataFrame()
         self.h2h_df = h2h_df if h2h_df is not None else pd.DataFrame()
+        self.team_profiles_df = team_profiles_df if team_profiles_df is not None else pd.DataFrame()
+        self._profile_lookup = {}
+        if not self.team_profiles_df.empty and "team" in self.team_profiles_df.columns:
+            self._profile_lookup = {
+                str(row["team"]): row
+                for _, row in self.team_profiles_df.iterrows()
+            }
         self._team_features: dict[str, dict] = {}
 
     def build_team_features(self, team: str) -> dict:
         if team in self._team_features:
             return self._team_features[team]
 
-        elo = get_elo_rating(team, self.elo_df)
+        profile = self._profile_lookup.get(team)
+        elo = float(profile.get("elo_rating")) if profile is not None and "elo_rating" in profile and not pd.isna(profile.get("elo_rating")) else get_elo_rating(team, self.elo_df)
         stats = FALLBACK_STATS.get(team, {
             "xg_pg": 1.0, "xga_pg": 1.2, "form_5": 0.50, "ppda": 14.0
         })
-        xg_pg = stats["xg_pg"]
-        xga_pg = stats["xga_pg"]
-        form_5 = stats["form_5"]
-        ppda = stats["ppda"]
+        xg_pg = float(profile.get("xg_per_game")) if profile is not None and "xg_per_game" in profile and not pd.isna(profile.get("xg_per_game")) else stats["xg_pg"]
+        xga_pg = float(profile.get("xga_per_game")) if profile is not None and "xga_per_game" in profile and not pd.isna(profile.get("xga_per_game")) else stats["xga_pg"]
+        form_5 = float(profile.get("form_5")) if profile is not None and "form_5" in profile and not pd.isna(profile.get("form_5")) else stats["form_5"]
+        ppda = float(profile.get("ppda")) if profile is not None and "ppda" in profile and not pd.isna(profile.get("ppda")) else stats["ppda"]
         wc_history = compute_world_cup_history_score(team)
         mv = MARKET_VALUE_EUR_M.get(team, 100.0)
 
@@ -86,8 +95,9 @@ class FeatureBuilder:
             3 if form_5 > 0.75 else (1 if form_5 > 0.45 else 0)
         ] * 10)
 
-        elo_momentum = self._get_elo_momentum(team)
-        days_since = self._get_days_since_last_match(team)
+        elo_momentum = float(profile.get("elo_momentum")) if profile is not None and "elo_momentum" in profile and not pd.isna(profile.get("elo_momentum")) else self._get_elo_momentum(team)
+        days_since = float(profile.get("days_since_last_match")) if profile is not None and "days_since_last_match" in profile and not pd.isna(profile.get("days_since_last_match")) else self._get_days_since_last_match(team)
+        fifa_rank = float(profile.get("fifa_rank")) if profile is not None and "fifa_rank" in profile and not pd.isna(profile.get("fifa_rank")) else 75.0
 
         feats = {
             "team": team,
@@ -104,6 +114,7 @@ class FeatureBuilder:
             "market_value_norm": min(mv / 1500, 1.0),
             "elo_momentum": elo_momentum,
             "days_since_last_match": days_since,
+            "fifa_rank": fifa_rank,
         }
         self._team_features[team] = feats
         return feats
@@ -142,8 +153,6 @@ class FeatureBuilder:
         )
 
         ctx = context or INFERENCE_CONTEXT_FEATURES
-        extra = DEFAULT_EXTRA_FEATURES
-
         features = np.array([
             elo_diff,
             elo_win_prob,
@@ -162,10 +171,10 @@ class FeatureBuilder:
             ctx.get("is_wc", 1.0),
             ctx.get("is_qualifier", 0.0),
             ctx.get("is_home", 0.0),
-            extra.get("fifa_rank_diff", 0.0),
-            extra.get("elo_momentum_diff", 0.0),
-            extra.get("days_since_last_match_diff", 0.0),
-            extra.get("rest_days_diff", 0.0),
+            fb["fifa_rank"] - fa["fifa_rank"],
+            fa["elo_momentum"] - fb["elo_momentum"],
+            fa["days_since_last_match"] - fb["days_since_last_match"],
+            fb["days_since_last_match"] - fa["days_since_last_match"],
         ], dtype=np.float32)
 
         return features

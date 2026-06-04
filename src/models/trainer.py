@@ -2,9 +2,11 @@
 
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 
 import joblib
 import numpy as np
@@ -20,6 +22,7 @@ from src.features.feature_builder import MATCH_FEATURE_COLUMNS
 from src.features.historical_features import compute_world_cup_history_score
 from src.features.risk_features import compute_tactical_advantage
 from src.features.squad_features import compute_squad_depth_from_market_value
+from src.data.national_team_proxy import FALLBACK_STATS, MARKET_VALUE_EUR_M
 from src.models.catboost_model import CatBoostOutcomeClassifier
 from src.models.confederation_models import ConfederationModels
 from src.models.ensemble import EnsemblePredictor
@@ -30,6 +33,13 @@ from src.models.two_stage import TwoStageClassifier
 from src.models.xgb_model import XGBOutcomeClassifier
 
 logger = logging.getLogger(__name__)
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return max(1, int(os.getenv(name, str(default))))
+    except ValueError:
+        return default
 
 
 def _standardize_training_matches(df: pd.DataFrame | None, source: str) -> pd.DataFrame:
@@ -134,6 +144,88 @@ def _apply_statsbomb_xg(stats: dict[str, dict], statsbomb_df: pd.DataFrame | Non
         stats[team]["xg_pg"] = 0.7 * stats[team]["xg_pg"] + 0.3 * estimated_xg_pg
 
 
+def _context_flags(row: pd.Series) -> tuple[float, float, float, float]:
+    tournament = str(row.get("tournament", "") or "").lower()
+    is_friendly = "friendly" in tournament
+    is_wc = "world cup" in tournament and "qualification" not in tournament and "qualifier" not in tournament
+    is_qualifier = "qualification" in tournament or "qualifier" in tournament
+    is_home = 1.0 if not bool(row.get("neutral", True)) else 0.0
+    return float(not is_friendly), float(is_wc), float(is_qualifier), is_home
+
+
+def _update_elo(elo_a: float, elo_b: float, goals_a: int, goals_b: int, k: float = 28.0) -> tuple[float, float]:
+    expected_a = 1.0 / (1.0 + 10.0 ** ((elo_b - elo_a) / 400.0))
+    score_a = 1.0 if goals_a > goals_b else (0.5 if goals_a == goals_b else 0.0)
+    delta = k * (score_a - expected_a)
+    return elo_a + delta, elo_b - delta
+
+
+def _latest_rank_lookup(rankings_df: pd.DataFrame | None) -> dict[str, list[tuple[pd.Timestamp, float]]]:
+    if rankings_df is None or rankings_df.empty or "team" not in rankings_df.columns:
+        return {}
+    if "fifa_rank" not in rankings_df.columns:
+        return {}
+    df = rankings_df.copy()
+    df["date"] = pd.to_datetime(df.get("date", pd.NaT), errors="coerce")
+    df = df.dropna(subset=["team", "fifa_rank"]).sort_values(["team", "date"])
+    lookup: dict[str, list[tuple[pd.Timestamp, float]]] = {}
+    for team, group in df.groupby("team"):
+        lookup[str(team)] = [(pd.Timestamp(r.date), float(r.fifa_rank)) for r in group.itertuples()]
+    return lookup
+
+
+def _rank_before(
+    lookup: dict[str, list[tuple[pd.Timestamp, float]]],
+    team: str,
+    date: pd.Timestamp | None,
+) -> float:
+    rows = lookup.get(team)
+    if not rows:
+        return 75.0
+    if date is None or pd.isna(date):
+        return rows[-1][1]
+    rank = rows[0][1]
+    for row_date, row_rank in rows:
+        if pd.isna(row_date) or row_date <= date:
+            rank = row_rank
+        else:
+            break
+    return float(rank)
+
+
+def _confidence_thresholds_from_validation(probs: np.ndarray, y_true: np.ndarray) -> dict:
+    max_probs = probs.max(axis=1)
+    preds = probs.argmax(axis=1)
+    candidates = [round(v, 2) for v in np.arange(0.45, 0.86, 0.05)]
+    rows = []
+    for threshold in candidates:
+        mask = max_probs >= threshold
+        n = int(mask.sum())
+        acc = float(accuracy_score(y_true[mask], preds[mask])) if n else 0.0
+        rows.append({"threshold": threshold, "n": n, "accuracy": round(acc, 4)})
+
+    min_high_prob = 0.70
+    eligible = [r for r in rows if r["threshold"] >= min_high_prob and r["n"] >= 20 and r["accuracy"] >= 0.75]
+    if eligible:
+        high = eligible[-1]
+    else:
+        high_candidates = [r for r in rows if r["threshold"] >= min_high_prob and r["n"] >= 20]
+        high = max(high_candidates, key=lambda r: (r["accuracy"], r["n"])) if high_candidates else max(rows, key=lambda r: (r["accuracy"], r["n"]))
+
+    medium_candidates = [r for r in rows if r["threshold"] < high["threshold"] and r["n"] >= 20]
+    medium = medium_candidates[-1] if medium_candidates else {"threshold": 0.45, "n": int(len(y_true)), "accuracy": 0.0}
+    return {
+        "high_prob": float(high["threshold"]),
+        "medium_prob": float(medium["threshold"]),
+        "target_high_accuracy": 0.75,
+        "min_high_samples": 20,
+        "min_high_prob": min_high_prob,
+        "validation_bins": rows,
+        "selected_high_validation_accuracy": high["accuracy"],
+        "selected_high_validation_samples": high["n"],
+    }
+
+
 class NationalTeamTrainingFeatureBuilder:
     def __init__(self, team_stats: dict[str, dict]):
         self.team_stats = team_stats
@@ -203,6 +295,273 @@ class NationalTeamTrainingFeatureBuilder:
         return np.array(x_rows, dtype=np.float32), np.array(y_rows, dtype=np.int32)
 
 
+class RollingNationalTeamFeatureBuilder:
+    """Builds chronological features using only state available before each match."""
+
+    def __init__(
+        self,
+        fifa_rankings_df: pd.DataFrame | None = None,
+        statsbomb_xg_df: pd.DataFrame | None = None,
+        initial_elo_df: pd.DataFrame | None = None,
+    ):
+        self.rank_lookup = _latest_rank_lookup(fifa_rankings_df)
+        self.statsbomb_xg = self._statsbomb_lookup(statsbomb_xg_df)
+        self.initial_elo = self._initial_elo_lookup(initial_elo_df)
+        self.state: dict[str, dict] = {}
+
+    def _statsbomb_lookup(self, statsbomb_xg_df: pd.DataFrame | None) -> dict[str, dict]:
+        if statsbomb_xg_df is None or statsbomb_xg_df.empty or "team" not in statsbomb_xg_df.columns:
+            return {}
+        out: dict[str, dict] = {}
+        for _, row in statsbomb_xg_df.iterrows():
+            team = str(row.get("team", ""))
+            shots = float(row.get("statsbomb_shots", 0) or 0)
+            if shots < 50:
+                continue
+            xg_per_shot = float(row.get("statsbomb_xg_per_shot", 0.10) or 0.10)
+            out[team] = {"xg_pg": max(0.5, min(2.4, xg_per_shot * 11.0))}
+        return out
+
+    def _initial_elo_lookup(self, initial_elo_df: pd.DataFrame | None) -> dict[str, float]:
+        if initial_elo_df is None or initial_elo_df.empty or "team" not in initial_elo_df.columns:
+            return {}
+        rating_col = "elo_rating" if "elo_rating" in initial_elo_df.columns else None
+        if rating_col is None:
+            return {}
+        df = initial_elo_df.dropna(subset=["team", rating_col]).copy()
+        if "date" in df.columns:
+            df = df.sort_values("date")
+        latest = df.groupby("team").tail(1)
+        return dict(zip(latest["team"].astype(str), latest[rating_col].astype(float)))
+
+    def _team_state(self, team: str) -> dict:
+        if team not in self.state:
+            fallback = FALLBACK_STATS.get(team, {
+                "xg_pg": 1.1,
+                "xga_pg": 1.1,
+                "form_5": 0.50,
+                "ppda": 13.0,
+            }).copy()
+            fallback.update(self.statsbomb_xg.get(team, {}))
+            initial_elo = float(self.initial_elo.get(team, 1600.0))
+            self.state[team] = {
+                "gf": [],
+                "ga": [],
+                "points": [],
+                "dates": [],
+                "elo": initial_elo,
+                "elo_history": [initial_elo],
+                "fallback": fallback,
+            }
+        return self.state[team]
+
+    def _profile(self, team: str, date: pd.Timestamp | None) -> dict:
+        st = self._team_state(team)
+        n = len(st["gf"])
+        fallback = st["fallback"]
+        if n:
+            prior_weight = 8.0
+            gf = (float(np.mean(st["gf"])) * n + fallback["xg_pg"] * prior_weight) / (n + prior_weight)
+            ga = (float(np.mean(st["ga"])) * n + fallback["xga_pg"] * prior_weight) / (n + prior_weight)
+            recent_points = st["points"][-5:]
+            form_5 = float(sum(recent_points) / max(3 * len(recent_points), 1))
+            last_date = st["dates"][-1]
+            days_since = float(max((date - last_date).days, 0)) if date is not None and not pd.isna(date) else 30.0
+        else:
+            gf = float(fallback["xg_pg"])
+            ga = float(fallback["xga_pg"])
+            form_5 = float(fallback["form_5"])
+            days_since = 30.0
+
+        elo_hist = st["elo_history"]
+        elo_momentum = float(st["elo"] - elo_hist[-6]) if len(elo_hist) >= 6 else 0.0
+        return {
+            "xg_pg": max(0.35, min(2.8, gf)),
+            "xga_pg": max(0.35, min(2.8, ga)),
+            "form_5": form_5,
+            "ppda": float(max(8.0, 14.0 - (gf - 1.3) * 2.0)),
+            "elo": float(st["elo"]),
+            "elo_momentum": elo_momentum,
+            "days_since_last_match": days_since,
+            "fifa_rank": _rank_before(self.rank_lookup, team, date),
+            "games": n,
+        }
+
+    def build_match_features(self, row: pd.Series, reverse: bool = False) -> np.ndarray:
+        team_a = str(row["team_b"] if reverse else row["team_a"])
+        team_b = str(row["team_a"] if reverse else row["team_b"])
+        date = pd.Timestamp(row["date"]) if not pd.isna(row.get("date", pd.NaT)) else None
+
+        sa = self._profile(team_a, date)
+        sb = self._profile(team_b, date)
+        elo_a = float(sa["elo"])
+        elo_b = float(sb["elo"])
+        elo_diff = elo_a - elo_b
+        op_a = compute_offensive_power(sa["xg_pg"])
+        op_b = compute_offensive_power(sb["xg_pg"])
+        ds_a = compute_defensive_stability(sa["xga_pg"], sa["ppda"])
+        ds_b = compute_defensive_stability(sb["xga_pg"], sb["ppda"])
+        wc_a = compute_world_cup_history_score(team_a)
+        wc_b = compute_world_cup_history_score(team_b)
+        mv_a = min(MARKET_VALUE_EUR_M.get(team_a, 100.0) / 1500, 1.0)
+        mv_b = min(MARKET_VALUE_EUR_M.get(team_b, 100.0) / 1500, 1.0)
+        tactical_adv = compute_tactical_advantage(elo_diff, op_a, ds_b, op_b, ds_a)
+        is_tournament, is_wc, is_qualifier, is_home = _context_flags(row)
+        if reverse:
+            is_home = 0.0
+
+        return np.array([
+            elo_diff,
+            compute_elo_win_probability(elo_a, elo_b),
+            sa["xg_pg"] - sb["xg_pg"],
+            sa["xga_pg"] - sb["xga_pg"],
+            float(sa["form_5"] - sb["form_5"]),
+            op_a - op_b,
+            ds_a - ds_b,
+            compute_squad_depth_from_market_value(team_a) - compute_squad_depth_from_market_value(team_b),
+            float(sa["form_5"] - sb["form_5"]),
+            wc_a - wc_b,
+            mv_a - mv_b,
+            tactical_adv,
+            0.0,
+            is_tournament,
+            is_wc,
+            is_qualifier,
+            is_home,
+            float(sb["fifa_rank"] - sa["fifa_rank"]),
+            float(sa["elo_momentum"] - sb["elo_momentum"]),
+            float(sa["days_since_last_match"] - sb["days_since_last_match"]),
+            float(sb["days_since_last_match"] - sa["days_since_last_match"]),
+        ], dtype=np.float32)
+
+    def update_from_match(self, row: pd.Series) -> None:
+        team_a = str(row["team_a"])
+        team_b = str(row["team_b"])
+        goals_a = int(row["goals_a"])
+        goals_b = int(row["goals_b"])
+        date = pd.Timestamp(row["date"]) if not pd.isna(row.get("date", pd.NaT)) else pd.Timestamp("1900-01-01")
+        st_a = self._team_state(team_a)
+        st_b = self._team_state(team_b)
+
+        points_a = 3 if goals_a > goals_b else (1 if goals_a == goals_b else 0)
+        points_b = 3 if goals_b > goals_a else (1 if goals_a == goals_b else 0)
+        st_a["gf"].append(float(goals_a))
+        st_a["ga"].append(float(goals_b))
+        st_a["points"].append(points_a)
+        st_a["dates"].append(date)
+        st_b["gf"].append(float(goals_b))
+        st_b["ga"].append(float(goals_a))
+        st_b["points"].append(points_b)
+        st_b["dates"].append(date)
+
+        new_elo_a, new_elo_b = _update_elo(float(st_a["elo"]), float(st_b["elo"]), goals_a, goals_b)
+        st_a["elo"] = new_elo_a
+        st_b["elo"] = new_elo_b
+        st_a["elo_history"].append(new_elo_a)
+        st_b["elo_history"].append(new_elo_b)
+
+    def build_split_matrices(
+        self,
+        match_df: pd.DataFrame,
+        train_end: int,
+        val_end: int,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, pd.DataFrame, pd.DataFrame]:
+        label_map = {"W": 2, "D": 1, "L": 0}
+        x_train, y_train, train_rows = [], [], []
+        x_val, y_val = [], []
+        x_test, y_test, test_rows = [], [], []
+
+        for idx, row in match_df.sort_values("date").reset_index(drop=True).iterrows():
+            label = label_map.get(row["result"], 1)
+            if idx < train_end:
+                x_train.append(self.build_match_features(row, reverse=False))
+                y_train.append(label)
+                train_rows.append(row.to_dict())
+                x_train.append(self.build_match_features(row, reverse=True))
+                y_train.append({"W": 0, "D": 1, "L": 2}.get(row["result"], 1))
+                rev = row.to_dict()
+                rev["team_a"], rev["team_b"] = rev["team_b"], rev["team_a"]
+                rev["goals_a"], rev["goals_b"] = rev["goals_b"], rev["goals_a"]
+                rev["result"] = {"W": "L", "L": "W", "D": "D"}.get(rev["result"], "D")
+                train_rows.append(rev)
+            elif idx < val_end:
+                x_val.append(self.build_match_features(row, reverse=False))
+                y_val.append(label)
+            else:
+                x_test.append(self.build_match_features(row, reverse=False))
+                y_test.append(label)
+                test_rows.append(row.to_dict())
+            self.update_from_match(row)
+
+        return (
+            np.array(x_train, dtype=np.float32),
+            np.array(y_train, dtype=np.int32),
+            np.array(x_val, dtype=np.float32),
+            np.array(y_val, dtype=np.int32),
+            np.array(x_test, dtype=np.float32),
+            np.array(y_test, dtype=np.int32),
+            pd.DataFrame(train_rows),
+            pd.DataFrame(test_rows),
+        )
+
+    def latest_profiles(self) -> pd.DataFrame:
+        rows = []
+        today = pd.Timestamp.now()
+        for team in sorted(self.state):
+            p = self._profile(team, today)
+            rows.append({
+                "team": team,
+                "elo_rating": p["elo"],
+                "xg_per_game": p["xg_pg"],
+                "xga_per_game": p["xga_pg"],
+                "form_5": p["form_5"],
+                "ppda": p["ppda"],
+                "elo_momentum": p["elo_momentum"],
+                "days_since_last_match": p["days_since_last_match"],
+                "fifa_rank": p["fifa_rank"],
+                "games": p["games"],
+            })
+        return pd.DataFrame(rows)
+
+
+def _apply_temperature(probs: np.ndarray, T: float) -> np.ndarray:
+    """p_cal[c] ∝ p[c]^(1/T); renormalized. T>1 softens, T<1 sharpens."""
+    T = max(0.05, T)
+    powered = np.power(np.clip(probs, 1e-9, 1.0), 1.0 / T)
+    row_sums = powered.sum(axis=1, keepdims=True)
+    row_sums[row_sums == 0] = 1.0
+    return powered / row_sums
+
+
+def _find_temperature(val_probs: np.ndarray, y_val: np.ndarray) -> float:
+    """Find temperature T that minimizes log_loss on validation probabilities."""
+    from scipy.optimize import minimize_scalar
+    from sklearn.metrics import log_loss as _log_loss
+
+    def objective(T):
+        cal = _apply_temperature(val_probs, T)
+        return _log_loss(y_val, cal, labels=[0, 1, 2])
+
+    result = minimize_scalar(objective, bounds=(0.1, 5.0), method="bounded")
+    return float(result.x)
+
+
+def _compute_recency_weights(train_df: pd.DataFrame, half_life_days: float = 1095.0) -> np.ndarray | None:
+    """Exponential decay weights: matches from 3 years ago get ~0.5 weight vs latest."""
+    if train_df is None or train_df.empty or "date" not in train_df.columns:
+        return None
+    dates = pd.to_datetime(train_df["date"], errors="coerce")
+    if dates.isna().all():
+        return None
+    max_date = dates.max()
+    days_back = (max_date - dates).dt.days.fillna(0).values.astype(float)
+    weights = np.exp(-np.log(2) * days_back / half_life_days)
+    mean_w = weights.mean()
+    if mean_w > 0:
+        weights /= mean_w
+    return weights.astype(np.float32)
+
+
 class ModelTrainer:
     def __init__(self, elo_df: pd.DataFrame | None = None):
         self.elo_df = elo_df
@@ -215,6 +574,8 @@ class ModelTrainer:
         enriched_match_df: pd.DataFrame | None = None,
         elo_history_df: pd.DataFrame | None = None,
         statsbomb_xg_df: pd.DataFrame | None = None,
+        fifa_rankings_df: pd.DataFrame | None = None,
+        kaggle_elo_df: pd.DataFrame | None = None,
     ) -> dict:
         training_sources = []
         frames = []
@@ -237,6 +598,8 @@ class ModelTrainer:
                 training_sources=training_sources,
                 elo_history_df=elo_history_df,
                 statsbomb_xg_df=statsbomb_xg_df,
+                fifa_rankings_df=fifa_rankings_df,
+                kaggle_elo_df=kaggle_elo_df,
             )
 
         logger.warning("No national-team datasets available. Falling back to Kaggle club data.")
@@ -248,14 +611,12 @@ class ModelTrainer:
         training_sources: list[str],
         elo_history_df: pd.DataFrame | None,
         statsbomb_xg_df: pd.DataFrame | None,
+        fifa_rankings_df: pd.DataFrame | None,
+        kaggle_elo_df: pd.DataFrame | None = None,
     ) -> dict:
         if len(match_df) < 100:
             raise RuntimeError("Not enough national-team matches to train without defaults.")
         match_df = match_df.sort_values("date").reset_index(drop=True)
-        team_stats = _build_team_stats(match_df)
-        for team, elo in _latest_elo_overrides(elo_history_df).items():
-            team_stats.setdefault(team, {})["elo"] = float(elo)
-        _apply_statsbomb_xg(team_stats, statsbomb_xg_df)
 
         n = len(match_df)
         train_end = int(n * 0.70)
@@ -264,14 +625,21 @@ class ModelTrainer:
         val_matches = match_df.iloc[train_end:val_end].copy()
         test_matches = match_df.iloc[val_end:].copy()
 
-        train_df = _add_reverse_perspective(train_matches)
-        val_df = train_matches.copy()
-        test_df = test_matches.copy()
+        initial_elo_df = kaggle_elo_df if kaggle_elo_df is not None and not kaggle_elo_df.empty else elo_history_df
+        feature_builder = RollingNationalTeamFeatureBuilder(
+            fifa_rankings_df=fifa_rankings_df,
+            initial_elo_df=initial_elo_df,
+        )
+        x_train, y_train, x_val, y_val, x_test, y_test, train_df, test_df = feature_builder.build_split_matrices(
+            match_df=match_df,
+            train_end=train_end,
+            val_end=val_end,
+        )
+        latest_profiles = feature_builder.latest_profiles()
+        if not latest_profiles.empty:
+            latest_profiles.to_json(MODELS_DIR / "inference_team_profiles.json", orient="records", indent=2)
 
-        feature_builder = NationalTeamTrainingFeatureBuilder(team_stats)
-        x_train, y_train = feature_builder.build_training_matrix(train_df)
-        x_val, y_val = feature_builder.build_training_matrix(val_df)
-        x_test, y_test = feature_builder.build_training_matrix(test_df)
+        sample_weight = _compute_recency_weights(train_df)
 
         return self._fit_models(
             x_train=x_train, y_train=y_train,
@@ -280,6 +648,7 @@ class ModelTrainer:
             poisson_match_df=train_matches,
             train_matches_df=train_df,
             test_matches_df=test_df,
+            sample_weight=sample_weight,
             metadata_extra={
                 "training_source": "+".join(training_sources),
                 "n_source_matches": len(match_df),
@@ -288,7 +657,11 @@ class ModelTrainer:
                 "val_date_min": str(val_matches["date"].min().date()) if len(val_matches) > 0 and val_matches["date"].notna().any() else None,
                 "test_date_min": str(test_matches["date"].min().date()) if len(test_matches) > 0 and test_matches["date"].notna().any() else None,
                 "statsbomb_xg_teams": 0 if statsbomb_xg_df is None else int(len(statsbomb_xg_df)),
+                "statsbomb_xg_usage": "cached_not_used_for_training_static_aggregate",
                 "elo_history_rows": 0 if elo_history_df is None else int(len(elo_history_df)),
+                "kaggle_elo_rows": 0 if kaggle_elo_df is None else int(len(kaggle_elo_df)),
+                "fifa_rankings_rows": 0 if fifa_rankings_df is None else int(len(fifa_rankings_df)),
+                "feature_generation": "rolling_no_future_leakage",
             },
         )
 
@@ -354,6 +727,7 @@ class ModelTrainer:
         poisson_match_df: pd.DataFrame,
         train_matches_df: pd.DataFrame | None = None,
         test_matches_df: pd.DataFrame | None = None,
+        sample_weight: np.ndarray | None = None,
         metadata_extra: dict | None = None,
     ) -> dict:
         if metadata_extra is None:
@@ -375,32 +749,47 @@ class ModelTrainer:
         lgbm_params = self._extract_model_params(best_params, "lgbm")
         cb_params = self._extract_model_params(best_params, "cb")
 
-        results_futures = {}
         models = {}
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        base_workers = _env_int("TRAIN_BASE_WORKERS", 4)
+        logger.info(
+            "Entrenando modelos base en paralelo: RF, XGB, LGBM, CatBoost "
+            "(workers=%d, model_jobs=%s)",
+            base_workers,
+            os.getenv("TRAIN_MODEL_JOBS", "2"),
+        )
+        t0 = perf_counter()
+        sw = sample_weight
+        with ThreadPoolExecutor(max_workers=base_workers) as executor:
             futures = {}
             futures["rf"] = executor.submit(
-                lambda: RFOutcomeClassifier(params=rf_params).train(x_train_s, y_train))
+                lambda sw=sw: RFOutcomeClassifier(params=rf_params).train(x_train_s, y_train, sample_weight=sw))
             futures["xgb"] = executor.submit(
-                lambda: XGBOutcomeClassifier(params=xgb_params).train(x_train_s, y_train, x_val_s, y_val))
+                lambda sw=sw: XGBOutcomeClassifier(params=xgb_params).train(x_train_s, y_train, x_val_s, y_val, sample_weight=sw))
             futures["lgbm"] = executor.submit(
-                lambda: LGBMOutcomeClassifier(params=lgbm_params).train(x_train_s, y_train, x_val_s, y_val))
+                lambda sw=sw: LGBMOutcomeClassifier(params=lgbm_params).train(x_train_s, y_train, x_val_s, y_val, sample_weight=sw))
             futures["cb"] = executor.submit(
-                lambda: CatBoostOutcomeClassifier(params=cb_params).train(x_train_s, y_train, x_val_s, y_val))
+                lambda sw=sw: CatBoostOutcomeClassifier(params=cb_params).train(x_train_s, y_train, x_val_s, y_val, sample_weight=sw))
 
-            for name in futures:
+            for future in as_completed(futures.values()):
+                name = next(k for k, v in futures.items() if v is future)
                 try:
-                    models[name] = futures[name].result(timeout=120)
+                    models[name] = future.result(timeout=1)
                     models[name].save()
+                    logger.info("Modelo base %s listo.", name)
                 except Exception as e:
                     logger.warning("Model %s failed: %s. Skipping.", name, e)
                     models[name] = None
+            for name in futures:
+                models.setdefault(name, None)
+        logger.info("Modelos base finalizados en %.1fs.", perf_counter() - t0)
 
         rf = models.get("rf")
         xgb = models.get("xgb")
         lgbm = models.get("lgbm")
         catboost = models.get("cb")
 
+        logger.info("Entrenando Poisson...")
+        t0 = perf_counter()
         poisson = PoissonGoalModel()
         if poisson_match_df is not None and not poisson_match_df.empty:
             try:
@@ -411,8 +800,9 @@ class ModelTrainer:
         else:
             poisson._set_default_params(pd.DataFrame())
         poisson.save()
+        logger.info("Poisson listo en %.1fs.", perf_counter() - t0)
 
-        model_order = ["rf", "xgb", "lgbm", "catboost"]
+        model_order = [("rf", "rf"), ("xgb", "xgb"), ("lgbm", "lgbm"), ("catboost", "cb")]
         val_acc = {}
 
         def _elo_probs_for_diff(elo_diff):
@@ -428,43 +818,76 @@ class ModelTrainer:
                 out[i] = _elo_probs_for_diff(float(d))
             return out
 
-        for name in model_order:
-            m = models.get(name)
+        logger.info("Calculando accuracies de validation y pesos del voting...")
+        for metric_name, model_key in model_order:
+            m = models.get(model_key)
             if m and m.is_fitted_:
                 preds = m.predict_proba_batch(x_val_s).argmax(axis=1)
-                val_acc[name] = float(accuracy_score(y_val, preds))
+                val_acc[metric_name] = float(accuracy_score(y_val, preds))
             else:
-                val_acc[name] = 0.33
+                val_acc[metric_name] = 0.33
         val_acc["elo"] = float(accuracy_score(y_val, _elo_probs_batch(x_val[:, 0]).argmax(axis=1)))
 
         weights = {}
-        for name in model_order + ["elo"]:
+        for name in [m[0] for m in model_order] + ["elo"]:
             weights[name] = max(0.05, val_acc[name] - 0.33)
         total = sum(weights.values()) or 1.0
         weights = {k: v / total for k, v in weights.items()}
 
+        val_elo = _elo_probs_batch(x_val[:, 0])
+        val_blend_probs = np.zeros((len(y_val), 3))
+        for metric_name, model_key in model_order:
+            m = models.get(model_key)
+            if m and m.is_fitted_:
+                val_blend_probs += weights[metric_name] * m.predict_proba_batch(x_val_s)
+            else:
+                val_blend_probs += weights[metric_name] * np.tile([0.38, 0.24, 0.38], (len(y_val), 3))
+        val_blend_probs += weights["elo"] * val_elo
+        row_sums = val_blend_probs.sum(axis=1, keepdims=True)
+        row_sums[row_sums == 0] = 1.0
+        val_blend_probs /= row_sums
+        confidence_thresholds = _confidence_thresholds_from_validation(val_blend_probs, y_val)
+        with open(MODELS_DIR / "confidence_thresholds.json", "w", encoding="utf-8") as f:
+            json.dump(confidence_thresholds, f, indent=2)
+
+        # Temperature scaling calibration fitted on validation probabilities.
+        # More robust than isotonic regression when val set is small (<1000 samples):
+        # isotonic overfits to extreme values and hurts log_loss on test.
+        # Temperature T > 1 softens probabilities toward uniform; T < 1 sharpens them.
+        temperature = _find_temperature(val_blend_probs, y_val)
+        joblib.dump({"temperature": temperature}, MODELS_DIR / "probability_calibrators.pkl")
+        logger.info("Temperature scaling calibrator fitted: T=%.4f", temperature)
+
         test_elo = _elo_probs_batch(x_test[:, 0])
         blend_probs = np.zeros((len(y_test), 3))
-        for name in model_order:
-            m = models.get(name)
+        for metric_name, model_key in model_order:
+            m = models.get(model_key)
             if m and m.is_fitted_:
-                blend_probs += weights[name] * m.predict_proba_batch(x_test_s)
+                blend_probs += weights[metric_name] * m.predict_proba_batch(x_test_s)
             else:
-                blend_probs += weights[name] * np.tile([0.38, 0.24, 0.38], (len(y_test), 3))
+                blend_probs += weights[metric_name] * np.tile([0.38, 0.24, 0.38], (len(y_test), 3))
         blend_probs += weights["elo"] * test_elo
         row_sums = blend_probs.sum(axis=1, keepdims=True)
         row_sums[row_sums == 0] = 1.0
         blend_probs /= row_sums
-        blend_pred = blend_probs.argmax(axis=1)
+
+        cal_blend_probs = _apply_temperature(blend_probs, temperature)
+
+        blend_pred = cal_blend_probs.argmax(axis=1)
 
         elo_diff_test = x_test[:, 0]
         high_elo_mask = np.abs(elo_diff_test) >= 200
 
+        logger.info("Entrenando TwoStage...")
+        t0 = perf_counter()
         two_stage = TwoStageClassifier()
         two_stage.train(x_train_s, y_train)
         two_stage.save()
         ts_acc = round(float(accuracy_score(y_test, two_stage.predict_proba_batch(x_test_s).argmax(axis=1))), 4) if two_stage.is_fitted_ else 0.0
+        logger.info("TwoStage listo en %.1fs. Accuracy test: %.4f", perf_counter() - t0, ts_acc)
 
+        logger.info("Entrenando ConfederationModels...")
+        t0 = perf_counter()
         conf_models = ConfederationModels()
         conf_acc = 0.0
         n_conf_pairs = 0
@@ -485,19 +908,25 @@ class ModelTrainer:
                 n_conf_pairs = len(conf_models.models)
             except Exception as e:
                 logger.warning("Confederation models failed: %s", e)
+        logger.info(
+            "ConfederationModels listo en %.1fs. Pares=%d, accuracy test=%.4f",
+            perf_counter() - t0,
+            n_conf_pairs,
+            conf_acc,
+        )
 
         ensemble = EnsemblePredictor()
         ensemble.set_weights_from_accuracies(val_acc)
         ensemble.save_weights(weights)
 
         accuracies = {}
-        for name in model_order:
-            m = models.get(name)
+        for metric_name, model_key in model_order:
+            m = models.get(model_key)
             if m and m.is_fitted_:
-                accuracies[name] = round(m.score(x_test_s, y_test), 4)
+                accuracies[metric_name] = round(m.score(x_test_s, y_test), 4)
             else:
-                accuracies[name] = 0.0
-        accuracies["voting"] = round(float(accuracy_score(y_test, blend_pred)), 4)
+                accuracies[metric_name] = 0.0
+        accuracies["voting"] = round(float(accuracy_score(y_test, blend_pred)), 4)  # blend_pred from calibrated probs
         accuracies["two_stage"] = ts_acc
         accuracies["confederation"] = conf_acc
 
@@ -511,17 +940,21 @@ class ModelTrainer:
             "accuracy_rf": accuracies.get("rf", 0),
             "accuracy_xgb": accuracies.get("xgb", 0),
             "accuracy_lgbm": accuracies.get("lgbm", 0),
-            "accuracy_catboost": accuracies.get("cb", 0),
+            "accuracy_catboost": accuracies.get("catboost", 0),
             "accuracy_voting": accuracies["voting"],
             "accuracy_two_stage": accuracies["two_stage"],
             "accuracy_confederation": accuracies["confederation"],
             "n_confederation_pairs": n_conf_pairs,
-            "log_loss_voting": round(float(log_loss(y_test, blend_probs, labels=[0, 1, 2])), 4),
-            "accuracy_high_confidence": round(self._segment_accuracy(blend_probs, y_test, threshold=HIGH_CONFIDENCE_THRESHOLD), 4),
+            "log_loss_voting": round(float(log_loss(y_test, cal_blend_probs, labels=[0, 1, 2])), 4),
+            "log_loss_uncalibrated": round(float(log_loss(y_test, blend_probs, labels=[0, 1, 2])), 4),
+            "accuracy_high_confidence": round(self._segment_accuracy(cal_blend_probs, y_test, threshold=confidence_thresholds["high_prob"]), 4),
+            "n_high_confidence_matches": int((cal_blend_probs.max(axis=1) >= confidence_thresholds["high_prob"]).sum()),
+            "confidence_thresholds": confidence_thresholds,
             "accuracy_high_elo_diff_200": round(
                 float(accuracy_score(y_test[high_elo_mask], blend_pred[high_elo_mask]))
                 if high_elo_mask.sum() >= 10 else 0.0, 4
             ),
+            "recency_weighted_training": sample_weight is not None,
             "n_high_elo_matches": int(high_elo_mask.sum()),
             "baseline_random": 0.333,
             "split_type": "time_series_chronological",

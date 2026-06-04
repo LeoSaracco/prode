@@ -9,6 +9,7 @@ Outcome:  P_win  = P(not draw) * P(win | not draw)
 """
 
 import logging
+import os
 from pathlib import Path
 
 import joblib
@@ -19,6 +20,13 @@ from sklearn.ensemble import RandomForestClassifier
 from config.settings import MODELS_DIR
 
 logger = logging.getLogger(__name__)
+
+
+def _model_jobs(default: int = 2) -> int:
+    try:
+        return max(1, int(os.getenv("TRAIN_MODEL_JOBS", str(default))))
+    except ValueError:
+        return default
 
 
 class TwoStageClassifier:
@@ -59,7 +67,7 @@ class TwoStageClassifier:
         draw_defaults = {
             "n_estimators": 200, "max_depth": 8,
             "min_samples_split": 15, "min_samples_leaf": 8,
-            "class_weight": "balanced", "random_state": 42, "n_jobs": -1,
+            "class_weight": "balanced", "random_state": 42, "n_jobs": _model_jobs(),
         }
         draw_defaults.update(self.draw_params)
         self.draw_clf = RandomForestClassifier(**draw_defaults)
@@ -69,7 +77,7 @@ class TwoStageClassifier:
             win_defaults = {
                 "n_estimators": 200, "max_depth": 8,
                 "min_samples_split": 15, "min_samples_leaf": 6,
-                "class_weight": "balanced", "random_state": 42, "n_jobs": -1,
+                "class_weight": "balanced", "random_state": 42, "n_jobs": _model_jobs(),
             }
             win_defaults.update(self.win_params)
             self.win_clf = RandomForestClassifier(**win_defaults)

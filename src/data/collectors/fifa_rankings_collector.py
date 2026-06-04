@@ -16,13 +16,12 @@ from config.settings import FIFA_RANKINGS_DIR
 logger = logging.getLogger(__name__)
 
 FIFA_RANKINGS_URL = (
-    "https://raw.githubusercontent.com/sshh12/fifa-rankings-history/master/data/"
-    "fifa_ranking_men_current.csv"
+    "https://raw.githubusercontent.com/Dato-Futbol/fifa-ranking/refs/heads/master/"
+    "ranking_fifa_historical.csv"
 )
 
 FIFA_RANKINGS_INTERNATIONAL_URL = (
-    "https://raw.githubusercontent.com/dcervantes/fifa_rankings_historical/main/"
-    "fifa_ranking.csv"
+    "https://raw.githubusercontent.com/cnc8/fifa-world-ranking/master/fifa_ranking.csv"
 )
 
 
@@ -68,7 +67,7 @@ class FIFARankingsCollector:
         rank_col = _first_col(raw, ["rank", "ranking", "position"])
         points_col = _first_col(raw, ["total_points", "points", "score"])
 
-        if not team_col or not rank_col:
+        if not team_col or (not rank_col and not points_col):
             logger.warning("FIFA rankings CSV has unexpected columns: %s", list(raw.columns))
             return pd.DataFrame()
 
@@ -78,9 +77,12 @@ class FIFARankingsCollector:
         else:
             df["date"] = pd.NaT
         df["team_raw"] = raw[team_col].astype(str)
-        df["fifa_rank"] = pd.to_numeric(raw[rank_col], errors="coerce")
         if points_col:
             df["fifa_points"] = pd.to_numeric(raw[points_col], errors="coerce")
+        if rank_col:
+            df["fifa_rank"] = pd.to_numeric(raw[rank_col], errors="coerce")
+        elif "fifa_points" in df.columns:
+            df["fifa_rank"] = df.groupby("date")["fifa_points"].rank(ascending=False, method="first")
 
         df = df.dropna(subset=["fifa_rank"])
         df["fifa_rank"] = df["fifa_rank"].astype(int)

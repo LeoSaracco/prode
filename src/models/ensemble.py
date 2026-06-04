@@ -46,6 +46,8 @@ class EnsemblePredictor:
         self.scaler = scaler
 
         self.voting_weights = None
+        self.confidence_thresholds = None
+        self.calibrators = None
 
     def set_weights_from_accuracies(self, accuracies: dict[str, float]) -> None:
         """Compute voting weights from val-set accuracies.
@@ -95,6 +97,18 @@ class EnsemblePredictor:
             p_win, p_draw, p_loss = p_win / total, p_draw / total, p_loss / total
         else:
             p_win, p_draw, p_loss = 0.40, 0.25, 0.35
+
+        if self.calibrators is not None:
+            try:
+                T = float(self.calibrators.get("temperature", 1.0))
+                raw = np.array([[p_win, p_draw, p_loss]])
+                powered = np.power(np.clip(raw, 1e-9, 1.0), 1.0 / max(0.05, T))
+                s = powered.sum()
+                if s > 0:
+                    powered /= s
+                p_win, p_draw, p_loss = float(powered[0, 0]), float(powered[0, 1]), float(powered[0, 2])
+            except Exception:
+                pass
 
         xg_a, xg_b = (1.3, 1.1)
         if self.poisson:
@@ -173,6 +187,14 @@ class EnsemblePredictor:
         return {"rf": 0.30, "xgb": 0.20, "lgbm": 0.20, "catboost": 0.20, "elo": 0.10}
 
     def _compute_confidence(self, max_prob: float, elo_diff: float) -> str:
+        if self.confidence_thresholds:
+            high = float(self.confidence_thresholds.get("high_prob", CONFIDENCE_HIGH_PROB))
+            medium = float(self.confidence_thresholds.get("medium_prob", CONFIDENCE_MEDIUM_PROB))
+            if max_prob >= high:
+                return "ALTO"
+            if max_prob >= medium or elo_diff > CONFIDENCE_MEDIUM_ELO_DIFF:
+                return "MEDIO"
+            return "BAJO"
         if max_prob > CONFIDENCE_HIGH_PROB and elo_diff > CONFIDENCE_HIGH_ELO_DIFF:
             return "ALTO"
         elif max_prob > CONFIDENCE_MEDIUM_PROB or elo_diff > CONFIDENCE_MEDIUM_ELO_DIFF:
@@ -210,4 +232,33 @@ class EnsemblePredictor:
                 return w
             except Exception:
                 pass
+        return None
+
+    def load_confidence_thresholds(self) -> dict | None:
+        path = MODELS_DIR / "confidence_thresholds.json"
+        if path.exists():
+            try:
+                with open(path) as f:
+                    thresholds = json.load(f)
+                self.confidence_thresholds = thresholds
+                logger.info("Confidence thresholds loaded: %s", thresholds)
+                return thresholds
+            except Exception:
+                pass
+        return None
+
+    def load_calibrators(self) -> dict | None:
+        import joblib
+        path = MODELS_DIR / "probability_calibrators.pkl"
+        if path.exists():
+            try:
+                data = joblib.load(path)
+                if isinstance(data, dict) and "temperature" in data:
+                    self.calibrators = data
+                    logger.info("Temperature calibrator loaded: T=%.4f", data["temperature"])
+                    return self.calibrators
+                else:
+                    logger.warning("Calibrator format unrecognized, skipping.")
+            except Exception as e:
+                logger.warning("Could not load calibrators: %s", e)
         return None

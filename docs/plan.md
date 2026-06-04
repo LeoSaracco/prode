@@ -2,214 +2,220 @@
 
 ## Contexto
 
-El objetivo del proyecto es predecir partidos del Mundial FIFA 2026 y simular grupos/torneo usando modelos entrenados y fuentes de datos futboleras.
+El objetivo del proyecto es predecir partidos del Mundial 2026 y simular grupos
+/ torneo con modelos entrenados sobre resultados internacionales historicos.
 
-Estado actual:
+El sistema tiene:
 
-- CLI principal en `cli.py`.
+- CLI en `cli.py`.
 - API REST en `api/`.
 - Frontend React/Vite en `frontend/`.
-- Modelos entrenados en `models/`.
+- Modelos y artefactos en `models/`.
 - Grupos oficiales en `config/wc2026_groups.py`.
-- Simulacion de grupos con tabla de clasificacion probable y marcador mas probable por fixture.
-- Fase A completada: pipeline robusto, split temporal cronologico, Elo computacional, features contextuales.
+- Pipeline automatizado en `run_all.bat`.
 
-## Arquitectura
+## Arquitectura Actual
 
-Componentes principales:
+Flujo principal:
 
-- `config/`: settings, aliases, grupos oficiales y pesos de features.
-- `src/data/`: collectors, cache, pipeline, validadores, Elo historico y FIFA rankings.
-- `src/features/`: construccion de features para prediccion (21 features).
-- `src/models/`: Poisson, XGBoost, LightGBM, Elo y ensemble con split temporal.
-- `src/simulation/`: simulacion de partidos, grupos y torneo.
-- `src/output/`: formateadores de consola.
-- `api/`: FastAPI, schemas, routers y carga de runtime.
-- `frontend/`: UI web para consumir la API.
+1. Recolectar resultados internacionales, Elo y rankings FIFA.
+2. Ordenar partidos cronologicamente.
+3. Construir features rolling sin mirar partidos futuros.
+4. Entrenar modelos base.
+5. Calcular pesos del ensemble en validation.
+6. Evaluar una sola vez en test cronologico.
+7. Guardar modelos, pesos, umbrales de confianza y metadata.
 
-## Features del Modelo (21 features)
+Componentes:
 
-Features base (17):
+- `src/data/`: collectors, cache y pipeline.
+- `src/features/`: features de partido e inferencia.
+- `src/models/`: modelos, trainer, ensemble, Poisson y auxiliares.
+- `src/runtime.py`: carga modelos para CLI/API.
+- `src/simulation/`: simulacion de grupos/torneo.
 
-- `elo_diff`
-- `elo_win_prob_a`
-- `xg_diff`
-- `xga_diff`
-- `form_5_diff`
-- `offensive_power_diff`
-- `defensive_stability_diff`
-- `squad_depth_diff`
-- `big_match_rating_diff`
-- `pressure_diff`
-- `consistency_diff`
-- `wc_history_diff`
-- `market_value_diff`
-- `tactical_advantage`
-- `h2h_advantage`
-- `form_times_elo_diff`
-- `attack_vs_defense_clash`
+## Features Del Modelo
 
-Features contextuales (4, agregadas en Fase A):
+El modelo usa 21 features por partido:
 
-- `is_tournament`: partido de torneo oficial (1) vs amistoso (0)
-- `is_wc`: partido de Mundial (1) o no (0)
-- `is_qualifier`: clasificatorio (1) o no (0)
-- `is_home`: localia (1) o neutral/visitante (0)
+| Feature | Que representa |
+|---|---|
+| `elo_diff` | Diferencia de rating Elo entre equipo A y equipo B. |
+| `elo_win_prob_a` | Probabilidad Elo teorica de que gane A. |
+| `xg_diff` | Diferencia estimada de goles esperados a favor. |
+| `xga_diff` | Diferencia estimada de goles esperados en contra. |
+| `form_5_diff` | Diferencia de forma reciente basada en ultimos partidos previos. |
+| `offensive_power_diff` | Diferencia de potencia ofensiva derivada de xG. |
+| `defensive_stability_diff` | Diferencia de estabilidad defensiva. |
+| `squad_depth_diff` | Diferencia aproximada de profundidad/calidad de plantel. |
+| `consistency_diff` | Diferencia de regularidad reciente. |
+| `wc_history_diff` | Diferencia de historia/rendimiento mundialista. |
+| `market_value_diff` | Diferencia de valor de mercado relativo. |
+| `tactical_advantage` | Feature combinada de ventaja tactica. |
+| `h2h_advantage` | Historial directo; hoy queda neutral si no hay dato confiable. |
+| `is_tournament` | 1 si es partido competitivo/torneo, 0 si amistoso. |
+| `is_wc` | 1 si es Mundial. |
+| `is_qualifier` | 1 si es clasificatorio. |
+| `is_home` | 1 si A tiene localia, 0 si neutral/visitante. |
+| `fifa_rank_diff` | Diferencia de ranking FIFA historico disponible antes del partido. |
+| `elo_momentum_diff` | Diferencia de momentum Elo reciente. |
+| `days_since_last_match_diff` | Diferencia de dias desde el ultimo partido. |
+| `rest_days_diff` | Diferencia inversa de descanso entre ambos equipos. |
 
-## Split Temporal (Fase A)
+## Control De Leakage
 
-El split train/val/test es estrictamente cronologico (70/15/15):
+El entrenamiento usa `feature_generation: rolling_no_future_leakage`.
 
-- Train: partidos mas antiguos (70%)
-- Val: partidos intermedios (15%)
-- Test: partidos mas recientes (15%)
+Esto significa:
 
-`_add_reverse_perspective` se aplica SOLO al train set para evitar data leakage.
-El metadata ahora incluye `split_type: time_series_chronological` y `accuracy_high_elo_diff_200`.
+- Para un partido en fecha `D`, las features se calculan solo con partidos anteriores a `D`.
+- Train, validation y test estan separados por fecha.
+- La perspectiva inversa se agrega solo en train.
+- Validation y test no se duplican ni contaminan con datos futuros.
 
-## Ensemble (Fase E)
+Este punto es clave: una metrica sin leakage puede verse mas baja que una metrica
+inflada, pero representa mejor como se comportara el modelo ante partidos reales.
 
-Arquitectura de weighted voting basada en accuracy en val set:
+## Modelos
 
-```text
-Base models (paralelizados con ThreadPoolExecutor):
-├── RandomForest (300 trees, OOB)
-├── XGBoost (300 iter, max_depth=5)
-├── LightGBM (300 iter, num_leaves=31)
-├── CatBoost (200 iter, depth=6, opcional)
-└── Elo (baseline, peso fijo 0.10)
+Modelos base:
 
-Voting:
-  peso_modelo = max(0.05, accuracy_val - 0.33)
-  Se normalizan para sumar 1.0.
+- RandomForest
+- XGBoost
+- LightGBM
+- CatBoost
+- Elo baseline
 
-TwoStage (8 features para draw, 21 para win/loss)
-Confederation (14 pares, RF 300 trees cada uno)
-```
-
-El entrenamiento es totalmente paralelo. Si CatBoost falla o tarda
-mas de 120s, se skipea y el ensemble vota con los 3 modelos restantes.
-Los pesos se guardan en `models/voting_weights.json`.
-
-## Hyperparameter Tuning (Fase C)
-
-Se usa Optuna con objetivo de minimizar log_loss en test set cronologico.
-
-Espacio de busqueda:
-
-- **RF**: n_estimators (200-800), max_depth (4-20), min_samples_split (5-30),
-  min_samples_leaf (2-15), max_features (sqrt/log2/None)
-- **XGBoost**: n_estimators (300-900), max_depth (3-9), lr (0.01-0.15 log),
-  subsample/colsample (0.6-1.0), min_child_weight (1-10),
-  gamma (0-2.0), reg_alpha/lambda (log)
-- **LightGBM**: n_estimators (300-900), num_leaves (15-63), lr (0.01-0.15 log),
-  subsample/colsample (0.6-1.0), min_child_samples (10-50), reg_alpha/lambda (log)
-- **CatBoost**: iterations (300-900), depth (3-9), lr (0.01-0.15 log),
-  l2_leaf_reg (0.5-10.0), border_count (32-255)
-- **Meta**: Cs (5-15)
-
-Resultados guardados en `models/best_params.json` y cargados automaticamente
-por `trainer.py` en el proximo entrenamiento.
-
-## Two-Stage Prediction (Fase D)
-
-En lugar de clasificar W/D/L directamente (3 clases), se descompone en:
-
-```
-Stage 1 — DrawClassifier (RF binario):
-  P(draw) vs P(not-draw)
-
-Stage 2 — WinClassifier (RF binario, entrenado solo en no-draws):
-  P(win | not-draw) vs P(loss | not-draw)
-
-Combinacion:
-  P_win  = (1 - P_draw) * P(win | not_draw)
-  P_draw = P_draw
-  P_loss = (1 - P_draw) * (1 - P(win | not_draw))
-```
-
-Ventaja: los clasificadores binarios logran mayor accuracy que uno
-multiclase, especialmente para draws que son eventos mas raros (~25%).
-
-## Confederation Models (Fase D)
-
-14 modelos RandomForest especificos por par de confederaciones:
-
-- UEFA-UEFA, UEFA-CONMEBOL, UEFA-CAF, UEFA-AFC, UEFA-CONCACAF
-- CONMEBOL-CONMEBOL, CONMEBOL-CAF, CONMEBOL-AFC, CONMEBOL-CONCACAF
-- CAF-CAF, CAF-AFC, AFC-AFC, AFC-CONCACAF, CONCACAF-CONCACAF
-
-Cada modelo se entrena solo con partidos de ese par de confederaciones.
-Rare matchups (ej: OFC vs cualquiera) usan el modelo global como fallback.
-
-## Simulacion de Grupos
-
-Para cada grupo A-L:
-
-- Se simulan los 6 partidos del grupo.
-- Se acumulan puntos, diferencia de gol y goles a favor.
-- Se ordena por puntos, diferencia de gol y goles a favor.
-- Se reporta probabilidad de terminar 1ro, 2do, 3ro y 4to.
-- Se reporta probabilidad de clasificacion directa como 1ro o 2do.
-- Se reportan puntos y diferencia de gol promedio.
-- Se reporta el marcador exacto mas probable para cada fixture del grupo.
-
-Ejemplo conceptual:
+Ensemble principal:
 
 ```text
-RESULTADOS MAS PROBABLES - GRUPO J
-Argentina vs Austria      1-0  (12.8%)
-Argentina vs Algeria      2-0  (11.4%)
-Argentina vs Jordan       2-0  (13.1%)
-Austria vs Algeria        1-1  (10.6%)
-Austria vs Jordan         1-0  (11.2%)
-Algeria vs Jordan         1-1  (11.0%)
+RF + XGB + LGBM + CatBoost + Elo -> accuracy-weighted voting
 ```
 
-La API expone estos datos en `fixtures` dentro de `GET /api/v1/simulate/group/{group_name}`.
+Los pesos se calculan con accuracy en validation:
 
-## Accuracy
+```text
+peso_modelo = max(0.05, accuracy_val - 0.33)
+```
+
+Luego se normalizan para sumar 1.0.
+
+Modelos auxiliares:
+
+- `TwoStageClassifier`: separa empate/no empate y luego win/loss.
+- `ConfederationModels`: RandomForest por pares de confederaciones.
+- `PoissonGoalModel`: estima xG y marcadores probables.
+
+## Metricas Explicadas
+
+Todas las `accuracy_*` son porcentajes de acierto sobre partidos historicos del
+conjunto de test. El problema tiene tres clases:
+
+- gana equipo A
+- empate
+- gana equipo B
+
+Por azar puro, la referencia aproximada es 33.3%.
+
+| Metrica | Significado |
+|---|---|
+| `accuracy_rf` | Acierto usando solo RandomForest. |
+| `accuracy_xgb` | Acierto usando solo XGBoost. |
+| `accuracy_lgbm` | Acierto usando solo LightGBM. |
+| `accuracy_catboost` | Acierto usando solo CatBoost. |
+| `accuracy_voting` | Acierto del ensemble principal. Es la metrica global mas importante. |
+| `accuracy_two_stage` | Acierto del modelo auxiliar de dos etapas. |
+| `accuracy_confederation` | Acierto del modelo especializado por confederacion. |
+| `accuracy_high_confidence` | Acierto solo donde la prediccion fue marcada `ALTO`. |
+| `accuracy_high_elo_diff_200` | Acierto en partidos con diferencia Elo de al menos 200 puntos. |
+
+Otras metricas:
+
+- `n_high_confidence_matches`: cantidad de casos usados para medir `accuracy_high_confidence`.
+- `n_high_elo_matches`: cantidad de casos usados para medir `accuracy_high_elo_diff_200`.
+- `log_loss_voting`: calidad de las probabilidades; mas bajo es mejor.
+- `val_accuracies`: aciertos por modelo en validation.
+- `voting_weights`: peso final de cada modelo en el ensemble.
+
+## Confianza
+
+La etiqueta de confianza se basa en la probabilidad maxima del ensemble:
+
+- `ALTO`: probabilidad maxima >= `high_prob`.
+- `MEDIO`: probabilidad maxima >= `medium_prob` o senal Elo suficiente.
+- `BAJO`: el modelo ve el partido como incierto.
+
+Los umbrales actuales se guardan en `models/confidence_thresholds.json`:
+
+```json
+{
+  "high_prob": 0.70,
+  "medium_prob": 0.65,
+  "target_high_accuracy": 0.75
+}
+```
+
+Importante: `ALTO` no significa seguro. En la corrida actual, `ALTO` acerto
+69.70% en test sobre 33 partidos.
+
+## Estado Real Actual
+
+Ultimo entrenamiento: `2026-06-04T12:14:51` (Fase G).
+
+| Campo | Valor |
+|---|---:|
+| Partidos fuente | 3,221 |
+| Train samples | 4,508 |
+| Validation samples | 483 |
+| Test samples | 484 |
+| FIFA rankings rows | 14,853 |
+| Kaggle Elo rows | 1,991 |
+| `accuracy_voting` | 50.62% |
+| `accuracy_catboost` | 51.65% |
+| `accuracy_high_confidence` | 70.73% (n=41) |
+| `accuracy_high_elo_diff_200` | 61.95% (n=113) |
+| `log_loss_voting` (calibrado) | 1.0337 |
+| `log_loss_uncalibrated` | 1.0364 |
+| `temperature_scaling` | T=1.0447 |
+| `recency_weighted_training` | True |
 
 Targets aspiracionales:
 
-- Global W/D/L: mayor a 55%.
-- Alta confianza: mayor a 80%.
-- Delta Elo mayor a 200: mayor a 85%.
+- Global W/D/L: >55%.
+- Alta confianza: >80%.
+- Delta Elo >200: >85%.
 
-Estado real (Fase E): weighted voting >=49%, mejor modelo individual CatBoost ~49%.
-Las metricas exactas estan en `models/model_metadata.json`.
+Estos targets todavia no estan alcanzados. Proximo objetivo: >52% con fix de h2h y datos Kaggle.
 
 ## Operacion
 
 Comandos principales:
 
 ```powershell
-python cli.py predict "Argentina" "Portugal"
-python cli.py simulate-group J
-python cli.py simulate-tournament
 python scripts/run_pipeline.py --fast
+python scripts/download_enriched_data.py
 python scripts/train_models.py
 python scripts/generate_report.py
+python cli.py predict "Argentina" "Portugal"
 uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Flujo automatizado recomendado:
+Flujo completo:
 
 ```powershell
 .\run_all.bat
 ```
 
-Este script ejecuta pipeline, validacion, entrenamiento, generacion de PDF,
-API y frontend en ese orden. Si falla el entrenamiento, tiene fallback sin CatBoost.
+Tuning de hiperparametros (opcional, ~3-4 min):
 
-## Changelog de Arquitectura
+```powershell
+python scripts/tune_hyperparams.py --trials 50
+```
 
-| Fase | Commit | Arquitectura |
-|------|--------|-------------|
-| Inicial | `83da947` | XGBoost(35%) + LightGBM(30%) + Elo(20%) + Poisson(15%) — pesos fijos |
-| A | `47a14ed` | Split cronologico sin leakage, Elo computacional, 17→21 features |
-| B | `fba0c5e` | RF + XGB + LGBM + CatBoost + Elo → LogisticRegressionCV meta-learner |
-| C | `7259fd4` | Modelos parametrizables (Optuna), best_params.json |
-| D | `b621c05` | TwoStageClassifier binario + 14 ConfederationModels |
-| E | `b9d12b8` | Weighted voting (accuracy-val), entrenamiento paralelo, pipeline rapido |
-| **Target** | — | >55% global, >80% alta confianza, >85% delta Elo >200 |
+## Proximas Mejoras Recomendadas (Fase H)
+
+- **Alta prioridad**: arreglar `h2h_advantage` (siempre 0) y `consistency_diff` (duplicado de `form_5_diff`).
+- **Alta prioridad**: fix collector Kaggle match features para parsear columnas `_home_team`/`_away_team`/`_date`.
+- **Media prioridad**: correr Optuna 50 trials con objetivo compuesto ya implementado.
+- **Media prioridad**: incorporar probabilidades Poisson al ensemble como modelo 6.
+- **Baja prioridad**: Docker, deploy, tests automatizados de no-leakage.

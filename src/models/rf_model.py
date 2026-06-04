@@ -1,6 +1,7 @@
 """RandomForest classifier for W/D/L prediction. Superior to boosting on small datasets."""
 
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
@@ -8,6 +9,13 @@ import numpy as np
 from config.settings import MODELS_DIR
 
 logger = logging.getLogger(__name__)
+
+
+def _model_jobs(default: int = 2) -> int:
+    try:
+        return max(1, int(os.getenv("TRAIN_MODEL_JOBS", str(default))))
+    except ValueError:
+        return default
 
 
 class RFOutcomeClassifier:
@@ -24,6 +32,7 @@ class RFOutcomeClassifier:
         y: np.ndarray,
         X_val: np.ndarray | None = None,
         y_val: np.ndarray | None = None,
+        sample_weight: np.ndarray | None = None,
     ) -> "RFOutcomeClassifier":
         from sklearn.ensemble import RandomForestClassifier
 
@@ -37,11 +46,11 @@ class RFOutcomeClassifier:
             "oob_score": True,
             "class_weight": "balanced_subsample",
             "random_state": 42,
-            "n_jobs": -1,
+            "n_jobs": _model_jobs(),
         }
         defaults.update(self.params)
         self.model_ = RandomForestClassifier(**defaults)
-        self.model_.fit(X, y)
+        self.model_.fit(X, y, sample_weight=sample_weight)
         self.is_fitted_ = True
 
         if hasattr(self.model_, "oob_score_"):

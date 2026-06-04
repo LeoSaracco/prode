@@ -2,16 +2,25 @@
 chcp 65001 >nul
 setlocal enabledelayedexpansion
 set PYTHONIOENCODING=utf-8
+set PYTHONUNBUFFERED=1
+if not defined TRAIN_BASE_WORKERS set TRAIN_BASE_WORKERS=4
+if not defined TRAIN_MODEL_JOBS set TRAIN_MODEL_JOBS=2
+if not defined CONFED_MODEL_JOBS set CONFED_MODEL_JOBS=1
+if not defined CONFED_N_ESTIMATORS set CONFED_N_ESTIMATORS=150
+if not defined POISSON_OPTIMIZE set POISSON_OPTIMIZE=0
 
 echo ============================================================
-echo  prode-ML - Pipeline Completo (Fases A-B-C-D)
+echo  prode-ML - Pipeline Completo (Fases A-B-C-D-E)
 echo ============================================================
+echo  Workers base: %TRAIN_BASE_WORKERS% ^| Threads por modelo: %TRAIN_MODEL_JOBS% ^| Poisson optimize: %POISSON_OPTIMIZE%
+echo  Confederation: %CONFED_N_ESTIMATORS% arboles/modelo ^| Threads: %CONFED_MODEL_JOBS%
+echo  Nota: despues de CatBoost siguen Poisson, TwoStage y Confederation.
 echo.
 
 cd /d "%~dp0"
 
-:: [1/7] Activar venv
-echo [1/7] Activando entorno virtual...
+:: [1/8] Activar venv
+echo [1/8] Activando entorno virtual...
 call venv\Scripts\activate.bat
 if %ERRORLEVEL% neq 0 (
     echo ERROR: No se pudo activar el venv. Ejecuta: python -m venv venv
@@ -19,8 +28,8 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-:: [2/7] Instalar dependencias si faltan
-echo [2/7] Verificando dependencias...
+:: [2/8] Instalar dependencias si faltan
+echo [2/8] Verificando dependencias...
 python -c "import catboost" 2>nul
 if %ERRORLEVEL% neq 0 (
     echo Instalando catboost + optuna...
@@ -31,34 +40,73 @@ if %ERRORLEVEL% neq 0 (
     echo Instalando fpdf2...
     pip install fpdf2 --quiet
 )
+python -c "import kaggle" 2>nul
+if %ERRORLEVEL% neq 0 (
+    echo Instalando kaggle...
+    pip install kaggle --quiet
+)
+python -c "import pypdf" 2>nul
+if %ERRORLEVEL% neq 0 (
+    echo Instalando pypdf...
+    pip install pypdf --quiet
+)
+python -c "import datasets" 2>nul
+if %ERRORLEVEL% neq 0 (
+    echo Instalando datasets...
+    pip install datasets --quiet
+)
+python -c "import bs4" 2>nul
+if %ERRORLEVEL% neq 0 (
+    echo Instalando beautifulsoup4...
+    pip install beautifulsoup4 --quiet
+)
+python -c "import lxml" 2>nul
+if %ERRORLEVEL% neq 0 (
+    echo Instalando lxml...
+    pip install lxml --quiet
+)
 echo OK
 
-:: [3/7] Pipeline de datos
+:: [3/8] Pipeline de datos
 echo.
-echo [3/7] Pipeline de datos (modo rapido)...
+echo [3/8] Pipeline de datos (modo rapido)...
 echo ============================================================
-python scripts/run_pipeline.py --fast --force 2>&1
+python -u scripts/run_pipeline.py --fast --force 2>&1
 if %ERRORLEVEL% neq 0 (
     echo ADVERTENCIA: Pipeline tuvo errores pero continuamos...
 )
 echo OK
 
-:: [4/7] Validacion
+:: [4/8] Datos enriquecidos
 echo.
-echo [4/7] Validando datos...
+echo [4/8] Descargando/limpiando datasets enriquecidos...
 echo ============================================================
-python scripts/validate_data.py 2>&1
+python -u scripts/download_enriched_data.py 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo ADVERTENCIA: Datos enriquecidos no disponibles; continuamos con datos base...
+)
 echo OK
 
-:: [5/7] Entrenamiento
+:: [5/8] Validacion
 echo.
-echo [5/7] Entrenando modelos (RF + XGB + LGBM + CatBoost + TwoStage + Confederation)...
+echo [5/8] Validando datos...
 echo ============================================================
-python scripts/train_models.py 2>&1
+python -u scripts/validate_data.py 2>&1
+echo OK
+
+:: [6/8] Entrenamiento
+echo.
+echo [6/8] Entrenando modelos (RF + XGB + LGBM + CatBoost + TwoStage + Confederation)...
+echo ============================================================
+echo Esto puede tardar unos minutos. El script mostrara progreso por subetapa.
+echo Base models: RF/XGB/LGBM/CatBoost en paralelo.
+echo Luego: Poisson, voting weights, TwoStage y ConfederationModels.
+echo.
+python -u scripts/train_models.py 2>&1
 if %ERRORLEVEL% neq 0 (
     echo.
     echo ERROR en entrenamiento. Intentando con datos reducidos...
-    python -c "import logging,sys;sys.path.insert(0,'.');logging.basicConfig(level=logging.INFO,format='%%(levelname)s: %%(message)s');from src.data.collectors.international_results_collector import InternationalResultsCollector;from src.data.collectors.elo_history_collector import EloHistoryCollector;from src.data.cache_manager import CacheManager;from src.models.trainer import ModelTrainer;from config.settings import MATCH_HISTORY_START_YEAR;df=InternationalResultsCollector().collect_match_history(start_year=MATCH_HISTORY_START_YEAR);elo=CacheManager().load('elo_ratings');eh=EloHistoryCollector().compute_from_matches(df);m=ModelTrainer(elo_df=elo).train_all(kaggle_df=None,international_df=df,enriched_match_df=None,elo_history_df=eh,statsbomb_xg_df=None);print();print('=== METRICS ===');[print(f'  {k}: {v}') for k,v in m.items()]"
+    python -u -c "import logging,sys;sys.path.insert(0,'.');logging.basicConfig(level=logging.INFO,format='%%(levelname)s: %%(message)s');from src.data.collectors.international_results_collector import InternationalResultsCollector;from src.data.collectors.elo_history_collector import EloHistoryCollector;from src.data.cache_manager import CacheManager;from src.models.trainer import ModelTrainer;from config.settings import MATCH_HISTORY_START_YEAR;cache=CacheManager();df=InternationalResultsCollector().collect_match_history(start_year=MATCH_HISTORY_START_YEAR);elo=cache.load('elo_ratings');ranks=cache.load('fifa_rankings');eh=EloHistoryCollector().compute_from_matches(df);m=ModelTrainer(elo_df=elo).train_all(kaggle_df=None,international_df=df,enriched_match_df=None,elo_history_df=eh,statsbomb_xg_df=None,fifa_rankings_df=ranks);print();print('=== METRICS ===');[print(f'  {k}: {v}') for k,v in m.items()]"
     if %ERRORLEVEL% neq 0 (
         echo ERROR FATAL: No se pudo entrenar. Revisa logs arriba.
         pause
@@ -67,11 +115,11 @@ if %ERRORLEVEL% neq 0 (
 )
 echo OK
 
-:: [6/7] Generar reporte PDF
+:: [7/8] Generar reporte PDF
 echo.
-echo [6/7] Generando reporte PDF de predicciones...
+echo [7/8] Generando reporte PDF de predicciones...
 echo ============================================================
-python scripts/generate_report.py 2>&1
+python -u scripts/generate_report.py 2>&1
 if %ERRORLEVEL% neq 0 (
     echo ADVERTENCIA: No se pudo generar el PDF.
 ) else (
@@ -79,9 +127,9 @@ if %ERRORLEVEL% neq 0 (
 )
 echo OK
 
-:: [7/7] Levantar API + Frontend
+:: [8/8] Levantar API + Frontend
 echo.
-echo [7/7] Levantando API (puerto 8000) + Frontend (puerto 5173)...
+echo [8/8] Levantando API (puerto 8000) + Frontend (puerto 5173)...
 echo ============================================================
 echo.
 echo API:       http://127.0.0.1:8000

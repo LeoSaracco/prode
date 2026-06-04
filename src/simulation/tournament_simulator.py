@@ -69,8 +69,9 @@ def _simulate_group(teams: list[str], poisson_model, rng: np.random.Generator) -
 
 
 class TournamentSimulator:
-    def __init__(self, poisson_model=None):
+    def __init__(self, poisson_model=None, group_simulator=None):
         self.poisson = poisson_model
+        self.group_simulator = group_simulator
 
     def simulate(self, n_sims: int = MC_ITERATIONS) -> pd.DataFrame:
         """

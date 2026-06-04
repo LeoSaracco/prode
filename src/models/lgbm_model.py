@@ -1,5 +1,6 @@
 """Clasificador LightGBM para predicción de resultado (W/D/L)."""
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
@@ -9,6 +10,13 @@ from config.settings import MODELS_DIR
 logger = logging.getLogger(__name__)
 
 
+def _model_jobs(default: int = 2) -> int:
+    try:
+        return max(1, int(os.getenv("TRAIN_MODEL_JOBS", str(default))))
+    except ValueError:
+        return default
+
+
 class LGBMOutcomeClassifier:
     def __init__(self, params: dict | None = None):
         self.model_ = None
@@ -16,7 +24,8 @@ class LGBMOutcomeClassifier:
         self.params = params or {}
 
     def train(self, X: np.ndarray, y: np.ndarray, X_val: np.ndarray | None = None,
-              y_val: np.ndarray | None = None) -> "LGBMOutcomeClassifier":
+              y_val: np.ndarray | None = None,
+              sample_weight: np.ndarray | None = None) -> "LGBMOutcomeClassifier":
         try:
             import lightgbm as lgb
         except ImportError:
@@ -36,7 +45,7 @@ class LGBMOutcomeClassifier:
             "num_class": 3,
             "metric": "multi_logloss",
             "random_state": 42,
-            "n_jobs": -1,
+            "n_jobs": _model_jobs(),
             "verbose": -1,
         }
         defaults.update(self.params)
@@ -47,6 +56,8 @@ class LGBMOutcomeClassifier:
         fit_kwargs = {"callbacks": callbacks}
         if eval_set:
             fit_kwargs["eval_set"] = eval_set
+        if sample_weight is not None:
+            fit_kwargs["sample_weight"] = sample_weight
         self.model_.fit(X, y, **fit_kwargs)
         self.is_fitted_ = True
         logger.info("LightGBM entrenado.")
@@ -68,8 +79,7 @@ class LGBMOutcomeClassifier:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            raw = self.model_.predict_proba(X)
-        return raw[:, [2, 1, 0]]
+            return self.model_.predict_proba(X)
 
     def score(self, X: np.ndarray, y: np.ndarray) -> float:
         if not self.is_fitted_:
