@@ -57,6 +57,18 @@ Cambios realizados:
 - **Study persistente**: almacenamiento SQLite en `models/optuna_study.db` para retomar sesiones.
 - **Meta_Cs tuneado**: el numero de C values del LogisticRegressionCV tambien se optimiza.
 
+### Fase D — Two-Stage + Confederation Models
+
+Estado: completado.
+
+Cambios realizados:
+
+- **TwoStageClassifier**: prediccion en dos etapas. Stage 1 clasifica draw vs no-draw (binario), Stage 2 clasifica win vs loss (binario, solo partidos no-draw). Mejor calibrado que 3-clases directo.
+- **ConfederationModels**: 14 modelos RF especificos por par de confederaciones (UEFA-UEFA, CONMEBOL-UEFA, CAF-AFC, etc.) + global fallback.
+- **Trainer integrado**: entrena TwoStage y ConfederationModels junto con el ensemble principal. Metricas `accuracy_two_stage` y `accuracy_confederation` en metadata.
+- **Runtime actualizado**: carga TwoStage y ConfederationModels automaticamente. `predict_match` devuelve `two_stage_breakdown` y `confederation_breakdown` en el resultado.
+- **Prediccion hibrida**: el ensemble principal usa meta-learner, pero los breakdowns de two-stage y confederation se incluyen para comparacion.
+
 ### API REST con FastAPI
 
 Estado: completado.

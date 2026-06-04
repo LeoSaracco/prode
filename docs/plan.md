@@ -110,6 +110,37 @@ Espacio de busqueda:
 Resultados guardados en `models/best_params.json` y cargados automaticamente
 por `trainer.py` en el proximo entrenamiento.
 
+## Two-Stage Prediction (Fase D)
+
+En lugar de clasificar W/D/L directamente (3 clases), se descompone en:
+
+```
+Stage 1 — DrawClassifier (RF binario):
+  P(draw) vs P(not-draw)
+
+Stage 2 — WinClassifier (RF binario, entrenado solo en no-draws):
+  P(win | not-draw) vs P(loss | not-draw)
+
+Combinacion:
+  P_win  = (1 - P_draw) * P(win | not_draw)
+  P_draw = P_draw
+  P_loss = (1 - P_draw) * (1 - P(win | not_draw))
+```
+
+Ventaja: los clasificadores binarios logran mayor accuracy que uno
+multiclase, especialmente para draws que son eventos mas raros (~25%).
+
+## Confederation Models (Fase D)
+
+14 modelos RandomForest especificos por par de confederaciones:
+
+- UEFA-UEFA, UEFA-CONMEBOL, UEFA-CAF, UEFA-AFC, UEFA-CONCACAF
+- CONMEBOL-CONMEBOL, CONMEBOL-CAF, CONMEBOL-AFC, CONMEBOL-CONCACAF
+- CAF-CAF, CAF-AFC, AFC-AFC, AFC-CONCACAF, CONCACAF-CONCACAF
+
+Cada modelo se entrena solo con partidos de ese par de confederaciones.
+Rare matchups (ej: OFC vs cualquiera) usan el modelo global como fallback.
+
 ## Simulacion de Grupos
 
 Para cada grupo A-L:

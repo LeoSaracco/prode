@@ -12,11 +12,13 @@ from config.team_aliases import TEAM_ALIASES, resolve_team_name
 from src.data.cache_manager import CacheManager
 from src.features.feature_builder import FeatureBuilder
 from src.models.catboost_model import CatBoostOutcomeClassifier
+from src.models.confederation_models import ConfederationModels
 from src.models.elo_model import EloModel
 from src.models.ensemble import EnsemblePredictor
 from src.models.lgbm_model import LGBMOutcomeClassifier
 from src.models.poisson_model import PoissonGoalModel
 from src.models.rf_model import RFOutcomeClassifier
+from src.models.two_stage import TwoStageClassifier
 from src.models.xgb_model import XGBOutcomeClassifier
 
 
@@ -25,6 +27,8 @@ class PredictionRuntime:
     ensemble: EnsemblePredictor
     feature_builder: FeatureBuilder
     poisson: PoissonGoalModel
+    two_stage: TwoStageClassifier | None
+    confederation: ConfederationModels | None
     elo_df: pd.DataFrame | None
     models_loaded: bool
 
@@ -53,10 +57,15 @@ def load_prediction_runtime() -> PredictionRuntime:
     )
     ensemble.load_meta()
 
+    two_stage = TwoStageClassifier().load()
+    confederation = ConfederationModels().load()
+
     return PredictionRuntime(
         ensemble=ensemble,
         feature_builder=FeatureBuilder(elo_df=elo_df),
         poisson=poisson,
+        two_stage=two_stage if two_stage.is_fitted_ else None,
+        confederation=confederation if confederation.is_fitted_ else None,
         elo_df=elo_df,
         models_loaded=bool(rf.is_fitted_ or xgb.is_fitted_ or lgbm.is_fitted_ or catboost.is_fitted_),
     )
@@ -78,5 +87,18 @@ def predict_match(runtime: PredictionRuntime, team_a_raw: str, team_b_raw: str) 
     team_b = resolve_team_or_raise(team_b_raw)
     x = runtime.feature_builder.build_match_features(team_a, team_b)
     result = runtime.ensemble.predict(team_a, team_b, x, elo_df=runtime.elo_df)
+
+    if runtime.two_stage is not None:
+        ts = runtime.two_stage.predict_proba(x)
+        result["two_stage_breakdown"] = {
+            "p_win": round(ts[0], 4), "p_draw": round(ts[1], 4), "p_loss": round(ts[2], 4)
+        }
+
+    if runtime.confederation is not None:
+        cf = runtime.confederation.predict_proba(x, team_a, team_b)
+        result["confederation_breakdown"] = {
+            "p_win": round(cf[0], 4), "p_draw": round(cf[1], 4), "p_loss": round(cf[2], 4)
+        }
+
     shap_features = runtime.ensemble.get_shap_explanation(x)
     return result, shap_features

@@ -20,10 +20,12 @@ from src.features.historical_features import compute_world_cup_history_score
 from src.features.risk_features import compute_tactical_advantage
 from src.features.squad_features import compute_squad_depth_from_market_value
 from src.models.catboost_model import CatBoostOutcomeClassifier
+from src.models.confederation_models import ConfederationModels
 from src.models.ensemble import EnsemblePredictor
 from src.models.lgbm_model import LGBMOutcomeClassifier
 from src.models.poisson_model import PoissonGoalModel
 from src.models.rf_model import RFOutcomeClassifier
+from src.models.two_stage import TwoStageClassifier
 from src.models.xgb_model import XGBOutcomeClassifier
 
 logger = logging.getLogger(__name__)
@@ -278,6 +280,8 @@ class ModelTrainer:
             x_val=x_val, y_val=y_val,
             x_test=x_test, y_test=y_test,
             poisson_match_df=train_matches,
+            train_matches_df=train_matches,
+            test_matches_df=test_matches,
             metadata_extra={
                 "training_source": "+".join(training_sources),
                 "n_source_matches": len(match_df),
@@ -350,8 +354,12 @@ class ModelTrainer:
         x_test: np.ndarray,
         y_test: np.ndarray,
         poisson_match_df: pd.DataFrame,
-        metadata_extra: dict,
+        train_matches_df: pd.DataFrame | None = None,
+        test_matches_df: pd.DataFrame | None = None,
+        metadata_extra: dict | None = None,
     ) -> dict:
+        if metadata_extra is None:
+            metadata_extra = {}
         if len(x_train) < 50:
             return self._train_default_models()
 
@@ -455,6 +463,37 @@ class ModelTrainer:
         elo_diff_test = x_test[:, 0]
         high_elo_mask = np.abs(elo_diff_test) >= 200
 
+        two_stage = TwoStageClassifier()
+        two_stage.train(x_train_s, y_train)
+        two_stage.save()
+        ts_probs = two_stage.predict_proba_batch(x_test_s)
+        ts_pred = ts_probs.argmax(axis=1)
+        ts_acc = round(float(accuracy_score(y_test, ts_pred)), 4) if two_stage.is_fitted_ else 0.0
+
+        conf_models = ConfederationModels()
+        conf_acc = 0.0
+        n_conf_pairs = 0
+        if train_matches_df is not None and not train_matches_df.empty and \
+           "team_a" in train_matches_df.columns and "team_b" in train_matches_df.columns:
+            conf_models.train(
+                x_train_s,
+                y_train,
+                list(train_matches_df["team_a"].astype(str)),
+                list(train_matches_df["team_b"].astype(str)),
+            )
+            conf_models.save()
+            if conf_models.is_fitted_ and test_matches_df is not None and not test_matches_df.empty:
+                conf_probs = conf_models.predict_proba_batch(
+                    x_test_s,
+                    list(test_matches_df["team_a"].astype(str)),
+                    list(test_matches_df["team_b"].astype(str)),
+                )
+                conf_pred = conf_probs.argmax(axis=1)
+                conf_acc = round(float(accuracy_score(y_test, conf_pred)), 4)
+            n_conf_pairs = len(conf_models.models)
+        else:
+            logger.info("Skipping confederation models: no team names in training data")
+
         accuracies = {}
         for name, model in models.items():
             if model.is_fitted_:
@@ -462,6 +501,8 @@ class ModelTrainer:
             else:
                 accuracies[name] = 0.0
         accuracies["meta"] = round(float(accuracy_score(y_test, meta_pred)), 4)
+        accuracies["two_stage"] = ts_acc
+        accuracies["confederation"] = conf_acc
 
         metadata = {
             "train_date": datetime.now().isoformat(),
@@ -475,6 +516,9 @@ class ModelTrainer:
             "accuracy_lgbm": accuracies["lgbm"],
             "accuracy_catboost": accuracies["catboost"],
             "accuracy_meta": accuracies["meta"],
+            "accuracy_two_stage": accuracies["two_stage"],
+            "accuracy_confederation": accuracies["confederation"],
+            "n_confederation_pairs": n_conf_pairs,
             "log_loss_meta": round(float(log_loss(y_test, meta_probs, labels=[0, 1, 2])), 4),
             "accuracy_high_confidence": round(self._segment_accuracy(meta_probs, y_test, threshold=HIGH_CONFIDENCE_THRESHOLD), 4),
             "accuracy_high_elo_diff_200": round(
