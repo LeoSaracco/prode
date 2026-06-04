@@ -57,17 +57,18 @@ Cambios realizados:
 - **Study persistente**: almacenamiento SQLite en `models/optuna_study.db` para retomar sesiones.
 - **Meta_Cs tuneado**: el numero de C values del LogisticRegressionCV tambien se optimiza.
 
-### Fase D — Two-Stage + Confederation Models
+### Fase E — Fixes y Optimizaciones
 
 Estado: completado.
 
 Cambios realizados:
 
-- **TwoStageClassifier**: prediccion en dos etapas. Stage 1 clasifica draw vs no-draw (binario), Stage 2 clasifica win vs loss (binario, solo partidos no-draw). Mejor calibrado que 3-clases directo.
-- **ConfederationModels**: 14 modelos RF especificos por par de confederaciones (UEFA-UEFA, CONMEBOL-UEFA, CAF-AFC, etc.) + global fallback.
-- **Trainer integrado**: entrena TwoStage y ConfederationModels junto con el ensemble principal. Metricas `accuracy_two_stage` y `accuracy_confederation` en metadata.
-- **Runtime actualizado**: carga TwoStage y ConfederationModels automaticamente. `predict_match` devuelve `two_stage_breakdown` y `confederation_breakdown` en el resultado.
-- **Prediccion hibrida**: el ensemble principal usa meta-learner, pero los breakdowns de two-stage y confederation se incluyen para comparacion.
+- **Weighted voting reemplaza meta-learner LR**: los pesos se calculan como `accuracy_val - 0.33` por modelo, normalizados. Elo siempre pesa base 0.10. Resultado: ensemble supera al mejor modelo individual.
+- **Poisson con timeout**: `maxiter=200`, `ftol=1e-4`. Si no converge usa default params.
+- **TwoStage con feature mask**: stage1 (draw) usa solo 8 features: elo_diff, elo_win_prob, xg_diff, xga_diff, form_5_diff, defensive_stability_diff, consistency_diff, is_tournament.
+- **Entrenamiento paralelo**: ThreadPoolExecutor(4) entrena RF, XGB, LGBM, CatBoost simultaneamente.
+- **CatBoost opcional**: si falla o timeout (120s), se skipea y el ensemble sigue con los otros 3.
+- **Pipeline rapido simplificado**: run_fast solo baja international results + Elo (sin StatsBomb/Kaggle/FIFA rotos).
 
 ### API REST con FastAPI
 

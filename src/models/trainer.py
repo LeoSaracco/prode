@@ -2,6 +2,7 @@
 
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
@@ -362,8 +363,6 @@ class ModelTrainer:
 
         best_params = self._load_best_params()
         tuned = bool(best_params)
-        if tuned:
-            logger.info("Loading tuned hyperparameters from best_params.json")
 
         scaler = StandardScaler()
         x_train_s = scaler.fit_transform(x_train)
@@ -376,86 +375,87 @@ class ModelTrainer:
         lgbm_params = self._extract_model_params(best_params, "lgbm")
         cb_params = self._extract_model_params(best_params, "cb")
 
-        rf = RFOutcomeClassifier(params=rf_params).train(x_train_s, y_train)
-        rf.save()
-        xgb = XGBOutcomeClassifier(params=xgb_params).train(x_train_s, y_train, x_val_s, y_val)
-        xgb.save()
-        lgbm = LGBMOutcomeClassifier(params=lgbm_params).train(x_train_s, y_train, x_val_s, y_val)
-        lgbm.save()
-        catboost = CatBoostOutcomeClassifier(params=cb_params).train(x_train_s, y_train, x_val_s, y_val)
-        catboost.save()
+        results_futures = {}
+        models = {}
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {}
+            futures["rf"] = executor.submit(
+                lambda: RFOutcomeClassifier(params=rf_params).train(x_train_s, y_train))
+            futures["xgb"] = executor.submit(
+                lambda: XGBOutcomeClassifier(params=xgb_params).train(x_train_s, y_train, x_val_s, y_val))
+            futures["lgbm"] = executor.submit(
+                lambda: LGBMOutcomeClassifier(params=lgbm_params).train(x_train_s, y_train, x_val_s, y_val))
+            futures["cb"] = executor.submit(
+                lambda: CatBoostOutcomeClassifier(params=cb_params).train(x_train_s, y_train, x_val_s, y_val))
+
+            for name in futures:
+                try:
+                    models[name] = futures[name].result(timeout=120)
+                    models[name].save()
+                except Exception as e:
+                    logger.warning("Model %s failed: %s. Skipping.", name, e)
+                    models[name] = None
+
+        rf = models.get("rf")
+        xgb = models.get("xgb")
+        lgbm = models.get("lgbm")
+        catboost = models.get("cb")
 
         poisson = PoissonGoalModel()
         if poisson_match_df is not None and not poisson_match_df.empty:
-            poisson.fit(poisson_match_df[["team_a", "team_b", "goals_a", "goals_b", "neutral"]])
+            try:
+                poisson.fit(poisson_match_df[["team_a", "team_b", "goals_a", "goals_b", "neutral"]])
+            except Exception:
+                logger.warning("Poisson fit failed. Using defaults.")
+                poisson._set_default_params(pd.DataFrame())
         else:
             poisson._set_default_params(pd.DataFrame())
         poisson.save()
 
-        models = {
-            "rf": rf,
-            "xgb": xgb,
-            "lgbm": lgbm,
-            "catboost": catboost,
-        }
         model_order = ["rf", "xgb", "lgbm", "catboost"]
+        val_acc = {}
 
-        raw_elo_diff = x_val[:, 0]
+        def _elo_probs_for_diff(elo_diff):
+            p_win = 1.0 / (1.0 + 10.0 ** (-elo_diff / 400.0))
+            p_draw = 0.22 * (1.0 - abs(p_win - 0.5) * 2.0)
+            p_win = p_win * (1.0 - p_draw)
+            p_loss = 1.0 - p_win - p_draw
+            return np.array([p_loss, p_draw, p_win])
 
-        def _elo_probs_batch(elo_diffs: np.ndarray) -> np.ndarray:
-            n = len(elo_diffs)
-            probs = np.zeros((n, 3))
-            for i in range(n):
-                ed = float(elo_diffs[i])
-                p_win = 1.0 / (1.0 + 10.0 ** (-ed / 400.0))
-                p_draw = 0.22 * (1.0 - abs(p_win - 0.5) * 2.0)
-                p_win = p_win * (1.0 - p_draw)
-                p_loss = 1.0 - p_win - p_draw
-                probs[i] = [p_loss, p_draw, p_win]
-            return probs
+        def _elo_probs_batch(diffs):
+            out = np.zeros((len(diffs), 3))
+            for i, d in enumerate(diffs):
+                out[i] = _elo_probs_for_diff(float(d))
+            return out
 
-        def _stack_probs(probs_dict: dict[str, np.ndarray]) -> np.ndarray:
-            vecs = []
-            for mn in model_order:
-                p = probs_dict.get(mn, np.tile([0.38, 0.24, 0.38], (len(next(iter(probs_dict.values()))), 1)))
-                vecs.append(p)
-            vecs.append(_elo_probs_batch(raw_elo_diff))
-            return np.hstack(vecs)
-
-        val_probs = {}
-        for name, model in models.items():
-            if model.is_fitted_:
-                val_probs[name] = model.predict_proba_batch(x_val_s)
+        for name in model_order:
+            m = models.get(name)
+            if m and m.is_fitted_:
+                preds = m.predict_proba_batch(x_val_s).argmax(axis=1)
+                val_acc[name] = float(accuracy_score(y_val, preds))
             else:
-                val_probs[name] = np.tile([0.38, 0.24, 0.38], (len(x_val_s), 3))
+                val_acc[name] = 0.33
+        val_acc["elo"] = float(accuracy_score(y_val, _elo_probs_batch(x_val[:, 0]).argmax(axis=1)))
 
-        val_stacked = _stack_probs(val_probs)
+        weights = {}
+        for name in model_order + ["elo"]:
+            weights[name] = max(0.05, val_acc[name] - 0.33)
+        total = sum(weights.values()) or 1.0
+        weights = {k: v / total for k, v in weights.items()}
 
-        meta_Cs = best_params.get("meta_Cs", 8)
-        from sklearn.linear_model import LogisticRegressionCV
-        meta = LogisticRegressionCV(
-            Cs=meta_Cs, cv=3, max_iter=2000,
-            random_state=42, n_jobs=-1,
-        )
-        meta.fit(val_stacked, y_val)
-
-        test_probs = {}
-        for name, model in models.items():
-            if model.is_fitted_:
-                test_probs[name] = model.predict_proba_batch(x_test_s)
-            else:
-                test_probs[name] = np.tile([0.38, 0.24, 0.38], (len(x_test_s), 3))
         test_elo = _elo_probs_batch(x_test[:, 0])
-        test_stacked = np.hstack([
-            test_probs["rf"], test_probs["xgb"], test_probs["lgbm"],
-            test_probs["catboost"], test_elo,
-        ])
-
-        meta_probs = meta.predict_proba(test_stacked)
-        meta_pred = np.argmax(meta_probs, axis=1)
-
-        import joblib as jl
-        jl.dump(meta, MODELS_DIR / "meta_learner.pkl")
+        blend_probs = np.zeros((len(y_test), 3))
+        for name in model_order:
+            m = models.get(name)
+            if m and m.is_fitted_:
+                blend_probs += weights[name] * m.predict_proba_batch(x_test_s)
+            else:
+                blend_probs += weights[name] * np.tile([0.38, 0.24, 0.38], (len(y_test), 3))
+        blend_probs += weights["elo"] * test_elo
+        row_sums = blend_probs.sum(axis=1, keepdims=True)
+        row_sums[row_sums == 0] = 1.0
+        blend_probs /= row_sums
+        blend_pred = blend_probs.argmax(axis=1)
 
         elo_diff_test = x_test[:, 0]
         high_elo_mask = np.abs(elo_diff_test) >= 200
@@ -463,41 +463,41 @@ class ModelTrainer:
         two_stage = TwoStageClassifier()
         two_stage.train(x_train_s, y_train)
         two_stage.save()
-        ts_probs = two_stage.predict_proba_batch(x_test_s)
-        ts_pred = ts_probs.argmax(axis=1)
-        ts_acc = round(float(accuracy_score(y_test, ts_pred)), 4) if two_stage.is_fitted_ else 0.0
+        ts_acc = round(float(accuracy_score(y_test, two_stage.predict_proba_batch(x_test_s).argmax(axis=1))), 4) if two_stage.is_fitted_ else 0.0
 
         conf_models = ConfederationModels()
         conf_acc = 0.0
         n_conf_pairs = 0
         if train_matches_df is not None and not train_matches_df.empty and \
-           "team_a" in train_matches_df.columns and "team_b" in train_matches_df.columns:
-            conf_models.train(
-                x_train_s,
-                y_train,
-                list(train_matches_df["team_a"].astype(str)),
-                list(train_matches_df["team_b"].astype(str)),
-            )
-            conf_models.save()
-            if conf_models.is_fitted_ and test_matches_df is not None and not test_matches_df.empty:
-                conf_probs = conf_models.predict_proba_batch(
-                    x_test_s,
-                    list(test_matches_df["team_a"].astype(str)),
-                    list(test_matches_df["team_b"].astype(str)),
-                )
-                conf_pred = conf_probs.argmax(axis=1)
-                conf_acc = round(float(accuracy_score(y_test, conf_pred)), 4)
-            n_conf_pairs = len(conf_models.models)
-        else:
-            logger.info("Skipping confederation models: no team names in training data")
+           "team_a" in train_matches_df.columns:
+            try:
+                conf_models.train(x_train_s, y_train,
+                                  list(train_matches_df["team_a"].astype(str)),
+                                  list(train_matches_df["team_b"].astype(str)))
+                conf_models.save()
+                if conf_models.is_fitted_ and test_matches_df is not None and not test_matches_df.empty:
+                    conf_pred = conf_models.predict_proba_batch(
+                        x_test_s,
+                        list(test_matches_df["team_a"].astype(str)),
+                        list(test_matches_df["team_b"].astype(str)),
+                    ).argmax(axis=1)
+                    conf_acc = round(float(accuracy_score(y_test, conf_pred)), 4)
+                n_conf_pairs = len(conf_models.models)
+            except Exception as e:
+                logger.warning("Confederation models failed: %s", e)
+
+        ensemble = EnsemblePredictor()
+        ensemble.set_weights_from_accuracies(val_acc)
+        ensemble.save_weights(weights)
 
         accuracies = {}
-        for name, model in models.items():
-            if model.is_fitted_:
-                accuracies[name] = round(model.score(x_test_s, y_test), 4)
+        for name in model_order:
+            m = models.get(name)
+            if m and m.is_fitted_:
+                accuracies[name] = round(m.score(x_test_s, y_test), 4)
             else:
                 accuracies[name] = 0.0
-        accuracies["meta"] = round(float(accuracy_score(y_test, meta_pred)), 4)
+        accuracies["voting"] = round(float(accuracy_score(y_test, blend_pred)), 4)
         accuracies["two_stage"] = ts_acc
         accuracies["confederation"] = conf_acc
 
@@ -508,26 +508,28 @@ class ModelTrainer:
             "n_test_samples": int(len(x_test)),
             "n_features": len(MATCH_FEATURE_COLUMNS),
             "features": MATCH_FEATURE_COLUMNS,
-            "accuracy_rf": accuracies["rf"],
-            "accuracy_xgb": accuracies["xgb"],
-            "accuracy_lgbm": accuracies["lgbm"],
-            "accuracy_catboost": accuracies["catboost"],
-            "accuracy_meta": accuracies["meta"],
+            "accuracy_rf": accuracies.get("rf", 0),
+            "accuracy_xgb": accuracies.get("xgb", 0),
+            "accuracy_lgbm": accuracies.get("lgbm", 0),
+            "accuracy_catboost": accuracies.get("cb", 0),
+            "accuracy_voting": accuracies["voting"],
             "accuracy_two_stage": accuracies["two_stage"],
             "accuracy_confederation": accuracies["confederation"],
             "n_confederation_pairs": n_conf_pairs,
-            "log_loss_meta": round(float(log_loss(y_test, meta_probs, labels=[0, 1, 2])), 4),
-            "accuracy_high_confidence": round(self._segment_accuracy(meta_probs, y_test, threshold=HIGH_CONFIDENCE_THRESHOLD), 4),
+            "log_loss_voting": round(float(log_loss(y_test, blend_probs, labels=[0, 1, 2])), 4),
+            "accuracy_high_confidence": round(self._segment_accuracy(blend_probs, y_test, threshold=HIGH_CONFIDENCE_THRESHOLD), 4),
             "accuracy_high_elo_diff_200": round(
-                float(accuracy_score(y_test[high_elo_mask], meta_pred[high_elo_mask]))
+                float(accuracy_score(y_test[high_elo_mask], blend_pred[high_elo_mask]))
                 if high_elo_mask.sum() >= 10 else 0.0, 4
             ),
             "n_high_elo_matches": int(high_elo_mask.sum()),
             "baseline_random": 0.333,
             "split_type": "time_series_chronological",
-            "ensemble_architecture": "RF+XGB+LGBM+CATBOOST+ELO -> LogisticRegressionCV meta-learner",
+            "ensemble_architecture": "RF+XGB+LGBM+CB+Elo -> accuracy-weighted voting",
+            "voting_weights": {k: round(v, 4) for k, v in weights.items()},
+            "val_accuracies": {k: round(v, 4) for k, v in val_acc.items()},
             "tuned_hyperparameters": tuned,
-            "meta_Cs": meta_Cs,
+            "parallel_training": True,
             **metadata_extra,
         }
         with open(MODELS_DIR / "model_metadata.json", "w", encoding="utf-8") as f:

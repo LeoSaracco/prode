@@ -1,16 +1,17 @@
 """
-Ensemble with meta-learner (LogisticRegressionCV) + Platt scaling calibration.
+Ensemble with accuracy-weighted voting.
 
 Architecture:
-  Layer 1 — Base models: RF, XGBoost, LightGBM, CatBoost, Elo
-  Layer 2 — Meta-learner: LogisticRegressionCV trained on val-set base predictions
-  Layer 3 — Calibrator: CalibratedClassifierCV with isotonic regression on test predictions
+  Base models: RF, XGBoost, LightGBM, CatBoost, Elo
+  Voting:       Weighted by each model's accuracy on the val set.
+                Elo always gets 0.10 as a stable baseline.
+                Weights are normalized to sum to 1.0.
 """
 
+import json
 import logging
 from pathlib import Path
 
-import joblib
 import numpy as np
 
 from config.settings import (
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class EnsemblePredictor:
-    """Stacked ensemble with meta-learner and probability calibration."""
+    """Weighted voting ensemble based on per-model validation accuracy."""
 
     def __init__(
         self,
@@ -44,53 +45,34 @@ class EnsemblePredictor:
         self.catboost = catboost_model
         self.scaler = scaler
 
-        self.meta_learner = None
-        self.calibrator = None
-        self.is_meta_trained = False
-        self.base_models_order = ["rf", "xgb", "lgbm", "catboost", "elo"]
+        self.voting_weights = None
 
-    def fit_meta_learner(
-        self,
-        val_base_probs: np.ndarray,
-        y_val: np.ndarray,
-        calibrator_probs: np.ndarray | None = None,
-        y_cal: np.ndarray | None = None,
-    ) -> None:
-        """Train meta-learner on base model predictions.
+    def set_weights_from_accuracies(self, accuracies: dict[str, float]) -> None:
+        """Compute voting weights from val-set accuracies.
 
         Args:
-            val_base_probs: (n_samples, n_models * 3) stacked base probabilities
-            y_val: true labels (0=L, 1=D, 2=W)
-            calibrator_probs: out-of-fold predictions for calibration
-            y_cal: labels for calibration
+            accuracies: dict like {'rf': 0.45, 'xgb': 0.44, ...}
         """
-        from sklearn.linear_model import LogisticRegressionCV
-        from sklearn.calibration import CalibratedClassifierCV
+        weights = {}
+        for name, acc in accuracies.items():
+            if name == "elo":
+                weights[name] = 0.10
+            else:
+                weights[name] = max(0.05, acc - 0.33)
 
-        self.meta_learner = LogisticRegressionCV(
-            Cs=10,
-            cv=3,
-            max_iter=2000,
-            random_state=42,
-            n_jobs=-1,
-        )
-        self.meta_learner.fit(val_base_probs, y_val)
-        self.is_meta_trained = True
-        logger.info("Meta-learner (LogisticRegressionCV) entrenado en %d samples", len(y_val))
+        self.load_or_set_weights(weights)
 
-        if calibrator_probs is not None and y_cal is not None and len(y_cal) >= 20:
-            self.calibrator = CalibratedClassifierCV(
-                estimator=None,
-                method="isotonic",
-                cv=3,
-            )
-            base_cal = calibrator_probs if calibrator_probs.ndim == 1 else calibrator_probs
-            try:
-                self.calibrator.fit(calibrator_probs, y_cal)
-                logger.info("Calibrator (isotonic) entrenado en %d samples", len(y_cal))
-            except Exception as e:
-                logger.warning("Calibrator failed: %s", e)
-                self.calibrator = None
+    def load_or_set_weights(self, weights: dict[str, float]) -> None:
+        total = sum(weights.values())
+        if total > 0:
+            self.voting_weights = {k: v / total for k, v in weights.items()}
+        else:
+            self.voting_weights = {
+                "rf": 0.30, "xgb": 0.20, "lgbm": 0.20,
+                "catboost": 0.20, "elo": 0.10,
+            }
+        logger.info("Voting weights: %s",
+                     {k: f"{v:.2f}" for k, v in self.voting_weights.items()})
 
     def predict(
         self,
@@ -102,29 +84,11 @@ class EnsemblePredictor:
         model_vector = self._scale_features(feature_vector)
         base_probs = self._get_all_base_probs(model_vector, team_a, team_b)
 
-        if self.is_meta_trained and self.meta_learner is not None:
-            stacked = self._stack_base_probs(base_probs)
-            meta_probs = self.meta_learner.predict_proba(stacked)[0]
-            if self.calibrator is not None:
-                try:
-                    meta_probs = self.calibrator.predict_proba(stacked)[0]
-                except Exception:
-                    pass
-            p_win, p_draw, p_loss = float(meta_probs[2]), float(meta_probs[1]), float(meta_probs[0])
-        else:
-            rf_w, xgb_w, lgbm_w, cb_w, elo_w = 0.30, 0.20, 0.20, 0.15, 0.15
-            total = rf_w + xgb_w + lgbm_w + cb_w + elo_w
-            p_win = (
-                rf_w * base_probs["rf"][0] + xgb_w * base_probs["xgb"][0] +
-                lgbm_w * base_probs["lgbm"][0] + cb_w * base_probs["catboost"][0] +
-                elo_w * base_probs["elo"][0]
-            ) / total
-            p_draw = (
-                rf_w * base_probs["rf"][1] + xgb_w * base_probs["xgb"][1] +
-                lgbm_w * base_probs["lgbm"][1] + cb_w * base_probs["catboost"][1] +
-                elo_w * base_probs["elo"][1]
-            ) / total
-            p_loss = 1.0 - p_win - p_draw
+        w = self.voting_weights or self._default_weights()
+
+        p_win = sum(w.get(name, 0) * base_probs[name][0] for name in base_probs)
+        p_draw = sum(w.get(name, 0) * base_probs[name][1] for name in base_probs)
+        p_loss = 1.0 - p_win - p_draw
 
         total = p_win + p_draw + p_loss
         if total > 0:
@@ -166,14 +130,21 @@ class EnsemblePredictor:
             "elo_b": elo_b,
             "elo_diff": elo_diff,
             "model_breakdown": {
-                "rf": base_probs.get("rf", (0.4, 0.25, 0.35)),
-                "xgb": base_probs.get("xgb", (0.4, 0.25, 0.35)),
-                "lgbm": base_probs.get("lgbm", (0.4, 0.25, 0.35)),
-                "catboost": base_probs.get("catboost", (0.4, 0.25, 0.35)),
-                "elo": base_probs.get("elo", (0.4, 0.25, 0.35)),
+                name: base_probs.get(name, (0.4, 0.25, 0.35))
+                for name in w
             },
-            "meta_trained": self.is_meta_trained,
         }
+
+    def predict_voting_probs(self, base_probs_dict: dict[str, np.ndarray]) -> np.ndarray:
+        w = self.voting_weights or self._default_weights()
+        n = len(next(iter(base_probs_dict.values())))
+        out = np.zeros((n, 3))
+        for name, probs in base_probs_dict.items():
+            weight = w.get(name, 0)
+            out += weight * probs
+        row_sums = out.sum(axis=1, keepdims=True)
+        row_sums[row_sums == 0] = 1.0
+        return out / row_sums
 
     def _get_all_base_probs(
         self, x: np.ndarray, team_a: str, team_b: str
@@ -186,25 +157,6 @@ class EnsemblePredictor:
         probs["elo"] = self.elo.predict_proba(team_a, team_b) if self.elo else (0.4, 0.25, 0.35)
         return probs
 
-    def _stack_base_probs(
-        self, base_probs: dict[str, tuple[float, float, float]]
-    ) -> np.ndarray:
-        vecs = []
-        for model_name in self.base_models_order:
-            p = base_probs.get(model_name, (0.4, 0.25, 0.35))
-            vecs.extend(p)
-        return np.array([vecs])
-
-    def predict_batch_stacked(
-        self, all_base_probs: list[dict[str, tuple[float, float, float]]]
-    ) -> np.ndarray:
-        if not self.is_meta_trained or self.meta_learner is None:
-            return np.tile([0.38, 0.24, 0.38], (len(all_base_probs), 1))
-        stacked = np.array([
-            self._stack_base_probs(bp)[0] for bp in all_base_probs
-        ])
-        return self.meta_learner.predict_proba(stacked)
-
     def _safe_predict(
         self, model, x: np.ndarray, team_a: str, team_b: str
     ) -> tuple[float, float, float]:
@@ -216,6 +168,9 @@ class EnsemblePredictor:
             return model.predict_proba(x)
         except Exception:
             return (0.40, 0.25, 0.35)
+
+    def _default_weights(self) -> dict[str, float]:
+        return {"rf": 0.30, "xgb": 0.20, "lgbm": 0.20, "catboost": 0.20, "elo": 0.10}
 
     def _compute_confidence(self, max_prob: float, elo_diff: float) -> str:
         if max_prob > CONFIDENCE_HIGH_PROB and elo_diff > CONFIDENCE_HIGH_ELO_DIFF:
@@ -237,30 +192,22 @@ class EnsemblePredictor:
             return self.xgb.explain(feature_vector)
         return []
 
-    def save_meta(self) -> None:
-        if self.meta_learner is not None:
-            joblib.dump(self.meta_learner, MODELS_DIR / "meta_learner.pkl")
-            logger.info("Meta-learner guardado")
-        if self.calibrator is not None:
-            joblib.dump(self.calibrator, MODELS_DIR / "calibrator.pkl")
-            logger.info("Calibrator guardado")
+    def save_weights(self, weights: dict[str, float]) -> None:
+        path = MODELS_DIR / "voting_weights.json"
+        with open(path, "w") as f:
+            json.dump(weights, f, indent=2)
+        logger.info("Voting weights saved to %s", path)
 
-    def load_meta(self) -> bool:
-        meta_path = MODELS_DIR / "meta_learner.pkl"
-        cal_path = MODELS_DIR / "calibrator.pkl"
-        loaded = False
-        if meta_path.exists():
+    def load_weights(self) -> dict[str, float] | None:
+        path = MODELS_DIR / "voting_weights.json"
+        if path.exists():
             try:
-                self.meta_learner = joblib.load(meta_path)
-                self.is_meta_trained = True
-                loaded = True
-                logger.info("Meta-learner cargado")
-            except Exception as e:
-                logger.warning("Error cargando meta-learner: %s", e)
-        if cal_path.exists():
-            try:
-                self.calibrator = joblib.load(cal_path)
-                logger.info("Calibrator cargado")
-            except Exception as e:
-                logger.warning("Error cargando calibrator: %s", e)
-        return loaded
+                with open(path) as f:
+                    w = json.load(f)
+                self.voting_weights = w
+                logger.info("Voting weights loaded: %s",
+                             {k: f"{v:.2f}" for k, v in w.items()})
+                return w
+            except Exception:
+                pass
+        return None

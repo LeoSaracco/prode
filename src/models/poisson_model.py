@@ -85,7 +85,12 @@ class PoissonGoalModel:
             return -ll
 
         result = minimize(neg_log_likelihood, x0, method="L-BFGS-B",
-                          options={"maxiter": 300, "ftol": 1e-6})
+                           options={"maxiter": 200, "ftol": 1e-4})
+
+        if not result.success:
+            logger.warning("Poisson fit did not converge (%s). Using default params.", result.message)
+            self._set_default_params(pd.DataFrame())
+            return self
 
         params = result.x
         self.attack_ = {t: params[team_idx[t]] for t in teams}

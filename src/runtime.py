@@ -55,7 +55,7 @@ def load_prediction_runtime() -> PredictionRuntime:
         poisson_model=poisson,
         scaler=scaler,
     )
-    ensemble.load_meta()
+    ensemble.load_weights()
 
     two_stage = TwoStageClassifier().load()
     confederation = ConfederationModels().load()

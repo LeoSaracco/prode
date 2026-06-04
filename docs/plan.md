@@ -67,28 +67,29 @@ El split train/val/test es estrictamente cronologico (70/15/15):
 `_add_reverse_perspective` se aplica SOLO al train set para evitar data leakage.
 El metadata ahora incluye `split_type: time_series_chronological` y `accuracy_high_elo_diff_200`.
 
-## Ensemble (Fase B)
+## Ensemble (Fase E)
 
-Arquitectura de stacking con meta-learner:
+Arquitectura de weighted voting basada en accuracy en val set:
 
 ```text
-Layer 1 — Base models:
-├── RandomForest (500 trees, OOB)
-├── XGBoost (600 iter, max_depth=5)
-├── LightGBM (600 iter, num_leaves=31)
-├── CatBoost (600 iter, depth=6)
-└── Elo (baseline estadistico)
+Base models (paralelizados con ThreadPoolExecutor):
+├── RandomForest (300 trees, OOB)
+├── XGBoost (300 iter, max_depth=5)
+├── LightGBM (300 iter, num_leaves=31)
+├── CatBoost (200 iter, depth=6, opcional)
+└── Elo (baseline, peso fijo 0.10)
 
-Layer 2 — Meta-learner:
-└── LogisticRegressionCV (Cs=8, multinomial)
-    Entrenado sobre predicciones base en val set.
+Voting:
+  peso_modelo = max(0.05, accuracy_val - 0.33)
+  Se normalizan para sumar 1.0.
 
-Layer 3 — Calibracion:
-└── IsotonicRegression (3-fold CV)
+TwoStage (8 features para draw, 21 para win/loss)
+Confederation (14 pares, RF 300 trees cada uno)
 ```
 
-El peso de cada modelo base es aprendido por el meta-learner,
-no hardcodeado. El modelo Poisson solo se usa para xG y scorelines.
+El entrenamiento es totalmente paralelo. Si CatBoost falla o tarda
+mas de 120s, se skipea y el ensemble vota con los 3 modelos restantes.
+Los pesos se guardan en `models/voting_weights.json`.
 
 ## Hyperparameter Tuning (Fase C)
 

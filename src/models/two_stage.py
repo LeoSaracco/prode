@@ -28,29 +28,28 @@ class TwoStageClassifier:
     - Draws are fundamentally different from non-draw outcomes
     - Binary classifiers achieve higher accuracy
     - Each stage can use different features optimized for its target
+
+    Stage 1 (draw vs not-draw): uses only 8 features optimized for draw detection
+    Stage 2 (win vs loss): uses all features
     """
+
+    DRAW_FEATURE_INDICES = [0, 1, 2, 3, 4, 6, 8, 13]
+    ALL_FEATURES = slice(None)
 
     def __init__(self, draw_params: dict | None = None, win_params: dict | None = None):
         self.draw_clf: RandomForestClassifier | None = None
         self.win_clf: RandomForestClassifier | None = None
-        self.draw_calibrated: CalibratedClassifierCV | None = None
-        self.win_calibrated: CalibratedClassifierCV | None = None
         self.is_fitted_ = False
         self.draw_params = draw_params or {}
         self.win_params = win_params or {}
 
     def train(self, X: np.ndarray, y: np.ndarray) -> "TwoStageClassifier":
-        """Train both stages.
-
-        Args:
-            X: feature matrix
-            y: labels 0=L, 1=D, 2=W
-        """
         if len(X) < 50:
             logger.warning("Not enough samples for TwoStage training")
             return self
 
         y_draw = (y == 1).astype(int)
+        X_draw = X[:, self.DRAW_FEATURE_INDICES]
 
         mask_not_draw = y_draw == 0
         X_nd = X[mask_not_draw]
@@ -58,27 +57,19 @@ class TwoStageClassifier:
         y_win = (y_nd == 2).astype(int)
 
         draw_defaults = {
-            "n_estimators": 400,
-            "max_depth": 10,
-            "min_samples_split": 15,
-            "min_samples_leaf": 6,
-            "class_weight": "balanced",
-            "random_state": 42,
-            "n_jobs": -1,
+            "n_estimators": 200, "max_depth": 8,
+            "min_samples_split": 15, "min_samples_leaf": 8,
+            "class_weight": "balanced", "random_state": 42, "n_jobs": -1,
         }
         draw_defaults.update(self.draw_params)
         self.draw_clf = RandomForestClassifier(**draw_defaults)
-        self.draw_clf.fit(X, y_draw)
+        self.draw_clf.fit(X_draw, y_draw)
 
         if len(X_nd) >= 30:
             win_defaults = {
-                "n_estimators": 400,
-                "max_depth": 10,
-                "min_samples_split": 15,
-                "min_samples_leaf": 6,
-                "class_weight": "balanced",
-                "random_state": 42,
-                "n_jobs": -1,
+                "n_estimators": 200, "max_depth": 8,
+                "min_samples_split": 15, "min_samples_leaf": 6,
+                "class_weight": "balanced", "random_state": 42, "n_jobs": -1,
             }
             win_defaults.update(self.win_params)
             self.win_clf = RandomForestClassifier(**win_defaults)
@@ -88,18 +79,18 @@ class TwoStageClassifier:
 
         self.is_fitted_ = True
         logger.info("TwoStage trained: stage1(draw) on %d, stage2(win|not-draw) on %d",
-                     len(X), len(X_nd))
+                     len(X_draw), len(X_nd))
         return self
 
     def predict_proba(self, x: np.ndarray) -> tuple[float, float, float]:
-        """Returns (p_win, p_draw, p_loss) for team_a."""
         if not self.is_fitted_:
             return 0.40, 0.25, 0.35
 
         x2d = x.reshape(1, -1)
 
         if self.draw_clf is not None:
-            p_draw = float(self.draw_clf.predict_proba(x2d)[0][1])
+            x_draw = x2d[:, self.DRAW_FEATURE_INDICES]
+            p_draw = float(self.draw_clf.predict_proba(x_draw)[0][1])
         else:
             p_draw = 0.25
 
@@ -127,7 +118,8 @@ class TwoStageClassifier:
             return np.tile([0.38, 0.24, 0.38], (n, 1))
 
         if self.draw_clf is not None:
-            p_draw = self.draw_clf.predict_proba(X)[:, 1]
+            X_draw = X[:, self.DRAW_FEATURE_INDICES]
+            p_draw = self.draw_clf.predict_proba(X_draw)[:, 1]
         else:
             p_draw = np.full(len(X), 0.25)
 
