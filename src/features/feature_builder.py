@@ -60,6 +60,7 @@ class FeatureBuilder:
         elo_df: pd.DataFrame | None = None,
         h2h_df: pd.DataFrame | None = None,
         team_profiles_df: pd.DataFrame | None = None,
+        h2h_stats: dict | None = None,
     ):
         self.elo_df = elo_df if elo_df is not None else pd.DataFrame()
         self.h2h_df = h2h_df if h2h_df is not None else pd.DataFrame()
@@ -71,6 +72,15 @@ class FeatureBuilder:
                 for _, row in self.team_profiles_df.iterrows()
             }
         self._team_features: dict[str, dict] = {}
+        # h2h_stats: {"TeamA||TeamB": {"win_rate": 0.6, "n": 10}, ...}
+        self._h2h: dict[tuple[str, str], float] = {}
+        if h2h_stats:
+            for key, val in h2h_stats.items():
+                try:
+                    ta, tb = key.split("||", 1)
+                    self._h2h[(ta, tb)] = float(val["win_rate"])
+                except Exception:
+                    pass
 
     def build_team_features(self, team: str) -> dict:
         if team in self._team_features:
@@ -91,9 +101,12 @@ class FeatureBuilder:
         offensive_power = compute_offensive_power(xg_pg)
         defensive_stability = compute_defensive_stability(xga_pg, ppda)
         squad_depth = compute_squad_depth_from_market_value(team)
-        consistency = compute_consistency_score([
-            3 if form_5 > 0.75 else (1 if form_5 > 0.45 else 0)
-        ] * 10)
+        if profile is not None and "consistency" in profile and not pd.isna(profile.get("consistency")):
+            consistency = float(profile.get("consistency"))
+        else:
+            consistency = compute_consistency_score([
+                3 if form_5 > 0.75 else (1 if form_5 > 0.45 else 0)
+            ] * 10)
 
         elo_momentum = float(profile.get("elo_momentum")) if profile is not None and "elo_momentum" in profile and not pd.isna(profile.get("elo_momentum")) else self._get_elo_momentum(team)
         days_since = float(profile.get("days_since_last_match")) if profile is not None and "days_since_last_match" in profile and not pd.isna(profile.get("days_since_last_match")) else self._get_days_since_last_match(team)
@@ -140,11 +153,15 @@ class FeatureBuilder:
         elo_diff = fa["elo_rating"] - fb["elo_rating"]
         elo_win_prob = compute_elo_win_probability(fa["elo_rating"], fb["elo_rating"])
 
-        h2h_score = 0.0
-        if h2h_df is not None and not h2h_df.empty:
+        win_rate_a = self._h2h.get((team_a, team_b))
+        if win_rate_a is not None:
+            h2h_score = float(2.0 * win_rate_a - 1.0)
+        elif h2h_df is not None and not h2h_df.empty:
             from src.features.historical_features import compute_h2h_record
             h2h = compute_h2h_record(h2h_df, team_a, team_b)
             h2h_score = h2h_advantage_score(h2h, team_a)
+        else:
+            h2h_score = 0.0
 
         tactical_adv = compute_tactical_advantage(
             elo_diff,

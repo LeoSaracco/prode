@@ -61,12 +61,22 @@ def load_prediction_runtime() -> PredictionRuntime:
     ensemble.load_confidence_thresholds()
     ensemble.load_calibrators()
 
+    h2h_stats = None
+    h2h_path = MODELS_DIR / "inference_h2h_stats.json"
+    if h2h_path.exists():
+        import json as _json
+        try:
+            with open(h2h_path, encoding="utf-8") as f:
+                h2h_stats = _json.load(f)
+        except Exception:
+            pass
+
     two_stage = TwoStageClassifier().load()
     confederation = ConfederationModels().load()
 
     return PredictionRuntime(
         ensemble=ensemble,
-        feature_builder=FeatureBuilder(elo_df=elo_df, team_profiles_df=team_profiles_df),
+        feature_builder=FeatureBuilder(elo_df=elo_df, team_profiles_df=team_profiles_df, h2h_stats=h2h_stats),
         poisson=poisson,
         two_stage=two_stage if two_stage.is_fitted_ else None,
         confederation=confederation if confederation.is_fitted_ else None,

@@ -268,11 +268,11 @@ class NationalTeamTrainingFeatureBuilder:
             op_a - op_b,
             ds_a - ds_b,
             compute_squad_depth_from_market_value(team_a) - compute_squad_depth_from_market_value(team_b),
-            consistency,
+            0.0,  # consistency_diff — not available in simple builder
             wc_a - wc_b,
             mv_a - mv_b,
             tactical_adv,
-            0.0,
+            0.0,  # h2h_advantage — not available in simple builder
             0.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 0.0,
         ], dtype=np.float32)
@@ -308,6 +308,7 @@ class RollingNationalTeamFeatureBuilder:
         self.statsbomb_xg = self._statsbomb_lookup(statsbomb_xg_df)
         self.initial_elo = self._initial_elo_lookup(initial_elo_df)
         self.state: dict[str, dict] = {}
+        self.h2h: dict[tuple[str, str], list[float]] = {}
 
     def _statsbomb_lookup(self, statsbomb_xg_df: pd.DataFrame | None) -> dict[str, dict]:
         if statsbomb_xg_df is None or statsbomb_xg_df.empty or "team" not in statsbomb_xg_df.columns:
@@ -375,6 +376,8 @@ class RollingNationalTeamFeatureBuilder:
 
         elo_hist = st["elo_history"]
         elo_momentum = float(st["elo"] - elo_hist[-6]) if len(elo_hist) >= 6 else 0.0
+        recent_pts = st["points"][-5:]
+        consistency = float(np.std(recent_pts)) if len(recent_pts) >= 2 else 0.0
         return {
             "xg_pg": max(0.35, min(2.8, gf)),
             "xga_pg": max(0.35, min(2.8, ga)),
@@ -385,7 +388,14 @@ class RollingNationalTeamFeatureBuilder:
             "days_since_last_match": days_since,
             "fifa_rank": _rank_before(self.rank_lookup, team, date),
             "games": n,
+            "consistency": consistency,
         }
+
+    def _h2h_advantage(self, team_a: str, team_b: str) -> float:
+        results = self.h2h.get((team_a, team_b), [])
+        if len(results) < 3:
+            return 0.0
+        return float(2.0 * np.mean(results[-10:]) - 1.0)  # -1=always lost, 0=balanced, +1=always won
 
     def build_match_features(self, row: pd.Series, reverse: bool = False) -> np.ndarray:
         team_a = str(row["team_b"] if reverse else row["team_a"])
@@ -419,11 +429,11 @@ class RollingNationalTeamFeatureBuilder:
             op_a - op_b,
             ds_a - ds_b,
             compute_squad_depth_from_market_value(team_a) - compute_squad_depth_from_market_value(team_b),
-            float(sa["form_5"] - sb["form_5"]),
+            float(sb["consistency"] - sa["consistency"]),  # positive = A more consistent
             wc_a - wc_b,
             mv_a - mv_b,
             tactical_adv,
-            0.0,
+            self._h2h_advantage(team_a, team_b),
             is_tournament,
             is_wc,
             is_qualifier,
@@ -459,6 +469,10 @@ class RollingNationalTeamFeatureBuilder:
         st_b["elo"] = new_elo_b
         st_a["elo_history"].append(new_elo_a)
         st_b["elo_history"].append(new_elo_b)
+
+        result_a = 1.0 if goals_a > goals_b else (0.5 if goals_a == goals_b else 0.0)
+        self.h2h.setdefault((team_a, team_b), []).append(result_a)
+        self.h2h.setdefault((team_b, team_a), []).append(1.0 - result_a)
 
     def build_split_matrices(
         self,
@@ -520,8 +534,19 @@ class RollingNationalTeamFeatureBuilder:
                 "days_since_last_match": p["days_since_last_match"],
                 "fifa_rank": p["fifa_rank"],
                 "games": p["games"],
+                "consistency": p["consistency"],
             })
         return pd.DataFrame(rows)
+
+    def h2h_stats_for_inference(self) -> dict[str, dict]:
+        out = {}
+        for (ta, tb), results in self.h2h.items():
+            if len(results) >= 3:
+                out[f"{ta}||{tb}"] = {
+                    "n": len(results),
+                    "win_rate": round(float(np.mean(results[-10:])), 4),
+                }
+        return out
 
 
 def _apply_temperature(probs: np.ndarray, T: float) -> np.ndarray:
@@ -638,6 +663,9 @@ class ModelTrainer:
         latest_profiles = feature_builder.latest_profiles()
         if not latest_profiles.empty:
             latest_profiles.to_json(MODELS_DIR / "inference_team_profiles.json", orient="records", indent=2)
+        h2h_stats = feature_builder.h2h_stats_for_inference()
+        with open(MODELS_DIR / "inference_h2h_stats.json", "w", encoding="utf-8") as f:
+            json.dump(h2h_stats, f, indent=2)
 
         sample_weight = _compute_recency_weights(train_df)
 
