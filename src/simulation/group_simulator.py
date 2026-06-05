@@ -145,7 +145,7 @@ class GroupSimulator:
         positions = {t: [0, 0, 0, 0] for t in teams}  # [1st, 2nd, 3rd, 4th]
         pts_accum = {t: 0 for t in teams}
         gd_accum = {t: 0 for t in teams}
-        rng = np.random.default_rng(seed=2026)
+        rng = np.random.default_rng()
 
         for _ in range(n_sims):
             table = _simulate_single_group(teams, match_models, rng)

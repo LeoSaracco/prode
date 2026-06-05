@@ -89,20 +89,27 @@ def _outcome(r):
     return "draw"
 
 def _scoreline(r, outcome):
+    import numpy as np
     for s in r.get("top_scorelines", []):
         ga = int(s.get("goals_a", 0) if isinstance(s, dict) else s[0])
         gb = int(s.get("goals_b", 0) if isinstance(s, dict) else s[1])
         if outcome == "win_a" and ga > gb: return ga, gb
         if outcome == "win_b" and gb > ga: return ga, gb
         if outcome == "draw" and ga == gb: return ga, gb
-    xa, xb = float(r.get("xg_a", 1.3)), float(r.get("xg_b", 1.1))
-    if outcome == "win_a":
-        ga = max(1, round(xa)); gb = max(0, min(ga - 1, round(xb)))
-    elif outcome == "win_b":
-        gb = max(1, round(xb)); ga = max(0, min(gb - 1, round(xa)))
-    else:
-        s = max(0, round((xa + xb) / 2)); ga = gb = s
-    return ga, gb
+    # Fallback: sample from Poisson conditioned on the outcome
+    xa = max(float(r.get("xg_a", 1.3)), 0.4)
+    xb = max(float(r.get("xg_b", 1.1)), 0.4)
+    rng = np.random.default_rng()
+    for _ in range(40):
+        ga, gb = int(rng.poisson(xa)), int(rng.poisson(xb))
+        if outcome == "win_a" and ga > gb: return ga, gb
+        if outcome == "win_b" and gb > ga: return ga, gb
+        if outcome == "draw" and ga == gb: return ga, gb
+    # Last resort: deterministic but outcome-consistent
+    if outcome == "win_a": return max(1, round(xa)), max(0, round(xb) - 1)
+    if outcome == "win_b": return max(0, round(xa) - 1), max(1, round(xb))
+    v = max(0, round((xa + xb) / 2))
+    return v, v
 
 def _match_summary(r, team_a, team_b):
     """Devuelve (titular, marcador, xg_txt, conf, color_conf)."""

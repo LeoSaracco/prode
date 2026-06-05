@@ -59,6 +59,8 @@ class EnsemblePredictor:
         for name, acc in accuracies.items():
             if name == "elo":
                 weights[name] = 0.10
+            elif name == "poisson":
+                weights[name] = 0.07  # fixed — orthogonal signal, not accuracy-driven
             else:
                 weights[name] = max(0.05, acc - 0.33)
 
@@ -122,7 +124,7 @@ class EnsemblePredictor:
 
         top_scorelines = []
         if self.poisson:
-            top_scorelines = self.poisson.get_top_scorelines(team_a, team_b, n=5)
+            top_scorelines = self.poisson.get_top_scorelines(team_a, team_b, n=15)
 
         from src.features.risk_features import compute_upset_probability
         underdog_elo = min(elo_a, elo_b)
@@ -169,6 +171,12 @@ class EnsemblePredictor:
         probs["lgbm"] = self._safe_predict(self.lgbm, x, team_a, team_b)
         probs["catboost"] = self._safe_predict(self.catboost, x, team_a, team_b)
         probs["elo"] = self.elo.predict_proba(team_a, team_b) if self.elo else (0.4, 0.25, 0.35)
+        if self.poisson and getattr(self.poisson, "is_fitted_", False):
+            try:
+                # predict_outcome_probs returns (p_win_a, p_draw, p_win_b)
+                probs["poisson"] = self.poisson.predict_outcome_probs(team_a, team_b)
+            except Exception:
+                pass
         return probs
 
     def _safe_predict(
@@ -184,7 +192,7 @@ class EnsemblePredictor:
             return (0.40, 0.25, 0.35)
 
     def _default_weights(self) -> dict[str, float]:
-        return {"rf": 0.30, "xgb": 0.20, "lgbm": 0.20, "catboost": 0.20, "elo": 0.10}
+        return {"rf": 0.28, "xgb": 0.18, "lgbm": 0.19, "catboost": 0.19, "elo": 0.09, "poisson": 0.07}
 
     def _compute_confidence(self, max_prob: float, elo_diff: float) -> str:
         if self.confidence_thresholds:

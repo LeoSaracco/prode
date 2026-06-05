@@ -21,10 +21,11 @@ Flujo principal:
 1. Recolectar resultados internacionales, Elo y rankings FIFA.
 2. Ordenar partidos cronologicamente.
 3. Construir features rolling sin mirar partidos futuros.
-4. Entrenar modelos base.
-5. Calcular pesos del ensemble en validation.
-6. Evaluar una sola vez en test cronologico.
-7. Guardar modelos, pesos, umbrales de confianza y metadata.
+4. Entrenar modelos base en paralelo (RF, XGB, LGBM, CatBoost).
+5. Entrenar Poisson sobre datos de train; evaluar W/D/L implicito en validation.
+6. Calcular pesos del ensemble en validation.
+7. Evaluar una sola vez en test cronologico.
+8. Guardar modelos, pesos, umbrales de confianza y metadata.
 
 Componentes:
 
@@ -47,12 +48,12 @@ El modelo usa 21 features por partido:
 | `form_5_diff` | Diferencia de forma reciente basada en ultimos partidos previos. |
 | `offensive_power_diff` | Diferencia de potencia ofensiva derivada de xG. |
 | `defensive_stability_diff` | Diferencia de estabilidad defensiva. |
-| `squad_depth_diff` | Diferencia aproximada de profundidad/calidad de plantel. |
-| `consistency_diff` | Diferencia de regularidad reciente. |
+| `squad_depth_diff` | Calidad del plantel desde ratings FIFA reales (avg_overall, max_overall, depth_ratio, shooting, defending). Reemplaza el valor de mercado. |
+| `consistency_diff` | Diferencia de regularidad reciente (std de resultados). |
 | `wc_history_diff` | Diferencia de historia/rendimiento mundialista. |
 | `market_value_diff` | Diferencia de valor de mercado relativo. |
 | `tactical_advantage` | Feature combinada de ventaja tactica. |
-| `h2h_advantage` | Historial directo; hoy queda neutral si no hay dato confiable. |
+| `h2h_advantage` | Historial directo rolling (min 3 partidos; 0 si no hay dato). |
 | `is_tournament` | 1 si es partido competitivo/torneo, 0 si amistoso. |
 | `is_wc` | 1 si es Mundial. |
 | `is_qualifier` | 1 si es clasificatorio. |
@@ -78,33 +79,36 @@ inflada, pero representa mejor como se comportara el modelo ante partidos reales
 
 ## Modelos
 
-Modelos base:
+Modelos base (6):
 
 - RandomForest
 - XGBoost
 - LightGBM
 - CatBoost
-- Elo baseline
+- Elo baseline (Bradley-Terry puro)
+- Poisson (W/D/L implicito desde distribucion bivariate de goles)
 
 Ensemble principal:
 
 ```text
-RF + XGB + LGBM + CatBoost + Elo -> accuracy-weighted voting
+RF + XGB + LGBM + CatBoost + Elo + Poisson -> accuracy-weighted voting
 ```
 
 Los pesos se calculan con accuracy en validation:
 
 ```text
-peso_modelo = max(0.05, accuracy_val - 0.33)
+peso_RF/XGB/LGBM/CatBoost = max(0.05, accuracy_val - 0.33)
+peso_elo    = 0.10  (fijo, baseline estable)
+peso_poisson = 0.07 (fijo, senal ortogonal de distribucion de goles)
 ```
 
 Luego se normalizan para sumar 1.0.
 
-Modelos auxiliares:
+Modelos auxiliares (diagnostico, no integrados al ensemble):
 
 - `TwoStageClassifier`: separa empate/no empate y luego win/loss.
 - `ConfederationModels`: RandomForest por pares de confederaciones.
-- `PoissonGoalModel`: estima xG y marcadores probables.
+- `PoissonGoalModel`: tambien usado para xG, marcadores probables y simulacion del torneo.
 
 ## Metricas Explicadas
 
@@ -123,8 +127,8 @@ Por azar puro, la referencia aproximada es 33.3%.
 | `accuracy_xgb` | Acierto usando solo XGBoost. |
 | `accuracy_lgbm` | Acierto usando solo LightGBM. |
 | `accuracy_catboost` | Acierto usando solo CatBoost. |
-| `accuracy_voting` | Acierto del ensemble principal. Es la metrica global mas importante. |
-| `accuracy_two_stage` | Acierto del modelo auxiliar de dos etapas. |
+| `accuracy_voting` | Acierto del ensemble de 6 modelos. Es la metrica global mas importante. |
+| `accuracy_two_stage` | Acierto del modelo auxiliar de dos etapas. Diagnostico. |
 | `accuracy_confederation` | Acierto del modelo especializado por confederacion. |
 | `accuracy_high_confidence` | Acierto solo donde la prediccion fue marcada `ALTO`. |
 | `accuracy_high_elo_diff_200` | Acierto en partidos con diferencia Elo de al menos 200 puntos. |
@@ -136,6 +140,7 @@ Otras metricas:
 - `log_loss_voting`: calidad de las probabilidades; mas bajo es mejor.
 - `val_accuracies`: aciertos por modelo en validation.
 - `voting_weights`: peso final de cada modelo en el ensemble.
+- `temperature_scaling`: factor T aplicado post-ensemble. T>1 suaviza, T<1 sharpens. T~1 indica probs bien calibradas.
 
 ## Confianza
 
@@ -145,47 +150,35 @@ La etiqueta de confianza se basa en la probabilidad maxima del ensemble:
 - `MEDIO`: probabilidad maxima >= `medium_prob` o senal Elo suficiente.
 - `BAJO`: el modelo ve el partido como incierto.
 
-Los umbrales actuales se guardan en `models/confidence_thresholds.json`:
-
-```json
-{
-  "high_prob": 0.70,
-  "medium_prob": 0.65,
-  "target_high_accuracy": 0.75
-}
-```
-
-Importante: `ALTO` no significa seguro. En la corrida actual, `ALTO` acerto
-69.70% en test sobre 33 partidos.
+Los umbrales actuales se guardan en `models/confidence_thresholds.json`.
+En el ultimo entrenamiento, `ALTO` acerto **82.5%** en test sobre 40 partidos.
+Target aspiracional de >80% alcanzado en Fase H.
 
 ## Estado Real Actual
 
-Ultimo entrenamiento: `2026-06-04T12:14:51` (Fase G).
+Ultimo entrenamiento: `2026-06-05T10:46:10` (Fase H).
 
 | Campo | Valor |
 |---|---:|
-| Partidos fuente | 3,221 |
-| Train samples | 4,508 |
-| Validation samples | 483 |
-| Test samples | 484 |
-| FIFA rankings rows | 14,853 |
-| Kaggle Elo rows | 1,991 |
-| `accuracy_voting` | 50.62% |
-| `accuracy_catboost` | 51.65% |
-| `accuracy_high_confidence` | 70.73% (n=41) |
-| `accuracy_high_elo_diff_200` | 61.95% (n=113) |
-| `log_loss_voting` (calibrado) | 1.0337 |
-| `log_loss_uncalibrated` | 1.0364 |
-| `temperature_scaling` | T=1.0447 |
+| Partidos fuente | 8,273 |
+| Train samples | 11,582 |
+| Validation samples | 1,241 |
+| Test samples | 1,241 |
+| `accuracy_voting` | 51.25% |
+| `accuracy_catboost` | 50.93% |
+| `accuracy_high_confidence` | **82.50%** (n=40) |
+| `accuracy_high_elo_diff_200` | 65.52% (n=290) |
+| `log_loss_voting` (calibrado) | 1.0003 |
+| `log_loss_uncalibrated` | 1.0002 |
+| `temperature_scaling` | T=0.9935 |
 | `recency_weighted_training` | True |
+| Ensemble | RF+XGB+LGBM+CatBoost+Elo+Poisson |
 
 Targets aspiracionales:
 
-- Global W/D/L: >55%.
-- Alta confianza: >80%.
-- Delta Elo >200: >85%.
-
-Estos targets todavia no estan alcanzados. Proximo objetivo: >52% con fix de h2h y datos Kaggle.
+- Global W/D/L: >55% (actual: 51.25%).
+- Alta confianza: >80% (alcanzado: 82.5%).
+- Delta Elo >200: >85% (actual: 65.52%).
 
 ## Operacion
 
@@ -197,6 +190,7 @@ python scripts/download_enriched_data.py
 python scripts/train_models.py
 python scripts/generate_report.py
 python cli.py predict "Argentina" "Portugal"
+python cli.py simulate-tournament
 uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -212,10 +206,9 @@ Tuning de hiperparametros (opcional, ~3-4 min):
 python scripts/tune_hyperparams.py --trials 50
 ```
 
-## Proximas Mejoras Recomendadas (Fase H)
+## Proximas Mejoras Recomendadas (Fase I)
 
-- **Alta prioridad**: arreglar `h2h_advantage` (siempre 0) y `consistency_diff` (duplicado de `form_5_diff`).
-- **Alta prioridad**: fix collector Kaggle match features para parsear columnas `_home_team`/`_away_team`/`_date`.
+- **Alta prioridad**: calibrar xG rolling por calidad del rival (partidos contra equipos debiles no deben inflar el xG del modelo tanto como partidos contra fuertes).
 - **Media prioridad**: correr Optuna 50 trials con objetivo compuesto ya implementado.
-- **Media prioridad**: incorporar probabilidades Poisson al ensemble como modelo 6.
-- **Baja prioridad**: Docker, deploy, tests automatizados de no-leakage.
+- **Media prioridad**: implementar tabla exacta FIFA para cruces de 8 mejores terceros (495 combinaciones posibles).
+- **Baja prioridad**: Docker, deploy, tests automatizados de no-leakage, fix `test_report_generation.py`.

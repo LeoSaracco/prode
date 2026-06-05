@@ -147,7 +147,7 @@ start "prode-ML API" cmd /c "cd /d %CD% && venv\Scripts\python.exe -m uvicorn ap
 timeout /t 3 /nobreak >nul
 
 :: Iniciar Frontend en background
-start "prode-ML Frontend" cmd /c "cd /d %CD%\frontend && npm run dev -- --host 127.0.0.1 --port 5173"
+start "prode-ML Frontend" cmd /c "cd /d %CD%\frontend && npm install && npm run dev -- --host 127.0.0.1 --port 5173"
 
 echo.
 echo Todo listo. Abriendo navegador...

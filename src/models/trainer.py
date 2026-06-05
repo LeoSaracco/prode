@@ -21,7 +21,7 @@ from src.features.elo_features import compute_elo_win_probability
 from src.features.feature_builder import MATCH_FEATURE_COLUMNS
 from src.features.historical_features import compute_world_cup_history_score
 from src.features.risk_features import compute_tactical_advantage
-from src.features.squad_features import compute_squad_depth_from_market_value
+from src.features.squad_features import compute_squad_depth_from_market_value, compute_squad_quality
 from src.data.national_team_proxy import FALLBACK_STATS, MARKET_VALUE_EUR_M
 from src.models.catboost_model import CatBoostOutcomeClassifier
 from src.models.confederation_models import ConfederationModels
@@ -267,7 +267,7 @@ class NationalTeamTrainingFeatureBuilder:
             form_diff,
             op_a - op_b,
             ds_a - ds_b,
-            compute_squad_depth_from_market_value(team_a) - compute_squad_depth_from_market_value(team_b),
+            compute_squad_quality(team_a) - compute_squad_quality(team_b),
             0.0,  # consistency_diff — not available in simple builder
             wc_a - wc_b,
             mv_a - mv_b,
@@ -428,7 +428,7 @@ class RollingNationalTeamFeatureBuilder:
             float(sa["form_5"] - sb["form_5"]),
             op_a - op_b,
             ds_a - ds_b,
-            compute_squad_depth_from_market_value(team_a) - compute_squad_depth_from_market_value(team_b),
+            compute_squad_quality(team_a) - compute_squad_quality(team_b),
             float(sb["consistency"] - sa["consistency"]),  # positive = A more consistent
             wc_a - wc_b,
             mv_a - mv_b,
@@ -675,6 +675,7 @@ class ModelTrainer:
             x_test=x_test, y_test=y_test,
             poisson_match_df=train_matches,
             train_matches_df=train_df,
+            val_matches_df=val_matches,
             test_matches_df=test_df,
             sample_weight=sample_weight,
             metadata_extra={
@@ -754,6 +755,7 @@ class ModelTrainer:
         y_test: np.ndarray,
         poisson_match_df: pd.DataFrame,
         train_matches_df: pd.DataFrame | None = None,
+        val_matches_df: pd.DataFrame | None = None,
         test_matches_df: pd.DataFrame | None = None,
         sample_weight: np.ndarray | None = None,
         metadata_extra: dict | None = None,
@@ -830,6 +832,29 @@ class ModelTrainer:
         poisson.save()
         logger.info("Poisson listo en %.1fs.", perf_counter() - t0)
 
+        def _poisson_probs_batch(matches_df: pd.DataFrame | None) -> np.ndarray | None:
+            """Returns (N, 3) array in [L=0, D=1, W=2] order for each match."""
+            if matches_df is None or matches_df.empty:
+                return None
+            rows = []
+            for _, row in matches_df.iterrows():
+                try:
+                    p_win_a, p_draw, p_win_b = poisson.predict_outcome_probs(
+                        str(row.get("team_a", "")), str(row.get("team_b", ""))
+                    )
+                    rows.append([p_win_b, p_draw, p_win_a])  # label order: L=0, D=1, W=2
+                except Exception:
+                    rows.append([0.38, 0.24, 0.38])
+            if not rows:
+                return None
+            arr = np.array(rows, dtype=np.float32)
+            s = arr.sum(axis=1, keepdims=True)
+            s[s == 0] = 1.0
+            return arr / s
+
+        poisson_val_probs = _poisson_probs_batch(val_matches_df)
+        poisson_test_probs = _poisson_probs_batch(test_matches_df)
+
         model_order = [("rf", "rf"), ("xgb", "xgb"), ("lgbm", "lgbm"), ("catboost", "cb")]
         val_acc = {}
 
@@ -855,10 +880,17 @@ class ModelTrainer:
             else:
                 val_acc[metric_name] = 0.33
         val_acc["elo"] = float(accuracy_score(y_val, _elo_probs_batch(x_val[:, 0]).argmax(axis=1)))
+        if poisson_val_probs is not None and len(poisson_val_probs) == len(y_val):
+            val_acc["poisson"] = float(accuracy_score(y_val, poisson_val_probs.argmax(axis=1)))
+        else:
+            val_acc["poisson"] = 0.40  # synthetic fallback — gives weight ~0.07
 
         weights = {}
         for name in [m[0] for m in model_order] + ["elo"]:
             weights[name] = max(0.05, val_acc[name] - 0.33)
+        weights["elo"] = 0.10  # fixed baseline
+        if poisson_val_probs is not None and len(poisson_val_probs) == len(y_val):
+            weights["poisson"] = 0.07  # fixed — orthogonal signal from goal distribution
         total = sum(weights.values()) or 1.0
         weights = {k: v / total for k, v in weights.items()}
 
@@ -871,6 +903,8 @@ class ModelTrainer:
             else:
                 val_blend_probs += weights[metric_name] * np.tile([0.38, 0.24, 0.38], (len(y_val), 3))
         val_blend_probs += weights["elo"] * val_elo
+        if poisson_val_probs is not None and len(poisson_val_probs) == len(y_val):
+            val_blend_probs += weights["poisson"] * poisson_val_probs
         row_sums = val_blend_probs.sum(axis=1, keepdims=True)
         row_sums[row_sums == 0] = 1.0
         val_blend_probs /= row_sums
@@ -895,6 +929,8 @@ class ModelTrainer:
             else:
                 blend_probs += weights[metric_name] * np.tile([0.38, 0.24, 0.38], (len(y_test), 3))
         blend_probs += weights["elo"] * test_elo
+        if poisson_test_probs is not None and len(poisson_test_probs) == len(y_test):
+            blend_probs += weights["poisson"] * poisson_test_probs
         row_sums = blend_probs.sum(axis=1, keepdims=True)
         row_sums[row_sums == 0] = 1.0
         blend_probs /= row_sums
@@ -986,7 +1022,9 @@ class ModelTrainer:
             "n_high_elo_matches": int(high_elo_mask.sum()),
             "baseline_random": 0.333,
             "split_type": "time_series_chronological",
-            "ensemble_architecture": "RF+XGB+LGBM+CB+Elo -> accuracy-weighted voting",
+            "ensemble_architecture": "RF+XGB+LGBM+CB+Elo+Poisson -> accuracy-weighted voting",
+            "accuracy_poisson_val": round(val_acc.get("poisson", 0.0), 4),
+            "temperature_scaling": round(temperature, 4),
             "voting_weights": {k: round(v, 4) for k, v in weights.items()},
             "val_accuracies": {k: round(v, 4) for k, v in val_acc.items()},
             "tuned_hyperparameters": tuned,

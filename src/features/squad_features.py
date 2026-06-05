@@ -55,3 +55,50 @@ def compute_squad_depth_from_market_value(team: str) -> float:
         experience_factor=0.60 + (mv / MAX_MARKET_VALUE) * 0.30,
         market_value_eur_m=mv,
     )
+
+
+def compute_squad_quality_from_ratings(
+    avg_overall: float,
+    max_overall: float,
+    avg_shooting: float = 65.0,
+    avg_defending: float = 63.0,
+) -> float:
+    """
+    Score de calidad del plantel [0, 1] basado en ratings reales de jugadores.
+
+    - avg_overall: calidad media del plantel (FIFA ratings, rango ~60-88)
+    - max_overall: rating del mejor jugador (rango ~65-92)
+    - avg_shooting / avg_defending: calidad específica ofensiva/defensiva
+    - depth_ratio = avg/max: cuán equilibrado es el plantel (1=uniforme, <0.85=estrella-dependiente)
+    """
+    avg_norm  = min(max((avg_overall - 60.0) / 30.0, 0.0), 1.0)   # [60,90] → [0,1]
+    max_norm  = min(max((max_overall - 65.0) / 27.0, 0.0), 1.0)   # [65,92] → [0,1]
+    depth_ratio = avg_overall / max(max_overall, 1.0)               # robustez sin la estrella
+    sh_norm   = min(max((avg_shooting - 50.0) / 30.0, 0.0), 1.0)
+    df_norm   = min(max((avg_defending - 50.0) / 30.0, 0.0), 1.0)
+
+    return (
+        0.35 * avg_norm +
+        0.20 * max_norm +
+        0.25 * depth_ratio +
+        0.10 * sh_norm +
+        0.10 * df_norm
+    )
+
+
+def compute_squad_quality(team: str) -> float:
+    """
+    Score principal de calidad del plantel para un equipo.
+    Usa ratings FIFA si están disponibles; fallback a valor de mercado.
+    """
+    from src.data.national_team_proxy import load_player_ratings_from_kaggle
+    ratings = load_player_ratings_from_kaggle()
+    if team in ratings:
+        r = ratings[team]
+        return compute_squad_quality_from_ratings(
+            avg_overall=r["avg_overall"],
+            max_overall=r["max_overall"],
+            avg_shooting=r.get("avg_shooting", 65.0),
+            avg_defending=r.get("avg_defending", 63.0),
+        )
+    return compute_squad_depth_from_market_value(team)

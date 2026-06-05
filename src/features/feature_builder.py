@@ -11,7 +11,7 @@ from src.data.national_team_proxy import FALLBACK_STATS, MARKET_VALUE_EUR_M
 from src.features.elo_features import get_elo_rating, compute_elo_win_probability
 from src.features.attack_features import compute_offensive_power
 from src.features.defense_features import compute_defensive_stability
-from src.features.squad_features import compute_squad_depth_from_market_value
+from src.features.squad_features import compute_squad_depth_from_market_value, compute_squad_quality
 from src.features.historical_features import compute_world_cup_history_score, h2h_advantage_score
 from src.features.risk_features import (
     compute_consistency_score,
@@ -100,7 +100,7 @@ class FeatureBuilder:
 
         offensive_power = compute_offensive_power(xg_pg)
         defensive_stability = compute_defensive_stability(xga_pg, ppda)
-        squad_depth = compute_squad_depth_from_market_value(team)
+        squad_depth = compute_squad_quality(team)
         if profile is not None and "consistency" in profile and not pd.isna(profile.get("consistency")):
             consistency = float(profile.get("consistency"))
         else:

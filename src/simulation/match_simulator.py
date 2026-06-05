@@ -13,7 +13,7 @@ def simulate_match(
     Más rápido que loop con numba para uso interactivo.
     Retorna dict con probabilidades y estadísticas.
     """
-    rng = np.random.default_rng(seed=42)
+    rng = np.random.default_rng()
     goals_a = rng.poisson(lambda_a, n_sims)
     goals_b = rng.poisson(lambda_b, n_sims)
 
