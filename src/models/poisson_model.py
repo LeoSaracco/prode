@@ -212,6 +212,25 @@ class PoissonGoalModel:
                 candidates.append((i, j, float(matrix[i][j])))
         return sorted(candidates, key=lambda x: x[2], reverse=True)[:n]
 
+    def get_representative_scoreline(
+        self,
+        team_a: str,
+        team_b: str,
+        outcome: str,
+        neutral_venue: bool = True,
+    ) -> tuple[int, int, float] | None:
+        """Retorna un marcador compatible con el outcome y representativo del xG."""
+        from src.prediction_policy import representative_scoreline_for_outcome
+
+        matrix = self.predict_score_matrix(team_a, team_b, neutral_venue)
+        xg_a, xg_b = self.predict_goals(team_a, team_b, neutral_venue)
+        candidates = [
+            (i, j, float(matrix[i][j]))
+            for i in range(POISSON_MAX_GOALS + 1)
+            for j in range(POISSON_MAX_GOALS + 1)
+        ]
+        return representative_scoreline_for_outcome(candidates, outcome, xg_a, xg_b)
+
     def save(self, path: Path | None = None) -> None:
         import joblib
         p = path or MODELS_DIR / "poisson_model.pkl"

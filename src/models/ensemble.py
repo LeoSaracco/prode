@@ -20,6 +20,7 @@ from config.settings import (
     CONFIDENCE_MEDIUM_PROB, CONFIDENCE_MEDIUM_ELO_DIFF,
 )
 from src.features.elo_features import get_elo_rating
+from src.prediction_policy import enrich_prediction_result, predicted_outcome
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +124,7 @@ class EnsemblePredictor:
         confidence = self._compute_confidence(max_prob, elo_diff)
 
         top_scorelines = []
+        representative_scoreline = None
         if self.poisson:
             top_scorelines = self.poisson.get_top_scorelines(team_a, team_b, n=15)
 
@@ -131,7 +133,7 @@ class EnsemblePredictor:
         favorite_elo = max(elo_a, elo_b)
         upset_risk = compute_upset_probability(favorite_elo, underdog_elo)
 
-        return {
+        result = {
             "team_a": team_a,
             "team_b": team_b,
             "p_win_a": round(p_win, 4),
@@ -150,6 +152,18 @@ class EnsemblePredictor:
                 for name in w
             },
         }
+        if self.poisson:
+            try:
+                representative_scoreline = self.poisson.get_representative_scoreline(
+                    team_a,
+                    team_b,
+                    predicted_outcome(result),
+                )
+            except Exception:
+                representative_scoreline = None
+        if representative_scoreline is not None:
+            result["representative_scoreline"] = representative_scoreline
+        return enrich_prediction_result(result)
 
     def predict_voting_probs(self, base_probs_dict: dict[str, np.ndarray]) -> np.ndarray:
         w = self.voting_weights or self._default_weights()

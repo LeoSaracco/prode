@@ -9,7 +9,7 @@ Poisson para marcadores y simulaciones Monte Carlo.
 - **Datos de entrenamiento**: 8,273 partidos internacionales (dataset ampliado con Kaggle match features).
 - **Split temporal**: 70% train, 15% validation, 15% test, en orden cronologico.
 - **Features sin mirar el futuro**: `rolling_no_future_leakage`.
-- **21 features**: Elo, forma reciente, goles a favor/en contra, ranking FIFA, descanso, torneo/localia, historia mundialista y calidad de plantel desde ratings FIFA de jugadores.
+- **27 features**: Elo, forma reciente, xG/xGA, ranking FIFA, descanso, torneo/localia, historia mundialista, perfiles WC recientes y calidad de plantel desde ratings FIFA de jugadores.
 - **Modelos base**: RandomForest, XGBoost, LightGBM, CatBoost, Elo y Poisson (6 modelos).
 - **Ensemble principal**: weighted voting con pesos aprendidos en validation. Poisson con peso fijo 0.08 como senal ortogonal.
 - **Calibracion probabilistica**: temperature scaling post-ensemble, ajustado en validation.
@@ -17,7 +17,8 @@ Poisson para marcadores y simulaciones Monte Carlo.
 - **Modelos auxiliares**: TwoStage (diagnostico, no integrado al ensemble) y ConfederationModels.
 - **Squad quality**: feature de calidad del plantel basada en ratings FIFA reales (avg_overall, max_overall, depth_ratio) desde `player_aggregates.csv`. Reemplaza el valor de mercado como proxy.
 - **Simulacion de torneo**: bracket oficial WC2026 con cruces de pod predefinidos. Mejores terceros seleccionados por rendimiento (pts > gd > gf), no por Elo.
-- **Marcadores**: fallback con Poisson sampling condicionado al resultado predicho; sin marcadores deterministicos.
+- **Marcadores**: se conserva el marcador exacto modal (`exact_most_likely_scoreline`) y se comunica un marcador recomendado (`outcome_scoreline`) condicionado al resultado predicho y al volumen xG. Esto evita reportes tipo `GANA 0-0` y reduce el sesgo conservador a `1-0`.
+- **PDF analitico**: el reporte incluye graficos de candidatos al titulo, distribucion de marcadores, xG vs confianza, ataques con mayor xG, defensas mas solidas/vulnerables, pesos del ensemble y accuracy por umbral de confianza.
 - **Runtime**: CLI, API FastAPI, frontend React/Vite y PDF.
 
 Metricas reales: `models/model_metadata.json`.
@@ -125,6 +126,23 @@ El simulador usa el bracket oficial WC2026:
 - **Mejores terceros por rendimiento**: pts > gd > gf, no por Elo.
 - **Arbol fijo**: R16, QF, SF y Final siguen posiciones predefinidas. No se baraja entre rondas.
 - **Conteos por ronda**: cada columna de probabilidad representa "llego a esa ronda" (32/16/8/4/2/1 equipos).
+
+## Reporte PDF Y Marcadores
+
+El PDF se genera con datos actuales de `models/model_metadata.json` y `MATCH_FEATURE_COLUMNS`, por lo que el conteo de features se muestra dinamicamente. En la corrida actual el reporte dice **27 variables**.
+
+Campos de marcador:
+
+- `exact_most_likely_scoreline`: modo puro de la matriz Poisson/Dixon-Coles, sin forzar compatibilidad con el outcome del clasificador.
+- `outcome_scoreline` / `most_likely_scoreline`: marcador recomendado para comunicar. Debe ser compatible con el resultado predicho y representativo del xG total, del xG de cada equipo y de la debilidad defensiva del rival.
+
+Validacion manual actual sobre los 72 partidos de fase de grupos:
+
+- Marcadores recomendados observados: `1-0`, `2-0`, `0-1`, `2-1`, `1-1`, `0-2`, `1-2`, `0-0`, `3-0`.
+- Partidos con mas de 2 goles recomendados: 10/72.
+- Promedio de goles recomendados: 1.60; promedio de xG total: 1.87.
+- Ataques con mayor xG promedio: England, Germany, Spain, Brazil, Argentina.
+- Defensas mas vulnerables por xGA permitido: Panama, New Zealand, Ecuador, Cape Verde, Jordan.
 
 ## Uso Rapido
 

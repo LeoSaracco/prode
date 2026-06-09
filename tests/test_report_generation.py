@@ -1,6 +1,6 @@
 import pandas as pd
 
-from scripts.generate_report import _match_row, _pdf_text, _tournament_section
+from scripts.generate_report import _match_row, _metadata_feature_count, _pdf_text, _tournament_section
 
 
 class FakePDF:
@@ -40,6 +40,19 @@ def _result(top_scorelines):
 def test_report_scoreline_tuple_and_dict():
     _match_row(FakePDF(), "A", "B", _result([(1, 0, 0.18)]))
     _match_row(FakePDF(), "A", "B", _result([{"goals_a": 1, "goals_b": 0, "probability": 0.18}]))
+
+
+def test_report_winner_summary_does_not_use_nil_nil():
+    pdf = FakePDF()
+    _match_row(FakePDF(), "A", "B", _result([(0, 0, 0.20), (2, 0, 0.14), (1, 0, 0.13)]))
+    _match_row(pdf, "A", "B", _result([(0, 0, 0.20), (2, 0, 0.14), (1, 0, 0.13)]))
+
+    assert "A GANA | 0-0" not in pdf.text[0]
+    assert "A GANA | 2-0" in pdf.text[0]
+
+
+def test_report_feature_count_uses_metadata_value():
+    assert _metadata_feature_count({"n_features": 27}) == 27
 
 
 def test_pdf_text_is_helvetica_compatible():

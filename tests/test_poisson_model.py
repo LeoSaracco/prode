@@ -65,3 +65,16 @@ def test_top_scoreline_compatible_with_reasonable_xg():
     assert prob > 0
     assert abs(goals_a - xg_a) <= 2
     assert abs(goals_b - xg_b) <= 2
+
+
+def test_representative_scoreline_conditions_on_outcome_and_xg_volume():
+    model = PoissonGoalModel()
+    model.attack_ = {"A": 0.8, "B": 0.0}
+    model.defense_ = {"A": 0.4, "B": -0.2}
+    model.is_fitted_ = True
+
+    goals_a, goals_b, prob = model.get_representative_scoreline("A", "B", "win_a")
+
+    assert goals_a > goals_b
+    assert goals_a >= 2
+    assert prob > 0

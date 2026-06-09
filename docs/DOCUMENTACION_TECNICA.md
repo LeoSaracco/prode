@@ -296,7 +296,9 @@ Prefijo base: `http://localhost:8000`
     "team_b": 1.21
   },
   "confidence": "MEDIO",
-  "most_likely_scoreline": { "goals_a": 1, "goals_b": 1, "probability": 0.0912 },
+  "most_likely_scoreline": { "goals_a": 2, "goals_b": 1, "probability": 0.0834 },
+  "outcome_scoreline": { "goals_a": 2, "goals_b": 1, "probability": 0.0834 },
+  "exact_most_likely_scoreline": { "goals_a": 1, "goals_b": 1, "probability": 0.0912 },
   "top_scorelines": [
     { "goals_a": 1, "goals_b": 1, "probability": 0.0912 },
     { "goals_a": 2, "goals_b": 1, "probability": 0.0834 }
@@ -632,7 +634,7 @@ erDiagram
     KAGGLE_MATCH_FEATURES ||--o{ TEAM_PROFILES : "enriquecen"
 ```
 
-### Vector de features de partido (21 dimensiones)
+### Vector de features de partido (27 dimensiones)
 
 Todas las features son **diferenciales** (valor del equipo A menos valor del equipo B),
 salvo las contextuales y la probabilidad Elo.
@@ -660,6 +662,21 @@ salvo las contextuales y la probabilidad Elo.
 | `elo_momentum_diff` | Diferencia de momentum Elo reciente |
 | `days_since_last_match_diff` | Diferencia de días sin jugar |
 | `rest_days_diff` | Diferencia de días de descanso |
+| `wc_recent_goal_balance_diff` | Diferencia de balance goleador reciente en Mundiales |
+| `wc_recent_win_rate_diff` | Diferencia de tasa de victorias reciente en Mundiales |
+| `wc_experience_diff` | Diferencia de experiencia mundialista acumulada |
+| `wc_knockout_depth_diff` | Diferencia de profundidad alcanzada en eliminatorias mundialistas |
+| `squad_market_value_diff` | Diferencia de valor estimado de plantel |
+| `fifa_points_pre_tournament_diff` | Diferencia de puntos FIFA previos al torneo |
+
+### Politica de marcadores comunicados
+
+El modelo mantiene dos lecturas de marcador:
+
+- `exact_most_likely_scoreline`: marcador modal puro de la matriz Poisson/Dixon-Coles.
+- `outcome_scoreline` / `most_likely_scoreline`: marcador recomendado para comunicacion. Se condiciona al resultado W/D/L predicho y se rankea por probabilidad, cercania a xG, total de goles esperado y debilidad defensiva implicita por xGA.
+
+Esto permite mostrar `2-0`, `2-1`, `1-2` o `3-0` cuando el volumen de xG lo justifica, sin cambiar las probabilidades 1X2 del ensemble.
 
 ### Modelos serializados
 
