@@ -26,6 +26,9 @@ export type MatchResult = {
     team_b: number;
   };
   confidence: string;
+  predicted_outcome: "win_a" | "draw" | "win_b";
+  outcome_scoreline: Scoreline | null;
+  exact_most_likely_scoreline: Scoreline | null;
   most_likely_scoreline: Scoreline | null;
   top_scorelines: Scoreline[];
   upset_risk: number;
@@ -65,7 +68,54 @@ export type TournamentRow = {
   p_finalist: number;
   p_champion: number;
   rank: number;
+  title_tier: "candidate" | "aspirant" | null;
 };
+
+// ── Calendar / Fixtures ─────────────────────────────────────────────────────
+
+export type FixturePrediction = {
+  date: string;
+  matchday: number;
+  group: string;
+  team_a: string;
+  team_b: string;
+  venue: string | null;
+  predicted_outcome: "win_a" | "draw" | "win_b";
+  outcome_scoreline: Scoreline | null;
+  win_a: number;
+  draw: number;
+  win_b: number;
+  confidence: string;
+  xg_a: number;
+  xg_b: number;
+};
+
+// ── Bracket ──────────────────────────────────────────────────────────────────
+
+export type BracketTeam = {
+  team: string;
+  prob: number;
+};
+
+export type BracketSlot = {
+  slot_index: number;
+  teams: BracketTeam[];
+  label: string | null;
+};
+
+export type BracketRound = {
+  round_name: string;
+  display: string;
+  slots: BracketSlot[];
+  feeds_from: number[][];
+};
+
+export type BracketResponse = {
+  n_sims: number;
+  rounds: BracketRound[];
+};
+
+// ── HTTP helpers ─────────────────────────────────────────────────────────────
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
@@ -108,5 +158,15 @@ export function simulateGroup(group: string, nSims = 5000) {
 export function simulateTournament(nSims = 2500, topN = 20) {
   return request<{ n_sims: number; results: TournamentRow[] }>(
     `/simulate/tournament?n_sims=${nSims}&top_n=${topN}`
+  );
+}
+
+export function fetchFixtures() {
+  return request<{ fixtures: FixturePrediction[] }>("/fixtures");
+}
+
+export function simulateTournamentBracket(nSims = 5000) {
+  return request<BracketResponse>(
+    `/simulate/tournament?n_sims=${nSims}&output=bracket`
   );
 }

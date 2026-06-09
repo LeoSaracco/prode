@@ -37,10 +37,21 @@ _ensemble = None
 _feature_builder = None
 _poisson = None
 _elo_df = None
+_predict_cache: dict[tuple[str, str], dict] = {}
+
+
+def _predict_for_simulation(team_a: str, team_b: str) -> dict:
+    key = (team_a, team_b)
+    if key in _predict_cache:
+        return _predict_cache[key]
+    x = _feature_builder.build_match_features(team_a, team_b)
+    result = _ensemble.predict(team_a, team_b, x, elo_source=_elo_dict if _elo_dict is not None else _elo_df)
+    _predict_cache[key] = result
+    return result
 
 
 def _load_models(silent: bool = False) -> bool:
-    global _models_loaded, _ensemble, _feature_builder, _poisson, _elo_df
+    global _models_loaded, _ensemble, _feature_builder, _poisson, _elo_df, _elo_dict
 
     if _models_loaded:
         return True
@@ -61,6 +72,9 @@ def _load_models(silent: bool = False) -> bool:
 
         cache = CacheManager()
         _elo_df = cache.load("elo_ratings")
+        _elo_dict = None
+        if _elo_df is not None and not _elo_df.empty and "team" in _elo_df.columns:
+            _elo_dict = dict(zip(_elo_df["team"], _elo_df["elo_rating"]))
         scaler_path = MODELS_DIR / "scaler.pkl"
         scaler = joblib.load(scaler_path) if scaler_path.exists() else None
 
@@ -169,7 +183,7 @@ def _do_simulate_group(group_name: str) -> None:
         from src.output.tournament_table import print_group_fixtures, print_group_table
         from config.settings import MC_ITERATIONS
 
-        sim = GroupSimulator(poisson_model=_poisson)
+        sim = GroupSimulator(poisson_model=_poisson, predictor=_predict_for_simulation)
         result = sim.simulate_group(gname, n_sims=MC_ITERATIONS)
         fixtures = sim.simulate_group_fixtures(gname, n_sims=MC_ITERATIONS)
         print_group_table(result, gname, MC_ITERATIONS)
@@ -189,7 +203,7 @@ def _do_simulate_tournament(top_n: int = 20) -> None:
         from src.output.tournament_table import print_tournament_forecast
         from config.settings import MC_ITERATIONS
 
-        sim = TournamentSimulator(poisson_model=_poisson)
+        sim = TournamentSimulator(poisson_model=_poisson, predictor=_predict_for_simulation)
         df = sim.simulate(n_sims=MC_ITERATIONS)
         print_tournament_forecast(df, MC_ITERATIONS, top_n=top_n)
     except Exception as e:

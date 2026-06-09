@@ -25,6 +25,14 @@ from src.prediction_policy import enrich_prediction_result, predicted_outcome
 logger = logging.getLogger(__name__)
 
 
+def _scorelines_from_matrix(matrix: np.ndarray, n: int = 15) -> list[tuple[int, int, float]]:
+    candidates = []
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            candidates.append((i, j, float(matrix[i][j])))
+    return sorted(candidates, key=lambda x: x[2], reverse=True)[:n]
+
+
 class EnsemblePredictor:
     """Weighted voting ensemble based on per-model validation accuracy."""
 
@@ -84,7 +92,7 @@ class EnsemblePredictor:
         team_a: str,
         team_b: str,
         feature_vector: np.ndarray,
-        elo_df=None,
+        elo_source=None,
     ) -> dict:
         model_vector = self._scale_features(feature_vector)
         base_probs = self._get_all_base_probs(model_vector, team_a, team_b)
@@ -114,19 +122,25 @@ class EnsemblePredictor:
                 pass
 
         xg_a, xg_b = (1.3, 1.1)
+        score_matrix: np.ndarray | None = None
         if self.poisson:
             xg_a, xg_b = self.poisson.predict_goals(team_a, team_b)
+            try:
+                score_matrix = self.poisson.predict_score_matrix(team_a, team_b)
+            except Exception:
+                score_matrix = None
 
-        elo_a = get_elo_rating(team_a, elo_df) if elo_df is not None else 1800
-        elo_b = get_elo_rating(team_b, elo_df) if elo_df is not None else 1800
+        from src.features.elo_features import get_elo_rating
+        elo_a = get_elo_rating(team_a, elo_source) if elo_source is not None else 1800
+        elo_b = get_elo_rating(team_b, elo_source) if elo_source is not None else 1800
         elo_diff = abs(elo_a - elo_b)
         max_prob = max(p_win, p_draw, p_loss)
         confidence = self._compute_confidence(max_prob, elo_diff)
 
         top_scorelines = []
         representative_scoreline = None
-        if self.poisson:
-            top_scorelines = self.poisson.get_top_scorelines(team_a, team_b, n=15)
+        if self.poisson and score_matrix is not None:
+            top_scorelines = _scorelines_from_matrix(score_matrix, n=15)
 
         from src.features.risk_features import compute_upset_probability
         underdog_elo = min(elo_a, elo_b)
@@ -152,12 +166,17 @@ class EnsemblePredictor:
                 for name in w
             },
         }
-        if self.poisson:
+        if self.poisson and score_matrix is not None:
             try:
-                representative_scoreline = self.poisson.get_representative_scoreline(
-                    team_a,
-                    team_b,
-                    predicted_outcome(result),
+                outcome = predicted_outcome(result)
+                from src.prediction_policy import representative_scoreline_for_outcome
+                candidates = [
+                    (i, j, float(score_matrix[i][j]))
+                    for i in range(score_matrix.shape[0])
+                    for j in range(score_matrix.shape[1])
+                ]
+                representative_scoreline = representative_scoreline_for_outcome(
+                    candidates, outcome, xg_a, xg_b
                 )
             except Exception:
                 representative_scoreline = None

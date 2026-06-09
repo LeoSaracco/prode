@@ -26,6 +26,9 @@ class MatchResult(BaseModel):
     probabilities: dict[str, float]
     expected_goals: dict[str, float]
     confidence: str
+    predicted_outcome: str
+    outcome_scoreline: Scoreline | None
+    exact_most_likely_scoreline: Scoreline | None
     most_likely_scoreline: Scoreline | None
     top_scorelines: list[Scoreline]
     upset_risk: float
@@ -91,8 +94,59 @@ class TournamentRow(BaseModel):
     p_finalist: float
     p_champion: float
     rank: int
+    title_tier: str | None = None
 
 
 class TournamentSimulationResponse(BaseModel):
     n_sims: int
     results: list[TournamentRow]
+
+
+# ── Fixtures / Calendar ──────────────────────────────────────────────────────
+
+
+class FixturePrediction(BaseModel):
+    date: str
+    matchday: int
+    group: str
+    team_a: str
+    team_b: str
+    venue: str | None
+    predicted_outcome: str
+    outcome_scoreline: Scoreline | None
+    win_a: float
+    draw: float
+    win_b: float
+    confidence: str
+    xg_a: float
+    xg_b: float
+
+
+class FixturesResponse(BaseModel):
+    fixtures: list[FixturePrediction]
+
+
+# ── Bracket / Tournament tree ────────────────────────────────────────────────
+
+
+class BracketTeam(BaseModel):
+    team: str
+    prob: float
+
+
+class BracketSlot(BaseModel):
+    slot_index: int
+    teams: list[BracketTeam]
+    label: str | None = None
+
+
+class BracketRound(BaseModel):
+    round_name: str
+    display: str
+    slots: list[BracketSlot]
+    feeds_from: list[list[int]]
+
+
+class BracketResponse(BaseModel):
+    n_sims: int
+    rounds: list[BracketRound]

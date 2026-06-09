@@ -25,17 +25,16 @@ def simulate_match(
     p_draw = draws / n_sims
     p_loss = wins_b / n_sims
 
-    # Distribución de marcadores
+    # Distribución de marcadores — vectorizado con numpy
     max_g = POISSON_MAX_GOALS
-    scoreline_counts: dict[tuple[int, int], int] = {}
-    for ga, gb in zip(goals_a, goals_b):
-        ga_c = min(int(ga), max_g)
-        gb_c = min(int(gb), max_g)
-        key = (ga_c, gb_c)
-        scoreline_counts[key] = scoreline_counts.get(key, 0) + 1
+    ga_clipped = np.clip(goals_a, 0, max_g).astype(np.int32)
+    gb_clipped = np.clip(goals_b, 0, max_g).astype(np.int32)
+    encoded = ga_clipped * (max_g + 1) + gb_clipped
+    unique, counts = np.unique(encoded, return_counts=True)
 
     top_scorelines = sorted(
-        [(k[0], k[1], v / n_sims) for k, v in scoreline_counts.items()],
+        [(int(idx // (max_g + 1)), int(idx % (max_g + 1)), float(c) / n_sims)
+         for idx, c in zip(unique, counts)],
         key=lambda x: x[2],
         reverse=True,
     )[:5]

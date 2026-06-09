@@ -13,15 +13,16 @@
 | F - Validacion ML | Completado | Voting 50.21% | Features rolling sin leakage, rankings FIFA, confianza calibrada. |
 | G - Calibracion y Recencia | Completado | Voting 50.62% | Temperature scaling, sample_weight por recencia, TwoStage fuera del reporte, Optuna con objetivo compuesto, Kaggle credentials. |
 | H - Features, Datos y Simulacion | Completado | Voting 51.25%, ALTO 82.5% | Poisson al ensemble, squad quality desde ratings FIFA, bracket oficial WC2026, seeds variables, FALLBACK_STATS diversificados. |
+| I - UX y Performance | Completado | Frontend 4 vistas, API cacheada | Calendario, bracket mirror, comparar partidos, spinner, pair_cache, elo_dict, score matrix unificada. |
 
 ## Estado Actual
 
 - CLI interactivo: implementado.
-- API REST FastAPI: implementada.
-- Frontend React/Vite: implementado.
+- API REST FastAPI: implementada (6 endpoints + `output=bracket`, `pair_cache`).
+- Frontend React/Vite: implementado (4 vistas: Prediccion, Calendario, Grupos, Torneo).
 - Grupos oficiales WC2026: implementados.
 - Reporte PDF: implementado.
-- Automatizacion local: `run_all.bat` (con `npm install` automatico para frontend).
+- Automatizacion local: `run_all.bat` y `start_solution.bat`.
 - Entrenamiento rolling sin leakage: implementado.
 - FIFA rankings historicos: collector reparado y cacheado.
 - Confidence thresholds: implementados.
@@ -30,6 +31,12 @@
 - Bracket oficial WC2026 con pods predefinidos y seleccion de terceros por rendimiento.
 - Marcadores Poisson-sampled (ya no deterministicos con round(xG)).
 - Seeds variables en simulaciones Monte Carlo.
+- **Calendario**: `GET /api/v1/fixtures` con fechas reales del fixture FIFA (72 partidos, resultados.csv).
+- **Bracket mirror**: diagrama simetrico de eliminacion directa (R32→SF←R32) con conectores diamante y badge de campeon.
+- **Comparar partidos**: prediccion dual lado a lado con auto-predict debounce.
+- **Spinner**: loading overlay con dual-ring CSS en todas las llamadas API (incluye carga inicial).
+- **Performance**: `pair_cache` cross-request en PredictionRuntime, `elo_dict` O(1), score matrix unica, skip SHAP/aux en simulacion, scoreline counting vectorizado con numpy, ThreadPoolExecutor en simulacion de torneo.
+- **Responsive**: 4 breakpoints (1200/1023/820/639/480), scroll horizontal en bracket, touch-action.
 
 Artefactos relevantes:
 
@@ -63,7 +70,55 @@ Notas:
 - El target de >80% en alta confianza fue alcanzado por primera vez en Fase H.
 - Las metricas son honestas: features rolling sin leakage, evaluacion unica en test cronologico.
 
-## Completado En Fase H (2026-06-05)
+## Completado En Fase I — UX y Performance (2026-06-09)
+
+### Backend — Nuevos Endpoints
+
+- **`GET /api/v1/fixtures`**: devuelve los 72 partidos de fase de grupos con fecha, grupo, venue, prediccion (outcome, scoreline, xG, confianza). Lee `data/raw/international/results.csv`, normaliza nombres con `resolve_team_name()`, calcula matchday por rango de fechas. Cachea predicciones en `runtime.pair_cache`.
+- **`GET /api/v1/simulate/tournament?output=bracket`**: nuevo parametro `output` que bifurca entre lista (`TournamentSimulationResponse`) y arbol (`BracketResponse` con 5 rondas: r32/r16/qf/sf/final, cada slot con equipos + probabilidades + `feeds_from`). Nuevo metodo `TournamentSimulator.simulate_bracket()` con slot occupancy tracking.
+
+### Backend — Optimizaciones de Performance
+
+- **`PredictionRuntime.pair_cache`**: cache cross-request que persiste en memoria del servidor. La primera llamada a un endpoint de simulacion o fixtures llena el cache con 72 predicciones (~5s). Requests subsiguientes son O(1) (~0s). Ubicado en `src/runtime.py:35-44`.
+- **`elo_dict`**: `load_prediction_runtime()` convierte `elo_df` a `dict[str, float]` al iniciar. `get_elo_rating()` acepta dict o DataFrame. Elimina scan lineal de pandas por cada predict. Ubicado en `src/runtime.py:51-53` y `src/features/elo_features.py:9-16`.
+- **`include_shap=False, include_aux=False`**: nuevos parametros en `predict_match()`. La simulacion y fixtures pasan `False` para evitar SHAP TreeExplainer y modelos auxiliares (two_stage, confederation). Ahorra ~40% por llamada. Ubicado en `src/runtime.py:99-118`.
+- **Score matrix unificada**: `EnsemblePredictor.predict()` computa `predict_score_matrix()` una sola vez y la reusa para `_scorelines_from_matrix()`, `top_scorelines`, y `get_representative_scoreline()`. Antes eran 3 llamadas independientes (300 evaluaciones PMF+Tau cada una). Helper `_scorelines_from_matrix()` en `src/models/ensemble.py:28-33`.
+- **Scoreline counting vectorizado**: `simulate_match()` reemplaza el for-loop Python de 100k iteraciones con `np.unique(encoded, return_counts=True)`. ~50x mas rapido. Ubicado en `src/simulation/match_simulator.py:28-36`.
+- **`ThreadPoolExecutor` en simulacion de torneo**: `TournamentSimulator.simulate()` divide `n_sims` en chunks y corre con `ThreadPoolExecutor` (max 4 workers). Cada worker tiene su propia instancia de `np.random.default_rng()`. Metodo refactorizado en `_sim_one_iteration()` + `_sim_chunk()`. Ubicado en `src/simulation/tournament_simulator.py`.
+
+### Frontend — Nuevas Vistas
+
+- **Calendario** (`view="calendar"`): timeline de fase de grupos con toggle "Por jornada" / "Por fecha". Agrupa fixtures en secciones colapsables con header sticky. Cada `FixtureCard` muestra fecha, grupo, equipos, marcador predicho, barra de probabilidades compacta, badge de confianza, xG. Consume `GET /api/v1/fixtures`. Ubicado en `main.tsx` (componentes `CalendarTimeline`, `FixtureCard`).
+- **Comparar partidos**: toggle `[Comparar]` en vista Prediccion. Duplica `TeamCombobox` + `PredictionPanel` lado a lado. Auto-predict con debounce de 600ms al cambiar cualquier equipo. `PredictionPanel` en modo `compact` (oculta SHAP features, reduce scorelines a top 3). Ubicado en `main.tsx`.
+- **Bracket mirror**: diagrama simetrico de eliminacion directa. Layout:
+  ```
+  Rama izquierda: R32(8) → R16(4) → QF(2) → SF(1)
+  Centro: 🏆 CAMPEON
+  Rama derecha: SF(1) → QF(2) → R16(4) → R32(8)
+  ```
+  Componentes: `BracketTree` → `BracketRoundColumn` → `BracketMatch` (2 `BracketTeamRow` + conector) → `ChampionBadge`. Conectores estilo grapa industrial con linea + diamante `◆` rotado 45°. Colores: gris `#444` (R32→QF), granate `#6B1030` (SF→Final, campeon). Consume `GET /api/v1/simulate/tournament?output=bracket`. Ubicado en `main.tsx:671-758`.
+
+### Frontend — UX Transversal
+
+- **Spinner global**: `LoadingOverlay` con dual-ring CSS (anillo exterior `#d6f36c`, interior `#8cc7ff`, rotacion opuesta), fondo `rgba(16,20,22,0.85)` + `backdrop-filter: blur(8px)`, texto contextual. Cubre **todas** las llamadas API: carga inicial (`initialLoading`), fixtures, prediccion, grupo, torneo. `role="alert" aria-busy="true"` para a11y. Ubicado en `main.tsx:736-748`.
+- **Responsive**: 4 breakpoints — 1023px (tablet), 820px (small tablet), 639px (mobile), 480px (mobile small). Bracket con `overflow-x: auto` + scroll horizontal. Cards de calendario 3→2→1 columna. `touch-action: manipulation` en todos los interactivos. Dropdowns con `max-height: 35-40vh`. Ubicado en `styles.css`.
+
+### Archivos Modificados en Fase I
+
+| Archivo | Cambio |
+|---------|--------|
+| `api/schemas.py` | + `FixturePrediction`, `FixturesResponse`, `BracketTeam`, `BracketSlot`, `BracketRound`, `BracketResponse` |
+| `api/routers/predictions.py` | + `GET /fixtures`, + `_load_wc_fixtures()`, `_compute_matchday()` |
+| `api/routers/simulation.py` | + query param `output=list\|bracket`, `_cached_predictor` usa `runtime.cached_predict()` |
+| `src/runtime.py` | + `elo_dict`, + `pair_cache`, + `cached_predict()`, + `include_shap/include_aux` |
+| `src/features/elo_features.py` | `get_elo_rating()` acepta `dict` ademas de `DataFrame` |
+| `src/models/ensemble.py` | + `_scorelines_from_matrix()`, score matrix unificada, `elo_source` param |
+| `src/simulation/tournament_simulator.py` | + `_prewarm_cache()`, `_sim_one_iteration()`, `_sim_chunk()`, `_build_df()`, `ThreadPoolExecutor` |
+| `src/simulation/match_simulator.py` | Scoreline counting con `np.unique` vectorizado |
+| `cli.py` | + `_predict_cache`, + `_elo_dict` |
+| `frontend/src/api.ts` | + `FixturePrediction`, `BracketResponse` y rama de tipos, + `fetchFixtures()`, `simulateTournamentBracket()` |
+| `frontend/src/main.tsx` | + vista calendar, `CalendarTimeline`, `FixtureCard`, `BracketTree` mirror, `BracketRoundColumn`, `BracketMatch`, `BracketTeamRow`, `ChampionBadge`, `_FLAGS`, compareMode, auto-predict, `initialLoading`, `LoadingOverlay` |
+| `frontend/src/styles.css` | + ~300 lineas: calendar, fixture cards, toggle groups, compare mode, bracket mirror, champion badge, connectors, spinner overlay, 4 media queries, mobile universal rules |
 
 ### Mejoras Sin Reentrenamiento
 
@@ -80,7 +135,7 @@ Notas:
 - **Mejores terceros por rendimiento**: `_select_best_thirds()` ordena por pts > gd > gf en lugar de Elo random.
 - **Pesos Elo y Poisson fijos**: en `trainer.py` los pesos de Elo (0.10) y Poisson (0.07) son fijos antes de normalizacion, independientes de val accuracy.
 
-## Pendiente (Fase I)
+## Pendiente (Fase J+)
 
 ### Calibracion De xG Por Calidad De Rival
 
@@ -111,11 +166,28 @@ Prioridad: media.
 - Tests que validen que probabilidades suman 1.
 - Fix `test_report_generation.py` que busca funciones renombradas (`_match_row`, `_pdf_text`, `_tournament_section`).
 
+### Frontend — Polish Visual
+
+Prioridad: media.
+
+- **Conectores SVG**: los conectores del bracket usan CSS (`::before`/`::after` con diamantes rotados). Reemplazar por SVG inline para lineas curvas estilo "grapa industrial" completa (como la imagen de referencia de Infobae), con trazados curvos en lugar de lineas rectas con diamantes.
+- **Animacion de entrada**: stagger fade-in de los slots del bracket (animation-delay escalonado por indice).
+- **Hover path highlight**: al hacer hover sobre un equipo en el bracket, resaltar su camino completo hasta la final (opacidad 1 en el camino, 0.3 en el resto).
+- **Flag sprites o PNG**: los emojis de bandera se renderizan distinto segun SO. Evaluar usar un sprite sheet o PNG de banderas para consistencia visual.
+
 ### Docker Y Deploy
 
 Prioridad: baja.
 
 - `Dockerfile.api`, `Dockerfile.frontend`, `docker-compose.yml`.
+
+### Performance Adicional
+
+Prioridad: baja.
+
+- **Precalentar pair_cache en lifespan**: mover el warm-up de predicciones al `lifespan` de FastAPI para que el primer request ya sea instantaneo (actualmente el primer request a `/fixtures` o `/simulate/tournament` tarda ~5s en llenar el cache).
+- **Predict match cache por feature vector**: `predict_match()` tarda ~1s por llamada aun sin SHAP. Cachear el resultado por feature vector (ya que `build_match_features` es determinista para un par de equipos) reduciria las 72 predicciones iniciales a ~0s si los features ya se calcularon.
+- **Paralelizar predict_match con multiprocessing**: `ThreadPoolExecutor` no ayuda con CPU-bound en Python por el GIL. Usar `ProcessPoolExecutor` para las 72 predicciones iniciales (cada proceso carga sus propios modelos, ~4-8 workers).
 
 ## Notas Operativas
 
