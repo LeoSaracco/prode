@@ -29,6 +29,8 @@ MODELS_DIR = Path(__file__).parent.parent / "models"
 CHARTS_DIR = OUTPUT_DIR / "_charts"
 REPORT_SIMS = 10_000
 PW = 210  # ancho A4 mm
+REPORT_AUTHOR = "Lic. Leandro Saracco"
+REPORT_LINKEDIN = "https://www.linkedin.com/in/leandro-saracco/"
 
 # ── Nombres de equipos en castellano ─────────────────────────────────────────
 TEAMS_ES: dict[str, str] = {
@@ -133,15 +135,22 @@ def _section_header(pdf, title, subtitle="", color=PRIMARY):
 
 def _page_footer(pdf, page_label=""):
     """Pie de pagina al final del contenido de la pagina actual."""
-    pdf.ln(3)
-    _rule(pdf, L_GRAY)
+    previous_auto_page_break = getattr(pdf, "auto_page_break", True)
+    previous_margin = getattr(pdf, "b_margin", 0)
+    pdf.set_auto_page_break(False)
+    pdf.set_y(-16)
+    _rgb(pdf, L_GRAY)
+    pdf.rect(10, pdf.get_y(), PW - 20, 0.7, "F")
+    pdf.set_y(pdf.get_y() + 1.5)
     _txt(pdf, LOW_GRAY)
     pdf.set_font("Helvetica", "", 6)
     _c(pdf, PW - 20, 4,
        f"prode-ML  |  FIFA World Cup 2026  |  {page_label}  |  "
        f"{datetime.now().strftime('%d/%m/%Y')}",
        ln=True, align="C")
+    _c(pdf, PW - 20, 4, f"{REPORT_AUTHOR}  |  LinkedIn: {REPORT_LINKEDIN}", ln=True, align="C")
     _txt(pdf, TEXT_COL)
+    pdf.set_auto_page_break(previous_auto_page_break, margin=previous_margin)
 
 
 # ── Helpers de prediccion ─────────────────────────────────────────────────────
@@ -503,6 +512,11 @@ def _portada(pdf, meta: dict):
     pdf.set_font("Helvetica", "I", 7.5)
     pdf.set_xy(0, 58)
     _c(pdf, PW, 5, f"Generado: {datetime.now().strftime('%d de %B de %Y  |  %H:%M')}", ln=True, align="C")
+
+    _txt(pdf, WHITE)
+    pdf.set_font("Helvetica", "B", 7.5)
+    pdf.set_xy(0, 63)
+    _c(pdf, PW, 5, f"{REPORT_AUTHOR}  |  LinkedIn: {REPORT_LINKEDIN}", ln=True, align="C")
 
     pdf.set_y(80)
     _txt(pdf, TEXT_COL)
