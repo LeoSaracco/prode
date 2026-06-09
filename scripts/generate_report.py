@@ -1394,6 +1394,9 @@ def _informe_tecnico_a(pdf, meta: dict, charts: dict | None = None):
     pdf.ln(4)
 
     # Pipeline de entrenamiento
+    pdf.add_page()
+    _section_header(pdf, "Informe Tecnico — Pipeline de Entrenamiento",
+                    "Secuencia de datos, entrenamiento, calibracion y evaluacion", DARK)
     _rule(pdf, PRIMARY)
     pdf.ln(2)
     _txt(pdf, DARK)
@@ -1663,6 +1666,9 @@ def _resultados_entrenamiento(pdf, meta: dict, charts: dict | None = None):
     pdf.ln(4)
 
     # Limitaciones
+    pdf.add_page()
+    _section_header(pdf, "Resultados del Modelo — Limitaciones",
+                    "Caveats de interpretacion y riesgos conocidos", DARK)
     _rule(pdf, SECONDARY)
     pdf.ln(2)
     _txt(pdf, DARK)
