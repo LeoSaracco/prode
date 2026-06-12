@@ -257,10 +257,11 @@ select {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 14px;
+  transition: opacity 0.15s ease;
 }
 
 .prediction-grid.loading {
-  opacity: 0.72;
+  opacity: 0.55;
 }
 
 /* ── Loading overlay ──────────────────────────────────────────────────────── */

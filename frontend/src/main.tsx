@@ -94,6 +94,19 @@ function App() {
 
   // Auto-predict debounce
   const debounceRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef2 = React.useRef<ReturnType<typeof setTimeout>>();
+  const [predicting, setPredicting] = React.useState(false);
+  const [predicting2, setPredicting2] = React.useState(false);
+
+  // Refs to the latest selected teams, used to discard stale/out-of-order responses
+  const teamARef = React.useRef(teamA);
+  const teamBRef = React.useRef(teamB);
+  const teamA2Ref = React.useRef(teamA2);
+  const teamB2Ref = React.useRef(teamB2);
+  teamARef.current = teamA;
+  teamBRef.current = teamB;
+  teamA2Ref.current = teamA2;
+  teamB2Ref.current = teamB2;
 
   React.useEffect(() => {
     setInitialLoading(true);
@@ -111,13 +124,28 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teams.length]);
 
-  function autoPredict(team1: string, team2: string, setter: (m: MatchResult) => void) {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+  function autoPredict(
+    team1: string,
+    team2: string,
+    setter: (m: MatchResult) => void,
+    timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | undefined>,
+    currentTeams: [React.MutableRefObject<string>, React.MutableRefObject<string>],
+    setPredictingFlag: (v: boolean) => void
+  ) {
+    if (timerRef.current) clearTimeout(timerRef.current);
     if (team1 === team2) return;
-    debounceRef.current = setTimeout(async () => {
+    timerRef.current = setTimeout(async () => {
+      setPredictingFlag(true);
       try {
-        setter(await predictMatch(team1, team2));
+        const result = await predictMatch(team1, team2);
+        // Discard the response if the user already changed the selection again
+        if (currentTeams[0].current === team1 && currentTeams[1].current === team2) {
+          setter(result);
+        }
       } catch { /* silent */ }
+      finally {
+        setPredictingFlag(false);
+      }
     }, 600);
   }
 
@@ -239,18 +267,18 @@ function App() {
       {view === "predict" && (
         <section className="workspace">
           <div className={`control-strip ${compareMode ? "dual" : ""}`}>
-            <TeamCombobox label="Equipo 1" value={teamA} teams={teams} onChange={v => { setTeamA(v); autoPredict(v, teamB, setMatch); }} />
+            <TeamCombobox label="Equipo 1" value={teamA} teams={teams} onChange={v => { setTeamA(v); autoPredict(v, teamB, setMatch, debounceRef, [teamARef, teamBRef], setPredicting); }} />
             <span className="versus">VS</span>
-            <TeamCombobox label="Equipo 2" value={teamB} teams={teams} onChange={v => { setTeamB(v); autoPredict(teamA, v, setMatch); }} />
+            <TeamCombobox label="Equipo 2" value={teamB} teams={teams} onChange={v => { setTeamB(v); autoPredict(teamA, v, setMatch, debounceRef, [teamARef, teamBRef], setPredicting); }} />
             {compareMode && (
               <>
-                <TeamCombobox label="Equipo 3" value={teamA2} teams={teams} onChange={v => { setTeamA2(v); autoPredict(v, teamB2, setMatch2); }} />
+                <TeamCombobox label="Equipo 3" value={teamA2} teams={teams} onChange={v => { setTeamA2(v); autoPredict(v, teamB2, setMatch2, debounceRef2, [teamA2Ref, teamB2Ref], setPredicting2); }} />
                 <span className="versus">VS</span>
-                <TeamCombobox label="Equipo 4" value={teamB2} teams={teams} onChange={v => { setTeamB2(v); autoPredict(teamA2, v, setMatch2); }} />
+                <TeamCombobox label="Equipo 4" value={teamB2} teams={teams} onChange={v => { setTeamB2(v); autoPredict(teamA2, v, setMatch2, debounceRef2, [teamA2Ref, teamB2Ref], setPredicting2); }} />
               </>
             )}
             <div className="action-group">
-              <button className={`secondary ${compareMode ? "active" : ""}`} onClick={() => { setCompareMode(!compareMode); if (!compareMode) { autoPredict(teamA2, teamB2, setMatch2); } }}>
+              <button className={`secondary ${compareMode ? "active" : ""}`} onClick={() => { setCompareMode(!compareMode); if (!compareMode) { autoPredict(teamA2, teamB2, setMatch2, debounceRef2, [teamA2Ref, teamB2Ref], setPredicting2); } }}>
                 <Activity size={16} /> Comparar
               </button>
               <button className="primary" onClick={runPrediction} disabled={loading || teamA === teamB}>
@@ -259,8 +287,8 @@ function App() {
             </div>
           </div>
           <div className={`prediction-dual ${compareMode ? "active" : ""}`}>
-            {match && <PredictionPanel match={match} compact={compareMode} />}
-            {compareMode && match2 && <PredictionPanel match={match2} compact={true} />}
+            {match && <PredictionPanel match={match} compact={compareMode} predicting={predicting} />}
+            {compareMode && match2 && <PredictionPanel match={match2} compact={true} predicting={predicting2} />}
           </div>
         </section>
       )}
@@ -444,7 +472,7 @@ function TeamCombobox({ label, value, teams, onChange }: {
 }
 
 // ── PredictionPanel ───────────────────────────────────────────────────────────
-function PredictionPanel({ match, compact }: { match: MatchResult; compact?: boolean }) {
+function PredictionPanel({ match, compact, predicting }: { match: MatchResult; compact?: boolean; predicting?: boolean }) {
   const score = match.outcome_scoreline ?? match.most_likely_scoreline;
   const teamAEs = es(match.team_a);
   const teamBEs = es(match.team_b);
@@ -456,7 +484,7 @@ function PredictionPanel({ match, compact }: { match: MatchResult; compact?: boo
   const bestOutcome = outcomes.reduce((best, current) => current.value > best.value ? current : best);
 
   return (
-    <div className={`prediction-grid ${compact ? "compact" : ""}`}>
+    <div className={`prediction-grid ${compact ? "compact" : ""} ${predicting ? "loading" : ""}`}>
       <section className="result-band">
         <div>
           <span className="eyebrow">Predicción del modelo entrenado</span>
