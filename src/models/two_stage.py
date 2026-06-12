@@ -64,10 +64,15 @@ class TwoStageClassifier:
         y_nd = y[mask_not_draw]
         y_win = (y_nd == 2).astype(int)
 
+        # class_weight="balanced" here caused the draw classifier to predict
+        # "draw" for ~85% of test samples (overall two-stage accuracy 0.34,
+        # below random), since draws are only ~25% of the data. Unweighted
+        # training raises overall accuracy to ~0.48, in line with the other
+        # models.
         draw_defaults = {
             "n_estimators": 200, "max_depth": 8,
             "min_samples_split": 15, "min_samples_leaf": 8,
-            "class_weight": "balanced", "random_state": 42, "n_jobs": _model_jobs(),
+            "random_state": 42, "n_jobs": _model_jobs(),
         }
         draw_defaults.update(self.draw_params)
         self.draw_clf = RandomForestClassifier(**draw_defaults)

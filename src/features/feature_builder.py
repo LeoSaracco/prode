@@ -37,6 +37,9 @@ MATCH_FEATURE_COLUMNS = [
     "is_tournament", "is_wc", "is_qualifier", "is_home",
     "fifa_rank_diff", "elo_momentum_diff",
     "days_since_last_match_diff", "rest_days_diff",
+    "wc_recent_goal_balance_diff", "wc_recent_win_rate_diff",
+    "wc_experience_diff", "wc_knockout_depth_diff",
+    "squad_market_value_diff", "fifa_points_pre_tournament_diff",
 ]
 
 INFERENCE_CONTEXT_FEATURES = {
@@ -112,6 +115,13 @@ class FeatureBuilder:
         days_since = float(profile.get("days_since_last_match")) if profile is not None and "days_since_last_match" in profile and not pd.isna(profile.get("days_since_last_match")) else self._get_days_since_last_match(team)
         fifa_rank = float(profile.get("fifa_rank")) if profile is not None and "fifa_rank" in profile and not pd.isna(profile.get("fifa_rank")) else 75.0
 
+        wc_recent_goal_balance = float(profile.get("wc_recent_goal_balance")) if profile is not None and "wc_recent_goal_balance" in profile and not pd.isna(profile.get("wc_recent_goal_balance")) else 0.0
+        wc_recent_win_rate = float(profile.get("wc_recent_win_rate")) if profile is not None and "wc_recent_win_rate" in profile and not pd.isna(profile.get("wc_recent_win_rate")) else 0.5
+        wc_experience_score = float(profile.get("wc_experience_score")) if profile is not None and "wc_experience_score" in profile and not pd.isna(profile.get("wc_experience_score")) else wc_history
+        wc_knockout_depth = float(profile.get("wc_knockout_depth")) if profile is not None and "wc_knockout_depth" in profile and not pd.isna(profile.get("wc_knockout_depth")) else 0.0
+        squad_market_value_norm = float(profile.get("squad_market_value_norm")) if profile is not None and "squad_market_value_norm" in profile and not pd.isna(profile.get("squad_market_value_norm")) else squad_depth
+        fifa_points_pre_tournament = float(profile.get("fifa_points_pre_tournament")) if profile is not None and "fifa_points_pre_tournament" in profile and not pd.isna(profile.get("fifa_points_pre_tournament")) else max(0.0, 1.0 - fifa_rank / 210.0)
+
         feats = {
             "team": team,
             "elo_rating": elo,
@@ -128,6 +138,12 @@ class FeatureBuilder:
             "elo_momentum": elo_momentum,
             "days_since_last_match": days_since,
             "fifa_rank": fifa_rank,
+            "wc_recent_goal_balance": wc_recent_goal_balance,
+            "wc_recent_win_rate": wc_recent_win_rate,
+            "wc_experience_score": wc_experience_score,
+            "wc_knockout_depth": wc_knockout_depth,
+            "squad_market_value_norm": squad_market_value_norm,
+            "fifa_points_pre_tournament": fifa_points_pre_tournament,
         }
         self._team_features[team] = feats
         return feats
@@ -192,6 +208,12 @@ class FeatureBuilder:
             fa["elo_momentum"] - fb["elo_momentum"],
             fa["days_since_last_match"] - fb["days_since_last_match"],
             fb["days_since_last_match"] - fa["days_since_last_match"],
+            fa["wc_recent_goal_balance"] - fb["wc_recent_goal_balance"],
+            fa["wc_recent_win_rate"] - fb["wc_recent_win_rate"],
+            fa["wc_experience_score"] - fb["wc_experience_score"],
+            fa["wc_knockout_depth"] - fb["wc_knockout_depth"],
+            fa["squad_market_value_norm"] - fb["squad_market_value_norm"],
+            fa["fifa_points_pre_tournament"] - fb["fifa_points_pre_tournament"],
         ], dtype=np.float32)
 
         return features

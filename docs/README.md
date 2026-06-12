@@ -10,11 +10,12 @@ Poisson para marcadores y simulaciones Monte Carlo.
 - **Split temporal**: 70% train, 15% validation, 15% test, en orden cronologico.
 - **Features sin mirar el futuro**: `rolling_no_future_leakage`.
 - **27 features**: Elo, forma reciente, xG/xGA, ranking FIFA, descanso, torneo/localia, historia mundialista, perfiles WC recientes y calidad de plantel desde ratings FIFA de jugadores.
+- **Perfiles WC recientes reales**: `wc_recent_goal_balance`, `wc_recent_win_rate` y `wc_knockout_depth` se calculan desde el historial real de partidos mundialistas de cada selección (ventana de 8 anos), ya no son placeholders neutrales.
 - **Modelos base**: RandomForest, XGBoost, LightGBM, CatBoost, Elo y Poisson (6 modelos).
 - **Ensemble principal**: weighted voting con pesos aprendidos en validation. Poisson con peso fijo 0.08 como senal ortogonal.
 - **Calibracion probabilistica**: temperature scaling post-ensemble, ajustado en validation.
 - **Pesos de recencia**: partidos recientes pesan mas en el entrenamiento (half-life 3 anos).
-- **Modelos auxiliares**: TwoStage (diagnostico, no integrado al ensemble) y ConfederationModels.
+- **Modelos auxiliares**: TwoStage (diagnostico, no integrado al ensemble; corregido el 2026-06-12 al quitar `class_weight="balanced"` del clasificador de empates, ahora rinde ~48.8%, en linea con los modelos base) y ConfederationModels.
 - **Squad quality**: feature de calidad del plantel basada en ratings FIFA reales (avg_overall, max_overall, depth_ratio) desde `player_aggregates.csv`. Reemplaza el valor de mercado como proxy.
 - **Simulacion de torneo**: bracket oficial WC2026 con cruces de pod predefinidos. Mejores terceros seleccionados por rendimiento (pts > gd > gf), no por Elo.
 - **Marcadores**: se conserva el marcador exacto modal (`exact_most_likely_scoreline`) y se comunica un marcador recomendado (`outcome_scoreline`) condicionado al resultado predicho y al volumen xG. Esto evita reportes tipo `GANA 0-0` y reduce el sesgo conservador a `1-0`.
@@ -25,25 +26,26 @@ Metricas reales: `models/model_metadata.json`.
 
 ## Resultado Actual Del Modelo
 
-Ultimo entrenamiento: `2026-06-05T10:46:10`.
+Ultimo entrenamiento: `2026-06-12T09:20:41`.
 
 | Metrica | Valor | Lectura rapida |
 |---|---:|---|
-| `accuracy_voting` | **51.25%** | Acierto general del ensemble de 6 modelos. |
-| `accuracy_catboost` | 50.93% | Mejor modelo individual en esta corrida. |
-| `accuracy_lgbm` | 50.36% | Acierto de LightGBM solo. |
-| `accuracy_rf` | 48.99% | Acierto de RandomForest solo. |
-| `accuracy_xgb` | 47.30% | Acierto de XGBoost solo. |
-| `accuracy_high_confidence` | **82.50%** | Acierto cuando el sistema marca confianza `ALTO`. Target >80% alcanzado. |
-| `n_high_confidence_matches` | 40 | Cantidad de partidos test que entraron en confianza `ALTO`. |
-| `accuracy_high_elo_diff_200` | **65.52%** | Acierto en partidos con diferencia Elo >= 200 (n=290). |
-| `log_loss_voting` | **1.0003** | Calidad de probabilidades calibradas; mas bajo es mejor. |
+| `accuracy_voting` | **50.36%** | Acierto general del ensemble de 6 modelos. |
+| `accuracy_lgbm` | 50.77% | Mejor modelo individual en esta corrida. |
+| `accuracy_catboost` | 50.44% | Acierto de CatBoost solo. |
+| `accuracy_rf` | 50.04% | Acierto de RandomForest solo. |
+| `accuracy_xgb` | 48.03% | Acierto de XGBoost solo. |
+| `accuracy_two_stage` | 48.83% | Acierto del modelo auxiliar de dos etapas (corregido el 2026-06-12, antes 34.65%). |
+| `accuracy_high_confidence` | **81.93%** | Acierto cuando el sistema marca confianza `ALTO`. Target >80% alcanzado. |
+| `n_high_confidence_matches` | 83 | Cantidad de partidos test que entraron en confianza `ALTO`. |
+| `accuracy_high_elo_diff_200` | **65.17%** | Acierto en partidos con diferencia Elo >= 200 (n=290). |
+| `log_loss_voting` | **1.0002** | Calidad de probabilidades calibradas; mas bajo es mejor. |
 | `log_loss_uncalibrated` | 1.0002 | Log-loss sin calibrar, para comparacion. |
-| `temperature_scaling` | T=0.9935 | Factor de calibracion (proximo a 1.0: probs bien calibradas). |
+| `temperature_scaling` | T=0.9625 | Factor de calibracion (proximo a 1.0: probs bien calibradas). |
 
 Interpretacion: el modelo supera el azar de 33.3% para un problema de tres clases
-(gana A / empate / gana B). El target de >80% en alta confianza fue alcanzado por
-primera vez (82.5%). El target global de >55% accuracy sigue siendo aspiracional.
+(gana A / empate / gana B). El target de >80% en alta confianza se mantiene logrado
+(81.93%). El target global de >55% accuracy sigue siendo aspiracional.
 
 ## Que Significa Cada Metrica
 
@@ -52,7 +54,7 @@ primera vez (82.5%). El target global de >55% accuracy sigue siendo aspiracional
 - `accuracy_lgbm`: porcentaje de aciertos de LightGBM solo.
 - `accuracy_catboost`: porcentaje de aciertos de CatBoost solo.
 - `accuracy_voting`: porcentaje de aciertos del ensemble principal. Combina RF, XGB, LGBM, CatBoost, Elo y Poisson con pesos aprendidos en validation.
-- `accuracy_two_stage`: porcentaje de aciertos del modelo auxiliar de dos etapas. Diagnostico solamente.
+- `accuracy_two_stage`: porcentaje de aciertos del modelo auxiliar de dos etapas. Diagnostico solamente (no integrado al ensemble), pero desde el fix del 2026-06-12 rinde en linea con los modelos base (~48.8%).
 - `accuracy_confederation`: porcentaje de aciertos de los modelos entrenados por pares de confederaciones.
 - `accuracy_high_confidence`: porcentaje de aciertos solo en predicciones donde el sistema dijo `ALTO`.
 - `n_high_confidence_matches`: cuantas predicciones del test fueron consideradas `ALTO`. Si este numero es bajo, la metrica puede variar mucho.
@@ -71,7 +73,7 @@ La confianza no significa "certeza absoluta". Es una etiqueta operacional:
 - `BAJO`: el modelo ve el partido como mas parejo o incierto.
 
 Los umbrales se guardan en `models/confidence_thresholds.json`.
-En el ultimo entrenamiento, `ALTO` acerto 82.5% en test sobre 40 partidos.
+En el ultimo entrenamiento, `ALTO` acerto 81.93% en test sobre 83 partidos.
 
 ## Arquitectura Del Entrenamiento
 
@@ -203,7 +205,7 @@ uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
 
 ## Limitaciones Actuales
 
-- El target de >55% global todavia no esta alcanzado (actual: 51.25%).
+- El target de >55% global todavia no esta alcanzado (actual: 50.36%).
 - Los xG rolling de algunos equipos estan inflados por goleadas en clasificatorias faciles (ej: England con 2.2 xG/partido en datos de entrenamiento). El modelo no filtra por calidad del rival.
 - No hay datos de lesiones, convocatoria final o minutos recientes por jugador.
 - Las metricas se basan en partidos historicos; el Mundial real tendra condiciones distintas.

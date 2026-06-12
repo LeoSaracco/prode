@@ -106,7 +106,10 @@ Luego se normalizan para sumar 1.0.
 
 Modelos auxiliares (diagnostico, no integrados al ensemble):
 
-- `TwoStageClassifier`: separa empate/no empate y luego win/loss.
+- `TwoStageClassifier`: separa empate/no empate y luego win/loss. Corregido el
+  2026-06-12 (se quito `class_weight="balanced"` del clasificador de empates);
+  accuracy subio de 34.65% (por debajo del azar) a 48.83%, en linea con los
+  modelos base.
 - `ConfederationModels`: RandomForest por pares de confederaciones.
 - `PoissonGoalModel`: tambien usado para xG, marcadores probables y simulacion del torneo.
 
@@ -128,7 +131,7 @@ Por azar puro, la referencia aproximada es 33.3%.
 | `accuracy_lgbm` | Acierto usando solo LightGBM. |
 | `accuracy_catboost` | Acierto usando solo CatBoost. |
 | `accuracy_voting` | Acierto del ensemble de 6 modelos. Es la metrica global mas importante. |
-| `accuracy_two_stage` | Acierto del modelo auxiliar de dos etapas. Diagnostico. |
+| `accuracy_two_stage` | Acierto del modelo auxiliar de dos etapas. Diagnostico (48.83% desde el fix del 2026-06-12). |
 | `accuracy_confederation` | Acierto del modelo especializado por confederacion. |
 | `accuracy_high_confidence` | Acierto solo donde la prediccion fue marcada `ALTO`. |
 | `accuracy_high_elo_diff_200` | Acierto en partidos con diferencia Elo de al menos 200 puntos. |
@@ -156,7 +159,7 @@ Target aspiracional de >80% alcanzado en Fase H.
 
 ## Estado Real Actual
 
-Ultimo entrenamiento: `2026-06-05T10:46:10` (Fase H).
+Ultimo entrenamiento: `2026-06-12T09:20:41` (Fase J).
 
 | Campo | Valor |
 |---|---:|
@@ -164,21 +167,23 @@ Ultimo entrenamiento: `2026-06-05T10:46:10` (Fase H).
 | Train samples | 11,582 |
 | Validation samples | 1,241 |
 | Test samples | 1,241 |
-| `accuracy_voting` | 51.25% |
-| `accuracy_catboost` | 50.93% |
-| `accuracy_high_confidence` | **82.50%** (n=40) |
-| `accuracy_high_elo_diff_200` | 65.52% (n=290) |
-| `log_loss_voting` (calibrado) | 1.0003 |
+| `accuracy_voting` | 50.36% |
+| `accuracy_lgbm` | 50.77% (mejor individual) |
+| `accuracy_catboost` | 50.44% |
+| `accuracy_two_stage` | 48.83% (corregido, antes 34.65%) |
+| `accuracy_high_confidence` | **81.93%** (n=83) |
+| `accuracy_high_elo_diff_200` | 65.17% (n=290) |
+| `log_loss_voting` (calibrado) | 1.0002 |
 | `log_loss_uncalibrated` | 1.0002 |
-| `temperature_scaling` | T=0.9935 |
+| `temperature_scaling` | T=0.9625 |
 | `recency_weighted_training` | True |
 | Ensemble | RF+XGB+LGBM+CatBoost+Elo+Poisson |
 
 Targets aspiracionales:
 
-- Global W/D/L: >55% (actual: 51.25%).
+- Global W/D/L: >55% (actual: 50.36%).
 - Alta confianza: >80% (alcanzado: 82.5%).
-- Delta Elo >200: >85% (actual: 65.52%).
+- Delta Elo >200: >85% (actual: 65.17%).
 
 ## Operacion
 

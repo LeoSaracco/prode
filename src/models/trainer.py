@@ -35,6 +35,9 @@ from src.models.xgb_model import XGBOutcomeClassifier
 logger = logging.getLogger(__name__)
 
 
+WC_STATS_WINDOW_YEARS = 8
+
+
 def _env_int(name: str, default: int) -> int:
     try:
         return max(1, int(os.getenv(name, str(default))))
@@ -350,6 +353,11 @@ class RollingNationalTeamFeatureBuilder:
                 "ga": [],
                 "points": [],
                 "dates": [],
+                "wc_gf": [],
+                "wc_ga": [],
+                "wc_points": [],
+                "wc_dates": [],
+                "wc_years": [],
                 "elo": initial_elo,
                 "elo_history": [initial_elo],
                 "fallback": fallback,
@@ -358,26 +366,74 @@ class RollingNationalTeamFeatureBuilder:
 
     def _profile(self, team: str, date: pd.Timestamp | None) -> dict:
         st = self._team_state(team)
-        n = len(st["gf"])
         fallback = st["fallback"]
+        dates = st["dates"]
+        n_total = len(dates)
+
+        # Solo se considera la ventana de los ultimos WC_STATS_WINDOW_YEARS anos
+        # para xg/xga/forma/consistencia: el promedio historico completo (siglo
+        # XX en adelante) diluye como llega cada equipo al torneo actual.
+        if n_total and date is not None and not pd.isna(date):
+            cutoff = date - pd.DateOffset(years=WC_STATS_WINDOW_YEARS)
+            window_idx = [i for i, d in enumerate(dates) if d >= cutoff]
+        else:
+            window_idx = list(range(n_total))
+
+        n = len(window_idx)
         if n:
+            gf_vals = [st["gf"][i] for i in window_idx]
+            ga_vals = [st["ga"][i] for i in window_idx]
+            pts_vals = [st["points"][i] for i in window_idx]
             prior_weight = 8.0
-            gf = (float(np.mean(st["gf"])) * n + fallback["xg_pg"] * prior_weight) / (n + prior_weight)
-            ga = (float(np.mean(st["ga"])) * n + fallback["xga_pg"] * prior_weight) / (n + prior_weight)
-            recent_points = st["points"][-5:]
+            gf = (float(np.mean(gf_vals)) * n + fallback["xg_pg"] * prior_weight) / (n + prior_weight)
+            ga = (float(np.mean(ga_vals)) * n + fallback["xga_pg"] * prior_weight) / (n + prior_weight)
+            recent_points = pts_vals[-5:]
             form_5 = float(sum(recent_points) / max(3 * len(recent_points), 1))
-            last_date = st["dates"][-1]
-            days_since = float(max((date - last_date).days, 0)) if date is not None and not pd.isna(date) else 30.0
+            consistency = float(np.std(recent_points)) if len(recent_points) >= 2 else 0.0
         else:
             gf = float(fallback["xg_pg"])
             ga = float(fallback["xga_pg"])
             form_5 = float(fallback["form_5"])
+            consistency = 0.0
+
+        if n_total:
+            last_date = dates[-1]
+            days_since = float(max((date - last_date).days, 0)) if date is not None and not pd.isna(date) else 30.0
+        else:
             days_since = 30.0
 
         elo_hist = st["elo_history"]
         elo_momentum = float(st["elo"] - elo_hist[-6]) if len(elo_hist) >= 6 else 0.0
-        recent_pts = st["points"][-5:]
-        consistency = float(np.std(recent_pts)) if len(recent_pts) >= 2 else 0.0
+        fifa_rank = _rank_before(self.rank_lookup, team, date)
+
+        # Performance en Mundiales recientes (ultimos WC_STATS_WINDOW_YEARS anos,
+        # tipicamente las ultimas 2 ediciones): balance de goles y win rate.
+        wc_dates = st["wc_dates"]
+        if wc_dates and date is not None and not pd.isna(date):
+            wc_cutoff = date - pd.DateOffset(years=WC_STATS_WINDOW_YEARS)
+            wc_window_idx = [i for i, d in enumerate(wc_dates) if d >= wc_cutoff]
+        else:
+            wc_window_idx = []
+
+        if wc_window_idx:
+            goal_diffs = [st["wc_gf"][i] - st["wc_ga"][i] for i in wc_window_idx]
+            wc_recent_goal_balance = float(np.tanh(np.mean(goal_diffs) / 2.0))
+            wc_pts = [st["wc_points"][i] for i in wc_window_idx]
+            wc_recent_win_rate = float(np.mean(wc_pts)) / 3.0
+        else:
+            wc_recent_goal_balance = 0.0
+            wc_recent_win_rate = 0.5
+
+        # Profundidad alcanzada en el ultimo Mundial disputado: cantidad de
+        # partidos jugados en esa edicion (3 = solo fase de grupos, 7 = final),
+        # normalizado a [0, 1]. Equipos sin Mundiales previos quedan en 0.
+        if st["wc_years"]:
+            last_wc_year = st["wc_years"][-1]
+            matches_last_wc = sum(1 for y in st["wc_years"] if y == last_wc_year)
+            wc_knockout_depth = float(max(0.0, min(1.0, (matches_last_wc - 3) / 4.0)))
+        else:
+            wc_knockout_depth = 0.0
+
         return {
             "xg_pg": max(0.35, min(2.8, gf)),
             "xga_pg": max(0.35, min(2.8, ga)),
@@ -386,9 +442,15 @@ class RollingNationalTeamFeatureBuilder:
             "elo": float(st["elo"]),
             "elo_momentum": elo_momentum,
             "days_since_last_match": days_since,
-            "fifa_rank": _rank_before(self.rank_lookup, team, date),
+            "fifa_rank": fifa_rank,
             "games": n,
             "consistency": consistency,
+            "wc_recent_goal_balance": wc_recent_goal_balance,
+            "wc_recent_win_rate": wc_recent_win_rate,
+            "wc_experience_score": compute_world_cup_history_score(team),
+            "wc_knockout_depth": wc_knockout_depth,
+            "squad_market_value_norm": compute_squad_quality(team),
+            "fifa_points_pre_tournament": max(0.0, 1.0 - fifa_rank / 210.0),
         }
 
     def _h2h_advantage(self, team_a: str, team_b: str) -> float:
@@ -442,6 +504,12 @@ class RollingNationalTeamFeatureBuilder:
             float(sa["elo_momentum"] - sb["elo_momentum"]),
             float(sa["days_since_last_match"] - sb["days_since_last_match"]),
             float(sb["days_since_last_match"] - sa["days_since_last_match"]),
+            float(sa["wc_recent_goal_balance"] - sb["wc_recent_goal_balance"]),
+            float(sa["wc_recent_win_rate"] - sb["wc_recent_win_rate"]),
+            float(sa["wc_experience_score"] - sb["wc_experience_score"]),
+            float(sa["wc_knockout_depth"] - sb["wc_knockout_depth"]),
+            float(sa["squad_market_value_norm"] - sb["squad_market_value_norm"]),
+            float(sa["fifa_points_pre_tournament"] - sb["fifa_points_pre_tournament"]),
         ], dtype=np.float32)
 
     def update_from_match(self, row: pd.Series) -> None:
@@ -463,6 +531,19 @@ class RollingNationalTeamFeatureBuilder:
         st_b["ga"].append(float(goals_a))
         st_b["points"].append(points_b)
         st_b["dates"].append(date)
+
+        _, is_wc_flag, _, _ = _context_flags(row)
+        if is_wc_flag:
+            st_a["wc_gf"].append(float(goals_a))
+            st_a["wc_ga"].append(float(goals_b))
+            st_a["wc_points"].append(points_a)
+            st_a["wc_dates"].append(date)
+            st_a["wc_years"].append(date.year)
+            st_b["wc_gf"].append(float(goals_b))
+            st_b["wc_ga"].append(float(goals_a))
+            st_b["wc_points"].append(points_b)
+            st_b["wc_dates"].append(date)
+            st_b["wc_years"].append(date.year)
 
         new_elo_a, new_elo_b = _update_elo(float(st_a["elo"]), float(st_b["elo"]), goals_a, goals_b)
         st_a["elo"] = new_elo_a
@@ -535,6 +616,12 @@ class RollingNationalTeamFeatureBuilder:
                 "fifa_rank": p["fifa_rank"],
                 "games": p["games"],
                 "consistency": p["consistency"],
+                "wc_recent_goal_balance": p["wc_recent_goal_balance"],
+                "wc_recent_win_rate": p["wc_recent_win_rate"],
+                "wc_experience_score": p["wc_experience_score"],
+                "wc_knockout_depth": p["wc_knockout_depth"],
+                "squad_market_value_norm": p["squad_market_value_norm"],
+                "fifa_points_pre_tournament": p["fifa_points_pre_tournament"],
             })
         return pd.DataFrame(rows)
 

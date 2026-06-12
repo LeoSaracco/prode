@@ -14,6 +14,7 @@
 | G - Calibracion y Recencia | Completado | Voting 50.62% | Temperature scaling, sample_weight por recencia, TwoStage fuera del reporte, Optuna con objetivo compuesto, Kaggle credentials. |
 | H - Features, Datos y Simulacion | Completado | Voting 51.25%, ALTO 82.5% | Poisson al ensemble, squad quality desde ratings FIFA, bracket oficial WC2026, seeds variables, FALLBACK_STATS diversificados. |
 | I - UX y Performance | Completado | Frontend 4 vistas, API cacheada | Calendario, bracket mirror, comparar partidos, spinner, pair_cache, elo_dict, score matrix unificada. |
+| J - Fix TwoStage y features WC reales | Completado | Voting 50.36%, TwoStage 48.83% | Se quito `class_weight="balanced"` del clasificador de empates (34.65% -> 48.83%); `wc_recent_goal_balance`/`wc_recent_win_rate`/`wc_knockout_depth` calculados desde historial real de Mundiales (ventana 8 anos). |
 
 ## Estado Actual
 
@@ -49,25 +50,26 @@ Artefactos relevantes:
 
 ## Metricas Actuales
 
-Ultimo entrenamiento: `2026-06-05T10:46:10`.
+Ultimo entrenamiento: `2026-06-12T09:20:41`.
 
 | Metrica | Valor | Que significa |
 |---|---:|---|
-| `accuracy_voting` | 51.25% | Acierto general del ensemble de 6 modelos. |
-| `accuracy_catboost` | 50.93% | Acierto de CatBoost solo. |
-| `accuracy_lgbm` | 50.36% | Acierto de LightGBM. |
-| `accuracy_rf` | 48.99% | Acierto de RandomForest. |
-| `accuracy_xgb` | 47.30% | Acierto de XGBoost. |
-| `accuracy_high_confidence` | **82.50%** | Acierto cuando el sistema marca `ALTO`. Target >80% alcanzado. |
-| `n_high_confidence_matches` | 40 | Partidos test con confianza `ALTO`. |
-| `accuracy_high_elo_diff_200` | 65.52% | Acierto cuando la diferencia Elo es >= 200 (n=290). |
-| `log_loss_voting` | 1.0003 | Calidad de probabilidades; menor es mejor. |
+| `accuracy_voting` | 50.36% | Acierto general del ensemble de 6 modelos. |
+| `accuracy_lgbm` | 50.77% | Acierto de LightGBM (mejor individual). |
+| `accuracy_catboost` | 50.44% | Acierto de CatBoost solo. |
+| `accuracy_rf` | 50.04% | Acierto de RandomForest. |
+| `accuracy_xgb` | 48.03% | Acierto de XGBoost. |
+| `accuracy_two_stage` | 48.83% | Acierto del modelo auxiliar de dos etapas (corregido 2026-06-12, antes 34.65%). |
+| `accuracy_high_confidence` | **81.93%** | Acierto cuando el sistema marca `ALTO`. Target >80% alcanzado. |
+| `n_high_confidence_matches` | 83 | Partidos test con confianza `ALTO`. |
+| `accuracy_high_elo_diff_200` | 65.17% | Acierto cuando la diferencia Elo es >= 200 (n=290). |
+| `log_loss_voting` | 1.0002 | Calidad de probabilidades; menor es mejor. |
 | Partidos de entrenamiento | 8,273 | Incluye datos base + Kaggle match features. |
 
 Notas:
 
 - `accuracy_voting` es la metrica principal global.
-- El target de >80% en alta confianza fue alcanzado por primera vez en Fase H.
+- El target de >80% en alta confianza fue alcanzado por primera vez en Fase H y se mantiene.
 - Las metricas son honestas: features rolling sin leakage, evaluacion unica en test cronologico.
 
 ## Completado En Fase I — UX y Performance (2026-06-09)
@@ -119,6 +121,43 @@ Notas:
 | `frontend/src/api.ts` | + `FixturePrediction`, `BracketResponse` y rama de tipos, + `fetchFixtures()`, `simulateTournamentBracket()` |
 | `frontend/src/main.tsx` | + vista calendar, `CalendarTimeline`, `FixtureCard`, `BracketTree` mirror, `BracketRoundColumn`, `BracketMatch`, `BracketTeamRow`, `ChampionBadge`, `_FLAGS`, compareMode, auto-predict, `initialLoading`, `LoadingOverlay` |
 | `frontend/src/styles.css` | + ~300 lineas: calendar, fixture cards, toggle groups, compare mode, bracket mirror, champion badge, connectors, spinner overlay, 4 media queries, mobile universal rules |
+
+## Completado En Fase J — Fix TwoStage Y Features WC Reales (2026-06-12)
+
+- **Fix `TwoStageClassifier`** (`src/models/two_stage.py`): el clasificador de
+  empates (stage 1) usaba `class_weight="balanced"`, lo que lo llevaba a
+  predecir "empate" en ~85% de los casos de test (accuracy two-stage 34.65%,
+  por debajo del azar 33.3%). Se quito `class_weight="balanced"` de
+  `draw_defaults`; la accuracy subio a 48.83%, en linea con los modelos base
+  (~48-51%).
+- **Features WC recientes reales** (`src/models/trainer.py`,
+  `RollingNationalTeamFeatureBuilder`): `wc_recent_goal_balance`,
+  `wc_recent_win_rate` y `wc_knockout_depth` ya no son placeholders neutrales
+  (0.0/0.5/0.0 para todos los equipos). Ahora cada equipo acumula
+  `wc_gf`/`wc_ga`/`wc_points`/`wc_dates`/`wc_years` para los partidos marcados
+  `is_wc=1`, y `_profile()` calcula:
+  - `wc_recent_goal_balance = tanh(mean(gf-ga en Mundiales de los ultimos 8 anos) / 2)`
+  - `wc_recent_win_rate = mean(puntos) / 3` (3=victoria, 1=empate, 0=derrota) sobre la misma ventana
+  - `wc_knockout_depth = clip((partidos_en_el_Mundial_mas_reciente - 3) / 4, 0, 1)` como proxy de fase alcanzada
+  - Equipos sin historial mundialista mantienen los valores neutrales (0.0/0.5/0.0).
+- Reentrenado (`scripts/train_models.py`, `train_date: 2026-06-12T09:20:41`).
+  28/28 tests pasan. Verificado end-to-end: `/api/v1/predict`,
+  `/simulate/group/A`, `/simulate/tournament` y frontend (Prediccion Argentina
+  vs Jordania con `top_features` poblado).
+
+## Pendiente — Fase K: Export Estatico + GitHub Pages
+
+- **Objetivo**: publicar el frontend en GitHub Pages via GitHub Actions, sin
+  que el sitio dependa de un backend Python en vivo.
+- **Enfoque**: generar localmente (no en CI) un conjunto de archivos JSON
+  estaticos llamando a la logica de prediccion/simulacion in-process (mismo
+  patron que `scripts/generate_report.py`), y adaptar
+  `frontend/src/api.ts` para que en modo build "estatico" lea esos JSON en
+  lugar de hacer `fetch` al backend. El workflow de GitHub Actions solo
+  compila y despliega el frontend.
+- **Estado**: planificado, no implementado. Ver `docs/STATIC_DEPLOY_CONTEXT.md`
+  para el plan detallado (script de export, adaptacion de `api.ts`, workflow
+  de GitHub Actions, decisiones abiertas).
 
 ### Mejoras Sin Reentrenamiento
 

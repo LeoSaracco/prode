@@ -662,10 +662,10 @@ salvo las contextuales y la probabilidad Elo.
 | `elo_momentum_diff` | Diferencia de momentum Elo reciente |
 | `days_since_last_match_diff` | Diferencia de días sin jugar |
 | `rest_days_diff` | Diferencia de días de descanso |
-| `wc_recent_goal_balance_diff` | Diferencia de balance goleador reciente en Mundiales |
-| `wc_recent_win_rate_diff` | Diferencia de tasa de victorias reciente en Mundiales |
+| `wc_recent_goal_balance_diff` | Diferencia de balance goleador (GF-GA) en Mundiales de los ultimos 8 anos, calculado desde el historial real de cada seleccion (`tanh` del promedio) |
+| `wc_recent_win_rate_diff` | Diferencia de tasa de puntos (victoria=3, empate=1, derrota=0, sobre 3) en Mundiales de los ultimos 8 anos, desde historial real |
 | `wc_experience_diff` | Diferencia de experiencia mundialista acumulada |
-| `wc_knockout_depth_diff` | Diferencia de profundidad alcanzada en eliminatorias mundialistas |
+| `wc_knockout_depth_diff` | Diferencia de profundidad alcanzada en el Mundial mas reciente, proxy por cantidad de partidos jugados (3=fase de grupos, 7=final) |
 | `squad_market_value_diff` | Diferencia de valor estimado de plantel |
 | `fifa_points_pre_tournament_diff` | Diferencia de puntos FIFA previos al torneo |
 
@@ -935,3 +935,29 @@ python scripts/validate_data.py
 3-clases. El sistema es más confiable cuando la diferencia de Elo entre equipos es grande
 (>200 puntos): en esos casos alcanza el 63%. El modelo TwoStageClassifier (draw/no-draw)
 está por debajo del azar y es el problema conocido más urgente.
+
+---
+
+## Apéndice: Métricas del modelo (estado al 12 de junio de 2026)
+
+| Métrica | Valor |
+|---------|-------|
+| Accuracy ensemble (voting) | 50.36% |
+| Accuracy LightGBM (mejor individual) | 50.77% |
+| Accuracy CatBoost | 50.44% |
+| Accuracy RandomForest | 50.04% |
+| Accuracy XGBoost | 48.03% |
+| Accuracy TwoStage (draw/no-draw) | 48.83% |
+| Accuracy alta confianza (umbral ≥0.70, n=83) | 81.93% |
+| Accuracy alta diferencia Elo (≥200 pts, n=290) | 65.17% |
+| Log-loss voting | 1.0002 |
+| Baseline aleatorio (3 clases) | 33.3% |
+
+**Notas:** El 2026-06-12 se corrigió `TwoStageClassifier`: el clasificador de
+empates tenía `class_weight="balanced"`, lo que lo hacía predecir "empate" en
+~85% de los casos (accuracy 34.65%, por debajo del azar). Al quitar ese
+parámetro la accuracy subió a 48.83%, en línea con los modelos base — ya **no**
+es el problema conocido más urgente. En la misma corrida se reemplazaron los
+features `wc_recent_goal_balance`, `wc_recent_win_rate` y `wc_knockout_depth`
+(antes placeholders neutrales para todos los equipos) por cálculos reales desde
+el historial de partidos mundialistas de cada selección (ventana de 8 años).

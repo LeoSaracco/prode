@@ -84,8 +84,13 @@ class XGBOutcomeClassifier:
             import shap
             explainer = shap.TreeExplainer(self.model_)
             shap_values = explainer.shap_values(x.reshape(1, -1))
-            # shap_values[2] = contribución a clase Win
-            win_shap = shap_values[2][0]
+            shap_values = np.asarray(shap_values)
+            if shap_values.ndim == 3:
+                # (n_samples, n_features, n_classes) — shap >= 0.45
+                win_shap = shap_values[0, :, 2]
+            else:
+                # list of (n_samples, n_features) per class — older shap
+                win_shap = shap_values[2][0]
             pairs = list(zip(MATCH_FEATURE_COLUMNS, win_shap))
             return sorted(pairs, key=lambda p: abs(p[1]), reverse=True)[:5]
         except Exception as e:

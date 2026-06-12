@@ -1,0 +1,19 @@
+# Runtime dependencies for the FastAPI prediction service (Dockerfile.api).
+# Slim subset of requirements.txt - excludes data-collection, training, and
+# notebook tooling (soccerdata, kaggle, datasets, jupyter, optuna, etc.).
+
+numpy
+pandas
+scipy
+scikit-learn
+xgboost
+lightgbm
+catboost
+shap
+joblib
+requests
+rich
+python-dotenv
+pydantic
+fastapi
+uvicorn[standard]
