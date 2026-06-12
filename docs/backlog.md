@@ -15,6 +15,7 @@
 | H - Features, Datos y Simulacion | Completado | Voting 51.25%, ALTO 82.5% | Poisson al ensemble, squad quality desde ratings FIFA, bracket oficial WC2026, seeds variables, FALLBACK_STATS diversificados. |
 | I - UX y Performance | Completado | Frontend 4 vistas, API cacheada | Calendario, bracket mirror, comparar partidos, spinner, pair_cache, elo_dict, score matrix unificada. |
 | J - Fix TwoStage y features WC reales | Completado | Voting 50.36%, TwoStage 48.83% | Se quito `class_weight="balanced"` del clasificador de empates (34.65% -> 48.83%); `wc_recent_goal_balance`/`wc_recent_win_rate`/`wc_knockout_depth` calculados desde historial real de Mundiales (ventana 8 anos). |
+| K - Export Estatico + GitHub Pages | Completado | Deploy en `leosaracco.github.io/prode` | Script `export_static_data.py` con ProcessPoolExecutor (6 workers, 2.2 min), split predictions/ en 48 archivos por equipo, `api.ts` modo STATIC_MODE con cache Map, `vite.config.ts` base dinamico, `.github/workflows/deploy-pages.yml`, footer con LinkedIn. |
 
 ## Estado Actual
 
@@ -145,19 +146,32 @@ Notas:
   `/simulate/group/A`, `/simulate/tournament` y frontend (Prediccion Argentina
   vs Jordania con `top_features` poblado).
 
-## Pendiente — Fase K: Export Estatico + GitHub Pages
+## Completado En Fase K — Export Estatico + GitHub Pages (2026-06-12)
 
-- **Objetivo**: publicar el frontend en GitHub Pages via GitHub Actions, sin
-  que el sitio dependa de un backend Python en vivo.
-- **Enfoque**: generar localmente (no en CI) un conjunto de archivos JSON
-  estaticos llamando a la logica de prediccion/simulacion in-process (mismo
-  patron que `scripts/generate_report.py`), y adaptar
-  `frontend/src/api.ts` para que en modo build "estatico" lea esos JSON en
-  lugar de hacer `fetch` al backend. El workflow de GitHub Actions solo
-  compila y despliega el frontend.
-- **Estado**: planificado, no implementado. Ver `docs/STATIC_DEPLOY_CONTEXT.md`
-  para el plan detallado (script de export, adaptacion de `api.ts`, workflow
-  de GitHub Actions, decisiones abiertas).
+- **`scripts/export_static_data.py`**: exporta `teams.json`, `groups.json`, `fixtures.json`, `predictions/<Team>.json` (48 x 47 = 2256 pares), `groups/<A..L>.json`, `tournament.json`, `tournament_bracket.json` a `frontend/public/data/`. Usa `ProcessPoolExecutor` (6 workers, 2.2 min para 2256 predicciones). Flag `--quick` para n_sims reducidos. `include_shap=False, include_aux=False`.
+- **`api/formatters.py`**: `format_prediction()` y `scoreline_tuple_to_schema()` extraidos de `api/routers/predictions.py` para reuso en API y export script.
+- **`frontend/src/api.ts`**: rama `STATIC_MODE` (`VITE_STATIC_MODE=true`) que lee JSON locales via `readStatic()` en lugar de `fetch` al backend. Cache `Map<string, Record<string, MatchResult>>` para predictions. Tipos TS sin cambios.
+- **`frontend/vite.config.ts`**: `base: process.env.VITE_BASE_PATH ?? "/"` para GitHub Pages.
+- **`.github/workflows/deploy-pages.yml`**: workflow Node-only (sin Python). Trigger en push a `master` con paths `frontend/**` y workflow. Jobs: build (checkout, setup-node, npm ci, build Vite, configure-pages, upload artifact) y deploy (deploy-pages). Permisos: contents:read, pages:write, id-token:write.
+- **Footer**: "Developed by Leandro Saracco" con link a LinkedIn en todas las vistas.
+- **GitHub Pages**: habilitado via API (`gh api /repos/LeoSaracco/prode/pages --method POST -f build_type=workflow`). URL: `https://leosaracco.github.io/prode/`.
+
+### Archivos Relevantes De Fase K
+
+- `scripts/export_static_data.py` — script de export de datos estaticos
+- `api/formatters.py` — helpers de formateo compartidos API + export
+- `frontend/src/api.ts` — modo STATIC_MODE + cache
+- `frontend/vite.config.ts` — base path dinamico
+- `.github/workflows/deploy-pages.yml` — CI/CD para GitHub Pages
+- `docs/fase-k-plan.md` — plan detallado con checks de progreso
+- `docs/STATIC_DEPLOY_CONTEXT.md` — contexto de handoff para la fase
+
+### Notas Operativas Fase K
+
+- Regenerar JSON tras reentrenamiento: `python scripts/export_static_data.py` y commitear `frontend/public/data/`.
+- El workflow NO entrena modelos ni ejecuta Python.
+- `VITE_BASE_PATH` usa `${{ github.event.repository.name }}` (prode).
+- `enablement: true` de `configure-pages` **no funciona con GITHUB_TOKEN**. Si se deshabilita Pages, hay que reactivarlo via API o Settings.
 
 ### Mejoras Sin Reentrenamiento
 
@@ -174,7 +188,7 @@ Notas:
 - **Mejores terceros por rendimiento**: `_select_best_thirds()` ordena por pts > gd > gf en lugar de Elo random.
 - **Pesos Elo y Poisson fijos**: en `trainer.py` los pesos de Elo (0.10) y Poisson (0.07) son fijos antes de normalizacion, independientes de val accuracy.
 
-## Pendiente (Fase J+)
+## Pendiente (Fase K+)
 
 ### Calibracion De xG Por Calidad De Rival
 
@@ -226,7 +240,6 @@ Prioridad: baja.
 
 - **Precalentar pair_cache en lifespan**: mover el warm-up de predicciones al `lifespan` de FastAPI para que el primer request ya sea instantaneo (actualmente el primer request a `/fixtures` o `/simulate/tournament` tarda ~5s en llenar el cache).
 - **Predict match cache por feature vector**: `predict_match()` tarda ~1s por llamada aun sin SHAP. Cachear el resultado por feature vector (ya que `build_match_features` es determinista para un par de equipos) reduciria las 72 predicciones iniciales a ~0s si los features ya se calcularon.
-- **Paralelizar predict_match con multiprocessing**: `ThreadPoolExecutor` no ayuda con CPU-bound en Python por el GIL. Usar `ProcessPoolExecutor` para las 72 predicciones iniciales (cada proceso carga sus propios modelos, ~4-8 workers).
 
 ## Notas Operativas
 
@@ -234,3 +247,4 @@ Prioridad: baja.
 - No comparar metricas antiguas con leakage contra metricas nuevas rolling como si fueran equivalentes.
 - Reentrenar despues de cambios en features, collector de datos o pesos.
 - Mantener `docs/README.md`, `docs/plan.md` y `docs/backlog.md` alineados con metadata real.
+- **Post-reentrenamiento**: correr `python scripts/export_static_data.py` y commitear `frontend/public/data/` para mantener GitHub Pages actualizado.
