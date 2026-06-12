@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Activity, BarChart3, CalendarDays, Linkedin, Play, Trophy } from "lucide-react";
+import { Activity, BarChart3, CalendarDays, Info, Linkedin, Play, Trophy } from "lucide-react";
 import {
   BracketResponse,
   BracketRound,
@@ -446,7 +446,6 @@ function TeamCombobox({ label, value, teams, onChange }: {
 // ── PredictionPanel ───────────────────────────────────────────────────────────
 function PredictionPanel({ match, compact }: { match: MatchResult; compact?: boolean }) {
   const score = match.outcome_scoreline ?? match.most_likely_scoreline;
-  const exactScore = match.exact_most_likely_scoreline;
   const teamAEs = es(match.team_a);
   const teamBEs = es(match.team_b);
   const outcomes = [
@@ -463,11 +462,9 @@ function PredictionPanel({ match, compact }: { match: MatchResult; compact?: boo
           <span className="eyebrow">Predicción del modelo entrenado</span>
           <h2>{bestOutcome.label}</h2>
           <p className="result-copy">
-            Marcador más probable: {teamAEs} {score?.goals_a ?? "-"} - {score?.goals_b ?? "-"} {teamBEs}
+            Marcador más probable:{" "}
+            <strong>{teamAEs} {score?.goals_a ?? "-"} - {score?.goals_b ?? "-"} {teamBEs}</strong>
           </p>
-          {exactScore && score && (exactScore.goals_a !== score.goals_a || exactScore.goals_b !== score.goals_b) && (
-            <p className="result-note">Marcador exacto global: {exactScore.goals_a}-{exactScore.goals_b}</p>
-          )}
         </div>
         <div className="confidence">{percent(bestOutcome.value)}</div>
       </section>
@@ -479,33 +476,14 @@ function PredictionPanel({ match, compact }: { match: MatchResult; compact?: boo
       </section>
 
       <section className="metrics">
-        <Metric label={`${teamAEs} xG`} value={match.expected_goals.team_a.toFixed(2)} />
+        <Metric
+          label={`${teamAEs} xG`}
+          value={match.expected_goals.team_a.toFixed(2)}
+          info="xG (goles esperados) es una forma de medir qué tan peligroso fue un equipo: estima cuántos goles debería haber anotado según las jugadas de gol que generó, sin importar si las convirtió o no."
+        />
         <Metric label={`${teamBEs} xG`} value={match.expected_goals.team_b.toFixed(2)} />
         <Metric label="Confianza" value={match.confidence} />
-        <Metric label="Diferencia Elo" value={Math.round(match.elo.diff).toString()} />
       </section>
-
-      <section className="scorelines">
-        <strong>Marcadores posibles</strong>
-        {(compact ? match.top_scorelines.slice(0, 3) : match.top_scorelines).map((item) => (
-          <div key={`${item.goals_a}-${item.goals_b}`}>
-            <strong>{item.goals_a}-{item.goals_b}</strong>
-            <span>{percent(item.probability)}</span>
-          </div>
-        ))}
-      </section>
-
-      {!compact && (
-        <section className="features">
-          <strong>Variables que más influyen</strong>
-          {match.top_features.length ? match.top_features.map((feature) => (
-            <div key={feature.name}>
-              <span>{feature.name}</span>
-              <strong>{feature.direction}</strong>
-            </div>
-          )) : <p>La explicación SHAP no está disponible para el modelo cargado.</p>}
-        </section>
-      )}
     </div>
   );
 }
@@ -523,8 +501,25 @@ function ProbBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return <div className="metric"><span>{label}</span><strong>{value}</strong></div>;
+function Metric({ label, value, info }: { label: string; value: string; info?: string }) {
+  return (
+    <div className="metric">
+      <span>
+        {label}
+        {info && <InfoTooltip text={info} />}
+      </span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function InfoTooltip({ text }: { text: string }) {
+  return (
+    <span className="info-tooltip" tabIndex={0} role="img" aria-label={text}>
+      <Info size={14} />
+      <span className="info-tooltip__bubble" role="tooltip">{text}</span>
+    </span>
+  );
 }
 
 function TeamList({ title, teams }: { title: string; teams: string[] }) {
