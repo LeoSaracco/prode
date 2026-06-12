@@ -1,0 +1,130 @@
+{
+  "group": "E",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "Germany",
+      "group": "E",
+      "prob_1st": 0.7555,
+      "prob_2nd": 0.175,
+      "prob_3rd": 0.0515,
+      "prob_4th": 0.018,
+      "qualify_direct_prob": 0.9305,
+      "avg_pts": 7.09,
+      "avg_gd": 3.58
+    },
+    {
+      "team": "Ecuador",
+      "group": "E",
+      "prob_1st": 0.1215,
+      "prob_2nd": 0.3815,
+      "prob_3rd": 0.31,
+      "prob_4th": 0.187,
+      "qualify_direct_prob": 0.503,
+      "avg_pts": 4.02,
+      "avg_gd": -0.73
+    },
+    {
+      "team": "Cote d'Ivoire",
+      "group": "E",
+      "prob_1st": 0.087,
+      "prob_2nd": 0.314,
+      "prob_3rd": 0.375,
+      "prob_4th": 0.224,
+      "qualify_direct_prob": 0.401,
+      "avg_pts": 3.52,
+      "avg_gd": -0.6
+    },
+    {
+      "team": "Curacao",
+      "group": "E",
+      "prob_1st": 0.036,
+      "prob_2nd": 0.1295,
+      "prob_3rd": 0.2635,
+      "prob_4th": 0.571,
+      "qualify_direct_prob": 0.1655,
+      "avg_pts": 2.07,
+      "avg_gd": -2.25
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "Germany",
+      "team_b": "Ecuador",
+      "expected_goals": {
+        "team_a": 1.88,
+        "team_b": 0.6
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1675
+      }
+    },
+    {
+      "team_a": "Germany",
+      "team_b": "Cote d'Ivoire",
+      "expected_goals": {
+        "team_a": 1.25,
+        "team_b": 0.73
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.17
+      }
+    },
+    {
+      "team_a": "Germany",
+      "team_b": "Curacao",
+      "expected_goals": {
+        "team_a": 1.53,
+        "team_b": 0.83
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.15
+      }
+    },
+    {
+      "team_a": "Ecuador",
+      "team_b": "Cote d'Ivoire",
+      "expected_goals": {
+        "team_a": 0.63,
+        "team_b": 1.15
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1905
+      }
+    },
+    {
+      "team_a": "Ecuador",
+      "team_b": "Curacao",
+      "expected_goals": {
+        "team_a": 0.75,
+        "team_b": 1.19
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1595
+      }
+    },
+    {
+      "team_a": "Cote d'Ivoire",
+      "team_b": "Curacao",
+      "expected_goals": {
+        "team_a": 0.95,
+        "team_b": 0.82
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1805
+      }
+    }
+  ]
+}

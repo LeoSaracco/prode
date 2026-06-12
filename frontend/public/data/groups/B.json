@@ -1,0 +1,130 @@
+{
+  "group": "B",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "Switzerland",
+      "group": "B",
+      "prob_1st": 0.504,
+      "prob_2nd": 0.267,
+      "prob_3rd": 0.154,
+      "prob_4th": 0.075,
+      "qualify_direct_prob": 0.771,
+      "avg_pts": 5.72,
+      "avg_gd": 1.72
+    },
+    {
+      "team": "Canada",
+      "group": "B",
+      "prob_1st": 0.26,
+      "prob_2nd": 0.317,
+      "prob_3rd": 0.2505,
+      "prob_4th": 0.1725,
+      "qualify_direct_prob": 0.577,
+      "avg_pts": 4.33,
+      "avg_gd": 0.19
+    },
+    {
+      "team": "Bosnia and Herzegovina",
+      "group": "B",
+      "prob_1st": 0.1455,
+      "prob_2nd": 0.2365,
+      "prob_3rd": 0.306,
+      "prob_4th": 0.312,
+      "qualify_direct_prob": 0.382,
+      "avg_pts": 3.51,
+      "avg_gd": -0.69
+    },
+    {
+      "team": "Qatar",
+      "group": "B",
+      "prob_1st": 0.0905,
+      "prob_2nd": 0.1795,
+      "prob_3rd": 0.2895,
+      "prob_4th": 0.4405,
+      "qualify_direct_prob": 0.27,
+      "avg_pts": 2.79,
+      "avg_gd": -1.23
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "Canada",
+      "team_b": "Switzerland",
+      "expected_goals": {
+        "team_a": 0.95,
+        "team_b": 1.11
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.143
+      }
+    },
+    {
+      "team_a": "Canada",
+      "team_b": "Qatar",
+      "expected_goals": {
+        "team_a": 0.67,
+        "team_b": 0.73
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.247
+      }
+    },
+    {
+      "team_a": "Canada",
+      "team_b": "Bosnia and Herzegovina",
+      "expected_goals": {
+        "team_a": 0.93,
+        "team_b": 0.82
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.178
+      }
+    },
+    {
+      "team_a": "Switzerland",
+      "team_b": "Qatar",
+      "expected_goals": {
+        "team_a": 0.9,
+        "team_b": 0.9
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1605
+      }
+    },
+    {
+      "team_a": "Switzerland",
+      "team_b": "Bosnia and Herzegovina",
+      "expected_goals": {
+        "team_a": 1.22,
+        "team_b": 0.98
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.149
+      }
+    },
+    {
+      "team_a": "Qatar",
+      "team_b": "Bosnia and Herzegovina",
+      "expected_goals": {
+        "team_a": 0.86,
+        "team_b": 0.74
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2065
+      }
+    }
+  ]
+}

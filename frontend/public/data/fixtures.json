@@ -1,0 +1,1444 @@
+{
+  "fixtures": [
+    {
+      "date": "2026-06-11",
+      "matchday": 1,
+      "group": "A",
+      "team_a": "Mexico",
+      "team_b": "South Africa",
+      "venue": "Mexico City, Mexico",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0874
+      },
+      "win_a": 0.614,
+      "draw": 0.2028,
+      "win_b": 0.1832,
+      "confidence": "MEDIO",
+      "xg_a": 1.18,
+      "xg_b": 0.9
+    },
+    {
+      "date": "2026-06-11",
+      "matchday": 1,
+      "group": "A",
+      "team_a": "South Korea",
+      "team_b": "Czechia",
+      "venue": "Zapopan, Mexico",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1143
+      },
+      "win_a": 0.3883,
+      "draw": 0.3469,
+      "win_b": 0.2648,
+      "confidence": "BAJO",
+      "xg_a": 0.65,
+      "xg_b": 0.91
+    },
+    {
+      "date": "2026-06-12",
+      "matchday": 1,
+      "group": "B",
+      "team_a": "Canada",
+      "team_b": "Bosnia and Herzegovina",
+      "venue": "Toronto, Canada",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1367
+      },
+      "win_a": 0.3792,
+      "draw": 0.3704,
+      "win_b": 0.2504,
+      "confidence": "MEDIO",
+      "xg_a": 0.92,
+      "xg_b": 0.82
+    },
+    {
+      "date": "2026-06-12",
+      "matchday": 1,
+      "group": "D",
+      "team_a": "United States",
+      "team_b": "Paraguay",
+      "venue": "Inglewood, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1189
+      },
+      "win_a": 0.3917,
+      "draw": 0.2523,
+      "win_b": 0.356,
+      "confidence": "MEDIO",
+      "xg_a": 0.91,
+      "xg_b": 0.94
+    },
+    {
+      "date": "2026-06-13",
+      "matchday": 1,
+      "group": "B",
+      "team_a": "Qatar",
+      "team_b": "Switzerland",
+      "venue": "Santa Clara, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1241
+      },
+      "win_a": 0.1514,
+      "draw": 0.2838,
+      "win_b": 0.5648,
+      "confidence": "MEDIO",
+      "xg_a": 0.9,
+      "xg_b": 0.95
+    },
+    {
+      "date": "2026-06-13",
+      "matchday": 1,
+      "group": "C",
+      "team_a": "Brazil",
+      "team_b": "Morocco",
+      "venue": "East Rutherford, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1873
+      },
+      "win_a": 0.5178,
+      "draw": 0.2496,
+      "win_b": 0.2326,
+      "confidence": "MEDIO",
+      "xg_a": 0.98,
+      "xg_b": 0.56
+    },
+    {
+      "date": "2026-06-13",
+      "matchday": 1,
+      "group": "C",
+      "team_a": "Haiti",
+      "team_b": "Scotland",
+      "venue": "Foxborough, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1394
+      },
+      "win_a": 0.351,
+      "draw": 0.2113,
+      "win_b": 0.4376,
+      "confidence": "MEDIO",
+      "xg_a": 0.81,
+      "xg_b": 1.01
+    },
+    {
+      "date": "2026-06-13",
+      "matchday": 1,
+      "group": "D",
+      "team_a": "Australia",
+      "team_b": "Turkiye",
+      "venue": "Vancouver, Canada",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1012
+      },
+      "win_a": 0.2397,
+      "draw": 0.2664,
+      "win_b": 0.4939,
+      "confidence": "BAJO",
+      "xg_a": 1.01,
+      "xg_b": 0.67
+    },
+    {
+      "date": "2026-06-14",
+      "matchday": 1,
+      "group": "E",
+      "team_a": "Germany",
+      "team_b": "Curacao",
+      "venue": "Houston, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.091
+      },
+      "win_a": 0.7495,
+      "draw": 0.1535,
+      "win_b": 0.097,
+      "confidence": "ALTO",
+      "xg_a": 1.51,
+      "xg_b": 0.82
+    },
+    {
+      "date": "2026-06-14",
+      "matchday": 1,
+      "group": "E",
+      "team_a": "Cote d'Ivoire",
+      "team_b": "Ecuador",
+      "venue": "Philadelphia, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0861
+      },
+      "win_a": 0.3472,
+      "draw": 0.2611,
+      "win_b": 0.3917,
+      "confidence": "MEDIO",
+      "xg_a": 1.12,
+      "xg_b": 0.61
+    },
+    {
+      "date": "2026-06-14",
+      "matchday": 1,
+      "group": "F",
+      "team_a": "Netherlands",
+      "team_b": "Japan",
+      "venue": "Arlington, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0576
+      },
+      "win_a": 0.3297,
+      "draw": 0.2458,
+      "win_b": 0.4244,
+      "confidence": "BAJO",
+      "xg_a": 1.3,
+      "xg_b": 0.89
+    },
+    {
+      "date": "2026-06-14",
+      "matchday": 1,
+      "group": "F",
+      "team_a": "Sweden",
+      "team_b": "Tunisia",
+      "venue": "Guadalupe, Mexico",
+      "predicted_outcome": "draw",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1548
+      },
+      "win_a": 0.3314,
+      "draw": 0.3714,
+      "win_b": 0.2973,
+      "confidence": "MEDIO",
+      "xg_a": 0.99,
+      "xg_b": 0.76
+    },
+    {
+      "date": "2026-06-15",
+      "matchday": 1,
+      "group": "G",
+      "team_a": "Belgium",
+      "team_b": "Egypt",
+      "venue": "Seattle, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0524
+      },
+      "win_a": 0.4192,
+      "draw": 0.3099,
+      "win_b": 0.271,
+      "confidence": "MEDIO",
+      "xg_a": 0.9,
+      "xg_b": 1.14
+    },
+    {
+      "date": "2026-06-15",
+      "matchday": 1,
+      "group": "G",
+      "team_a": "Iran",
+      "team_b": "New Zealand",
+      "venue": "Inglewood, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1347
+      },
+      "win_a": 0.4164,
+      "draw": 0.2913,
+      "win_b": 0.2923,
+      "confidence": "MEDIO",
+      "xg_a": 1.4,
+      "xg_b": 0.58
+    },
+    {
+      "date": "2026-06-15",
+      "matchday": 1,
+      "group": "H",
+      "team_a": "Spain",
+      "team_b": "Cape Verde",
+      "venue": "Atlanta, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1431
+      },
+      "win_a": 0.7275,
+      "draw": 0.1681,
+      "win_b": 0.1044,
+      "confidence": "ALTO",
+      "xg_a": 1.47,
+      "xg_b": 0.55
+    },
+    {
+      "date": "2026-06-15",
+      "matchday": 1,
+      "group": "H",
+      "team_a": "Saudi Arabia",
+      "team_b": "Uruguay",
+      "venue": "Miami Gardens, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.142
+      },
+      "win_a": 0.0982,
+      "draw": 0.1535,
+      "win_b": 0.7483,
+      "confidence": "ALTO",
+      "xg_a": 0.79,
+      "xg_b": 1.06
+    },
+    {
+      "date": "2026-06-16",
+      "matchday": 1,
+      "group": "I",
+      "team_a": "France",
+      "team_b": "Senegal",
+      "venue": "East Rutherford, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1479
+      },
+      "win_a": 0.7133,
+      "draw": 0.1676,
+      "win_b": 0.1191,
+      "confidence": "ALTO",
+      "xg_a": 0.91,
+      "xg_b": 0.76
+    },
+    {
+      "date": "2026-06-16",
+      "matchday": 1,
+      "group": "I",
+      "team_a": "Iraq",
+      "team_b": "Norway",
+      "venue": "Foxborough, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0798
+      },
+      "win_a": 0.2643,
+      "draw": 0.2465,
+      "win_b": 0.4892,
+      "confidence": "MEDIO",
+      "xg_a": 1.2,
+      "xg_b": 0.67
+    },
+    {
+      "date": "2026-06-16",
+      "matchday": 1,
+      "group": "J",
+      "team_a": "Argentina",
+      "team_b": "Algeria",
+      "venue": "Kansas City, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1675
+      },
+      "win_a": 0.5349,
+      "draw": 0.2421,
+      "win_b": 0.2231,
+      "confidence": "MEDIO",
+      "xg_a": 0.95,
+      "xg_b": 0.66
+    },
+    {
+      "date": "2026-06-16",
+      "matchday": 1,
+      "group": "J",
+      "team_a": "Austria",
+      "team_b": "Jordan",
+      "venue": "Santa Clara, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1222
+      },
+      "win_a": 0.5934,
+      "draw": 0.2278,
+      "win_b": 0.1788,
+      "confidence": "MEDIO",
+      "xg_a": 1.35,
+      "xg_b": 0.66
+    },
+    {
+      "date": "2026-06-17",
+      "matchday": 1,
+      "group": "K",
+      "team_a": "Portugal",
+      "team_b": "DR Congo",
+      "venue": "Houston, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1471
+      },
+      "win_a": 0.5864,
+      "draw": 0.2688,
+      "win_b": 0.1448,
+      "confidence": "MEDIO",
+      "xg_a": 0.89,
+      "xg_b": 0.76
+    },
+    {
+      "date": "2026-06-17",
+      "matchday": 1,
+      "group": "K",
+      "team_a": "Uzbekistan",
+      "team_b": "Colombia",
+      "venue": "Mexico City, Mexico",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1249
+      },
+      "win_a": 0.148,
+      "draw": 0.152,
+      "win_b": 0.7,
+      "confidence": "ALTO",
+      "xg_a": 0.89,
+      "xg_b": 0.89
+    },
+    {
+      "date": "2026-06-17",
+      "matchday": 1,
+      "group": "L",
+      "team_a": "England",
+      "team_b": "Croatia",
+      "venue": "Arlington, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0875
+      },
+      "win_a": 0.4222,
+      "draw": 0.2466,
+      "win_b": 0.3311,
+      "confidence": "MEDIO",
+      "xg_a": 1.43,
+      "xg_b": 0.77
+    },
+    {
+      "date": "2026-06-17",
+      "matchday": 1,
+      "group": "L",
+      "team_a": "Ghana",
+      "team_b": "Panama",
+      "venue": "Toronto, Canada",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.2109
+      },
+      "win_a": 0.4709,
+      "draw": 0.2223,
+      "win_b": 0.3068,
+      "confidence": "MEDIO",
+      "xg_a": 1.21,
+      "xg_b": 0.45
+    },
+    {
+      "date": "2026-06-18",
+      "matchday": 2,
+      "group": "A",
+      "team_a": "Czechia",
+      "team_b": "South Africa",
+      "venue": "Atlanta, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1055
+      },
+      "win_a": 0.4982,
+      "draw": 0.2485,
+      "win_b": 0.2532,
+      "confidence": "MEDIO",
+      "xg_a": 1.28,
+      "xg_b": 0.77
+    },
+    {
+      "date": "2026-06-18",
+      "matchday": 2,
+      "group": "A",
+      "team_a": "Mexico",
+      "team_b": "South Korea",
+      "venue": "Zapopan, Mexico",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1455
+      },
+      "win_a": 0.3822,
+      "draw": 0.3164,
+      "win_b": 0.3014,
+      "confidence": "MEDIO",
+      "xg_a": 0.84,
+      "xg_b": 0.76
+    },
+    {
+      "date": "2026-06-18",
+      "matchday": 2,
+      "group": "B",
+      "team_a": "Switzerland",
+      "team_b": "Bosnia and Herzegovina",
+      "venue": "Inglewood, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0832
+      },
+      "win_a": 0.5801,
+      "draw": 0.2325,
+      "win_b": 0.1874,
+      "confidence": "MEDIO",
+      "xg_a": 1.27,
+      "xg_b": 1.0
+    },
+    {
+      "date": "2026-06-18",
+      "matchday": 2,
+      "group": "B",
+      "team_a": "Canada",
+      "team_b": "Qatar",
+      "venue": "Vancouver, Canada",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1424
+      },
+      "win_a": 0.5309,
+      "draw": 0.2924,
+      "win_b": 0.1768,
+      "confidence": "MEDIO",
+      "xg_a": 0.69,
+      "xg_b": 0.74
+    },
+    {
+      "date": "2026-06-19",
+      "matchday": 2,
+      "group": "C",
+      "team_a": "Scotland",
+      "team_b": "Morocco",
+      "venue": "Foxborough, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1529
+      },
+      "win_a": 0.1409,
+      "draw": 0.2452,
+      "win_b": 0.614,
+      "confidence": "MEDIO",
+      "xg_a": 0.72,
+      "xg_b": 0.84
+    },
+    {
+      "date": "2026-06-19",
+      "matchday": 2,
+      "group": "C",
+      "team_a": "Brazil",
+      "team_b": "Haiti",
+      "venue": "Philadelphia, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1387
+      },
+      "win_a": 0.7548,
+      "draw": 0.1734,
+      "win_b": 0.0718,
+      "confidence": "ALTO",
+      "xg_a": 1.38,
+      "xg_b": 0.55
+    },
+    {
+      "date": "2026-06-19",
+      "matchday": 2,
+      "group": "D",
+      "team_a": "United States",
+      "team_b": "Australia",
+      "venue": "Seattle, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.0828
+      },
+      "win_a": 0.3458,
+      "draw": 0.3195,
+      "win_b": 0.3347,
+      "confidence": "BAJO",
+      "xg_a": 0.69,
+      "xg_b": 1.18
+    },
+    {
+      "date": "2026-06-19",
+      "matchday": 2,
+      "group": "D",
+      "team_a": "Turkiye",
+      "team_b": "Paraguay",
+      "venue": "Santa Clara, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1398
+      },
+      "win_a": 0.4759,
+      "draw": 0.2455,
+      "win_b": 0.2785,
+      "confidence": "BAJO",
+      "xg_a": 0.88,
+      "xg_b": 0.8
+    },
+    {
+      "date": "2026-06-20",
+      "matchday": 2,
+      "group": "E",
+      "team_a": "Germany",
+      "team_b": "Cote d'Ivoire",
+      "venue": "Toronto, Canada",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1039
+      },
+      "win_a": 0.7317,
+      "draw": 0.1536,
+      "win_b": 0.1147,
+      "confidence": "ALTO",
+      "xg_a": 1.24,
+      "xg_b": 0.76
+    },
+    {
+      "date": "2026-06-20",
+      "matchday": 2,
+      "group": "E",
+      "team_a": "Ecuador",
+      "team_b": "Curacao",
+      "venue": "Kansas City, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.0827
+      },
+      "win_a": 0.5814,
+      "draw": 0.2551,
+      "win_b": 0.1635,
+      "confidence": "MEDIO",
+      "xg_a": 0.74,
+      "xg_b": 1.2
+    },
+    {
+      "date": "2026-06-20",
+      "matchday": 2,
+      "group": "F",
+      "team_a": "Netherlands",
+      "team_b": "Sweden",
+      "venue": "Houston, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0791
+      },
+      "win_a": 0.5547,
+      "draw": 0.2847,
+      "win_b": 0.1606,
+      "confidence": "MEDIO",
+      "xg_a": 1.28,
+      "xg_b": 1.39
+    },
+    {
+      "date": "2026-06-20",
+      "matchday": 2,
+      "group": "F",
+      "team_a": "Tunisia",
+      "team_b": "Japan",
+      "venue": "Guadalupe, Mexico",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1344
+      },
+      "win_a": 0.1326,
+      "draw": 0.3008,
+      "win_b": 0.5666,
+      "confidence": "MEDIO",
+      "xg_a": 0.77,
+      "xg_b": 0.64
+    },
+    {
+      "date": "2026-06-21",
+      "matchday": 2,
+      "group": "G",
+      "team_a": "Belgium",
+      "team_b": "Iran",
+      "venue": "Inglewood, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0508
+      },
+      "win_a": 0.6285,
+      "draw": 0.2147,
+      "win_b": 0.1568,
+      "confidence": "MEDIO",
+      "xg_a": 0.9,
+      "xg_b": 1.17
+    },
+    {
+      "date": "2026-06-21",
+      "matchday": 2,
+      "group": "G",
+      "team_a": "New Zealand",
+      "team_b": "Egypt",
+      "venue": "Vancouver, Canada",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.1324
+      },
+      "win_a": 0.1436,
+      "draw": 0.2332,
+      "win_b": 0.6232,
+      "confidence": "MEDIO",
+      "xg_a": 0.58,
+      "xg_b": 1.36
+    },
+    {
+      "date": "2026-06-21",
+      "matchday": 2,
+      "group": "H",
+      "team_a": "Spain",
+      "team_b": "Saudi Arabia",
+      "venue": "Atlanta, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1191
+      },
+      "win_a": 0.7538,
+      "draw": 0.1557,
+      "win_b": 0.0904,
+      "confidence": "ALTO",
+      "xg_a": 1.24,
+      "xg_b": 0.63
+    },
+    {
+      "date": "2026-06-21",
+      "matchday": 2,
+      "group": "H",
+      "team_a": "Uruguay",
+      "team_b": "Cape Verde",
+      "venue": "Miami Gardens, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1117
+      },
+      "win_a": 0.65,
+      "draw": 0.1726,
+      "win_b": 0.1774,
+      "confidence": "MEDIO",
+      "xg_a": 1.25,
+      "xg_b": 0.7
+    },
+    {
+      "date": "2026-06-22",
+      "matchday": 2,
+      "group": "I",
+      "team_a": "France",
+      "team_b": "Iraq",
+      "venue": "Philadelphia, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1014
+      },
+      "win_a": 0.7211,
+      "draw": 0.1578,
+      "win_b": 0.1211,
+      "confidence": "ALTO",
+      "xg_a": 0.84,
+      "xg_b": 1.06
+    },
+    {
+      "date": "2026-06-22",
+      "matchday": 2,
+      "group": "I",
+      "team_a": "Norway",
+      "team_b": "Senegal",
+      "venue": "East Rutherford, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1524
+      },
+      "win_a": 0.3331,
+      "draw": 0.3132,
+      "win_b": 0.3537,
+      "confidence": "BAJO",
+      "xg_a": 0.73,
+      "xg_b": 0.86
+    },
+    {
+      "date": "2026-06-22",
+      "matchday": 2,
+      "group": "J",
+      "team_a": "Argentina",
+      "team_b": "Austria",
+      "venue": "Arlington, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0879
+      },
+      "win_a": 0.4817,
+      "draw": 0.2404,
+      "win_b": 0.2779,
+      "confidence": "MEDIO",
+      "xg_a": 1.37,
+      "xg_b": 0.97
+    },
+    {
+      "date": "2026-06-22",
+      "matchday": 2,
+      "group": "J",
+      "team_a": "Jordan",
+      "team_b": "Algeria",
+      "venue": "Santa Clara, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.2126
+      },
+      "win_a": 0.1223,
+      "draw": 0.1875,
+      "win_b": 0.6902,
+      "confidence": "MEDIO",
+      "xg_a": 0.46,
+      "xg_b": 0.92
+    },
+    {
+      "date": "2026-06-23",
+      "matchday": 2,
+      "group": "K",
+      "team_a": "Portugal",
+      "team_b": "Uzbekistan",
+      "venue": "Houston, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0713
+      },
+      "win_a": 0.6665,
+      "draw": 0.2133,
+      "win_b": 0.1202,
+      "confidence": "MEDIO",
+      "xg_a": 1.02,
+      "xg_b": 0.96
+    },
+    {
+      "date": "2026-06-23",
+      "matchday": 2,
+      "group": "K",
+      "team_a": "Colombia",
+      "team_b": "DR Congo",
+      "venue": "Zapopan, Mexico",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.154
+      },
+      "win_a": 0.5278,
+      "draw": 0.233,
+      "win_b": 0.2392,
+      "confidence": "MEDIO",
+      "xg_a": 0.78,
+      "xg_b": 0.7
+    },
+    {
+      "date": "2026-06-23",
+      "matchday": 2,
+      "group": "L",
+      "team_a": "England",
+      "team_b": "Ghana",
+      "venue": "Foxborough, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1169
+      },
+      "win_a": 0.6957,
+      "draw": 0.2055,
+      "win_b": 0.0988,
+      "confidence": "MEDIO",
+      "xg_a": 1.33,
+      "xg_b": 0.69
+    },
+    {
+      "date": "2026-06-23",
+      "matchday": 2,
+      "group": "L",
+      "team_a": "Panama",
+      "team_b": "Croatia",
+      "venue": "Toronto, Canada",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1963
+      },
+      "win_a": 0.1136,
+      "draw": 0.1569,
+      "win_b": 0.7295,
+      "confidence": "ALTO",
+      "xg_a": 0.49,
+      "xg_b": 1.35
+    },
+    {
+      "date": "2026-06-24",
+      "matchday": 3,
+      "group": "A",
+      "team_a": "Mexico",
+      "team_b": "Czechia",
+      "venue": "Mexico City, Mexico",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1116
+      },
+      "win_a": 0.4494,
+      "draw": 0.33,
+      "win_b": 0.2206,
+      "confidence": "MEDIO",
+      "xg_a": 0.76,
+      "xg_b": 0.96
+    },
+    {
+      "date": "2026-06-24",
+      "matchday": 3,
+      "group": "A",
+      "team_a": "South Africa",
+      "team_b": "South Korea",
+      "venue": "Guadalupe, Mexico",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1337
+      },
+      "win_a": 0.2121,
+      "draw": 0.2061,
+      "win_b": 0.5817,
+      "confidence": "MEDIO",
+      "xg_a": 0.84,
+      "xg_b": 1.01
+    },
+    {
+      "date": "2026-06-24",
+      "matchday": 3,
+      "group": "B",
+      "team_a": "Canada",
+      "team_b": "Switzerland",
+      "venue": "Vancouver, Canada",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0761
+      },
+      "win_a": 0.2354,
+      "draw": 0.2545,
+      "win_b": 0.5101,
+      "confidence": "MEDIO",
+      "xg_a": 0.95,
+      "xg_b": 1.07
+    },
+    {
+      "date": "2026-06-24",
+      "matchday": 3,
+      "group": "B",
+      "team_a": "Bosnia and Herzegovina",
+      "team_b": "Qatar",
+      "venue": "Seattle, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1532
+      },
+      "win_a": 0.3326,
+      "draw": 0.2104,
+      "win_b": 0.457,
+      "confidence": "MEDIO",
+      "xg_a": 0.72,
+      "xg_b": 0.87
+    },
+    {
+      "date": "2026-06-24",
+      "matchday": 3,
+      "group": "C",
+      "team_a": "Scotland",
+      "team_b": "Brazil",
+      "venue": "Miami Gardens, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.1207
+      },
+      "win_a": 0.0857,
+      "draw": 0.2444,
+      "win_b": 0.6699,
+      "confidence": "MEDIO",
+      "xg_a": 0.69,
+      "xg_b": 1.38
+    },
+    {
+      "date": "2026-06-24",
+      "matchday": 3,
+      "group": "C",
+      "team_a": "Morocco",
+      "team_b": "Haiti",
+      "venue": "Atlanta, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1827
+      },
+      "win_a": 0.6891,
+      "draw": 0.197,
+      "win_b": 0.1139,
+      "confidence": "MEDIO",
+      "xg_a": 0.83,
+      "xg_b": 0.57
+    },
+    {
+      "date": "2026-06-25",
+      "matchday": 3,
+      "group": "D",
+      "team_a": "United States",
+      "team_b": "Turkiye",
+      "venue": "Inglewood, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.14
+      },
+      "win_a": 0.2833,
+      "draw": 0.3253,
+      "win_b": 0.3914,
+      "confidence": "MEDIO",
+      "xg_a": 0.8,
+      "xg_b": 0.9
+    },
+    {
+      "date": "2026-06-25",
+      "matchday": 3,
+      "group": "D",
+      "team_a": "Paraguay",
+      "team_b": "Australia",
+      "venue": "Santa Clara, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1588
+      },
+      "win_a": 0.2905,
+      "draw": 0.3288,
+      "win_b": 0.3807,
+      "confidence": "BAJO",
+      "xg_a": 0.69,
+      "xg_b": 1.15
+    },
+    {
+      "date": "2026-06-25",
+      "matchday": 3,
+      "group": "E",
+      "team_a": "Curacao",
+      "team_b": "Cote d'Ivoire",
+      "venue": "Philadelphia, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1374
+      },
+      "win_a": 0.158,
+      "draw": 0.2378,
+      "win_b": 0.6042,
+      "confidence": "BAJO",
+      "xg_a": 0.82,
+      "xg_b": 0.92
+    },
+    {
+      "date": "2026-06-25",
+      "matchday": 3,
+      "group": "E",
+      "team_a": "Ecuador",
+      "team_b": "Germany",
+      "venue": "East Rutherford, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0892
+      },
+      "win_a": 0.1456,
+      "draw": 0.1285,
+      "win_b": 0.7259,
+      "confidence": "ALTO",
+      "xg_a": 0.61,
+      "xg_b": 1.83
+    },
+    {
+      "date": "2026-06-25",
+      "matchday": 3,
+      "group": "F",
+      "team_a": "Japan",
+      "team_b": "Sweden",
+      "venue": "Arlington, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0408
+      },
+      "win_a": 0.4275,
+      "draw": 0.3518,
+      "win_b": 0.2207,
+      "confidence": "MEDIO",
+      "xg_a": 0.8,
+      "xg_b": 1.25
+    },
+    {
+      "date": "2026-06-25",
+      "matchday": 3,
+      "group": "F",
+      "team_a": "Tunisia",
+      "team_b": "Netherlands",
+      "venue": "Kansas City, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1333
+      },
+      "win_a": 0.142,
+      "draw": 0.2303,
+      "win_b": 0.6277,
+      "confidence": "MEDIO",
+      "xg_a": 0.85,
+      "xg_b": 1.02
+    },
+    {
+      "date": "2026-06-26",
+      "matchday": 3,
+      "group": "G",
+      "team_a": "Egypt",
+      "team_b": "Iran",
+      "venue": "Seattle, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1511
+      },
+      "win_a": 0.3411,
+      "draw": 0.3241,
+      "win_b": 0.3348,
+      "confidence": "MEDIO",
+      "xg_a": 0.66,
+      "xg_b": 0.68
+    },
+    {
+      "date": "2026-06-26",
+      "matchday": 3,
+      "group": "G",
+      "team_a": "New Zealand",
+      "team_b": "Belgium",
+      "venue": "Vancouver, Canada",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0989
+      },
+      "win_a": 0.089,
+      "draw": 0.1374,
+      "win_b": 0.7736,
+      "confidence": "ALTO",
+      "xg_a": 1.0,
+      "xg_b": 1.84
+    },
+    {
+      "date": "2026-06-26",
+      "matchday": 3,
+      "group": "H",
+      "team_a": "Cape Verde",
+      "team_b": "Saudi Arabia",
+      "venue": "Houston, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1509
+      },
+      "win_a": 0.2577,
+      "draw": 0.2771,
+      "win_b": 0.4652,
+      "confidence": "BAJO",
+      "xg_a": 0.74,
+      "xg_b": 1.0
+    },
+    {
+      "date": "2026-06-26",
+      "matchday": 3,
+      "group": "H",
+      "team_a": "Uruguay",
+      "team_b": "Spain",
+      "venue": "Zapopan, Mexico",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0965
+      },
+      "win_a": 0.1523,
+      "draw": 0.2715,
+      "win_b": 0.5762,
+      "confidence": "MEDIO",
+      "xg_a": 0.78,
+      "xg_b": 1.16
+    },
+    {
+      "date": "2026-06-26",
+      "matchday": 3,
+      "group": "I",
+      "team_a": "Norway",
+      "team_b": "France",
+      "venue": "Foxborough, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0934
+      },
+      "win_a": 0.0942,
+      "draw": 0.1428,
+      "win_b": 0.763,
+      "confidence": "ALTO",
+      "xg_a": 1.08,
+      "xg_b": 1.55
+    },
+    {
+      "date": "2026-06-26",
+      "matchday": 3,
+      "group": "I",
+      "team_a": "Senegal",
+      "team_b": "Iraq",
+      "venue": "Toronto, Canada",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.125
+      },
+      "win_a": 0.4903,
+      "draw": 0.2805,
+      "win_b": 0.2292,
+      "confidence": "MEDIO",
+      "xg_a": 0.47,
+      "xg_b": 0.71
+    },
+    {
+      "date": "2026-06-27",
+      "matchday": 3,
+      "group": "J",
+      "team_a": "Algeria",
+      "team_b": "Austria",
+      "venue": "Kansas City, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1239
+      },
+      "win_a": 0.3524,
+      "draw": 0.2556,
+      "win_b": 0.392,
+      "confidence": "BAJO",
+      "xg_a": 0.9,
+      "xg_b": 0.92
+    },
+    {
+      "date": "2026-06-27",
+      "matchday": 3,
+      "group": "J",
+      "team_a": "Jordan",
+      "team_b": "Argentina",
+      "venue": "Arlington, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.1494
+      },
+      "win_a": 0.1044,
+      "draw": 0.152,
+      "win_b": 0.7437,
+      "confidence": "ALTO",
+      "xg_a": 0.48,
+      "xg_b": 1.39
+    },
+    {
+      "date": "2026-06-27",
+      "matchday": 3,
+      "group": "K",
+      "team_a": "Colombia",
+      "team_b": "Portugal",
+      "venue": "Miami Gardens, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1409
+      },
+      "win_a": 0.1763,
+      "draw": 0.3079,
+      "win_b": 0.5157,
+      "confidence": "BAJO",
+      "xg_a": 0.79,
+      "xg_b": 0.83
+    },
+    {
+      "date": "2026-06-27",
+      "matchday": 3,
+      "group": "K",
+      "team_a": "DR Congo",
+      "team_b": "Uzbekistan",
+      "venue": "Atlanta, United States",
+      "predicted_outcome": "draw",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1585
+      },
+      "win_a": 0.2248,
+      "draw": 0.5097,
+      "win_b": 0.2654,
+      "confidence": "BAJO",
+      "xg_a": 0.86,
+      "xg_b": 0.96
+    },
+    {
+      "date": "2026-06-27",
+      "matchday": 3,
+      "group": "L",
+      "team_a": "Panama",
+      "team_b": "England",
+      "venue": "East Rutherford, United States",
+      "predicted_outcome": "win_b",
+      "outcome_scoreline": {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.1292
+      },
+      "win_a": 0.1141,
+      "draw": 0.1698,
+      "win_b": 0.7161,
+      "confidence": "ALTO",
+      "xg_a": 0.44,
+      "xg_b": 2.25
+    },
+    {
+      "date": "2026-06-27",
+      "matchday": 3,
+      "group": "L",
+      "team_a": "Croatia",
+      "team_b": "Ghana",
+      "venue": "Philadelphia, United States",
+      "predicted_outcome": "win_a",
+      "outcome_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1428
+      },
+      "win_a": 0.6613,
+      "draw": 0.2051,
+      "win_b": 0.1336,
+      "confidence": "MEDIO",
+      "xg_a": 0.8,
+      "xg_b": 0.77
+    }
+  ]
+}

@@ -1,0 +1,786 @@
+{
+  "n_sims": 1000,
+  "rounds": [
+    {
+      "round_name": "r32",
+      "display": "Dieciseisavos",
+      "slots": [
+        {
+          "slot_index": 0,
+          "teams": [
+            {
+              "team": "Mexico",
+              "prob": 0.292
+            },
+            {
+              "team": "South Korea",
+              "prob": 0.2
+            },
+            {
+              "team": "Czechia",
+              "prob": 0.103
+            },
+            {
+              "team": "Canada",
+              "prob": 0.103
+            }
+          ],
+          "label": "W A vs R B"
+        },
+        {
+          "slot_index": 1,
+          "teams": [
+            {
+              "team": "Switzerland",
+              "prob": 0.212
+            },
+            {
+              "team": "Mexico",
+              "prob": 0.183
+            },
+            {
+              "team": "South Korea",
+              "prob": 0.179
+            },
+            {
+              "team": "Czechia",
+              "prob": 0.147
+            }
+          ],
+          "label": "W B vs R A"
+        },
+        {
+          "slot_index": 2,
+          "teams": [
+            {
+              "team": "Brazil",
+              "prob": 0.503
+            },
+            {
+              "team": "Morocco",
+              "prob": 0.176
+            },
+            {
+              "team": "Turkiye",
+              "prob": 0.089
+            },
+            {
+              "team": "Australia",
+              "prob": 0.08
+            }
+          ],
+          "label": "W C vs R D"
+        },
+        {
+          "slot_index": 3,
+          "teams": [
+            {
+              "team": "Morocco",
+              "prob": 0.271
+            },
+            {
+              "team": "Brazil",
+              "prob": 0.187
+            },
+            {
+              "team": "Turkiye",
+              "prob": 0.153
+            },
+            {
+              "team": "Scotland",
+              "prob": 0.089
+            }
+          ],
+          "label": "W D vs R C"
+        },
+        {
+          "slot_index": 4,
+          "teams": [
+            {
+              "team": "Germany",
+              "prob": 0.493
+            },
+            {
+              "team": "Netherlands",
+              "prob": 0.15
+            },
+            {
+              "team": "Japan",
+              "prob": 0.125
+            },
+            {
+              "team": "Sweden",
+              "prob": 0.082
+            }
+          ],
+          "label": "W E vs R F"
+        },
+        {
+          "slot_index": 5,
+          "teams": [
+            {
+              "team": "Netherlands",
+              "prob": 0.268
+            },
+            {
+              "team": "Japan",
+              "prob": 0.194
+            },
+            {
+              "team": "Ecuador",
+              "prob": 0.127
+            },
+            {
+              "team": "Cote d'Ivoire",
+              "prob": 0.12
+            }
+          ],
+          "label": "W F vs R E"
+        },
+        {
+          "slot_index": 6,
+          "teams": [
+            {
+              "team": "Uruguay",
+              "prob": 0.295
+            },
+            {
+              "team": "Belgium",
+              "prob": 0.275
+            },
+            {
+              "team": "Spain",
+              "prob": 0.128
+            },
+            {
+              "team": "Egypt",
+              "prob": 0.118
+            }
+          ],
+          "label": "W G vs R H"
+        },
+        {
+          "slot_index": 7,
+          "teams": [
+            {
+              "team": "Spain",
+              "prob": 0.517
+            },
+            {
+              "team": "Uruguay",
+              "prob": 0.132
+            },
+            {
+              "team": "Egypt",
+              "prob": 0.12
+            },
+            {
+              "team": "Iran",
+              "prob": 0.091
+            }
+          ],
+          "label": "W H vs R G"
+        },
+        {
+          "slot_index": 8,
+          "teams": [
+            {
+              "team": "France",
+              "prob": 0.413
+            },
+            {
+              "team": "Austria",
+              "prob": 0.156
+            },
+            {
+              "team": "Argentina",
+              "prob": 0.155
+            },
+            {
+              "team": "Algeria",
+              "prob": 0.143
+            }
+          ],
+          "label": "W I vs R J"
+        },
+        {
+          "slot_index": 9,
+          "teams": [
+            {
+              "team": "Argentina",
+              "prob": 0.382
+            },
+            {
+              "team": "Austria",
+              "prob": 0.137
+            },
+            {
+              "team": "Senegal",
+              "prob": 0.12
+            },
+            {
+              "team": "Norway",
+              "prob": 0.104
+            }
+          ],
+          "label": "W J vs R I"
+        },
+        {
+          "slot_index": 10,
+          "teams": [
+            {
+              "team": "Portugal",
+              "prob": 0.289
+            },
+            {
+              "team": "Croatia",
+              "prob": 0.218
+            },
+            {
+              "team": "England",
+              "prob": 0.215
+            },
+            {
+              "team": "Colombia",
+              "prob": 0.11
+            }
+          ],
+          "label": "W K vs R L"
+        },
+        {
+          "slot_index": 11,
+          "teams": [
+            {
+              "team": "England",
+              "prob": 0.424
+            },
+            {
+              "team": "Croatia",
+              "prob": 0.222
+            },
+            {
+              "team": "Colombia",
+              "prob": 0.13
+            },
+            {
+              "team": "Portugal",
+              "prob": 0.092
+            }
+          ],
+          "label": "W L vs R K"
+        },
+        {
+          "slot_index": 12,
+          "teams": [
+            {
+              "team": "Czechia",
+              "prob": 0.05
+            },
+            {
+              "team": "Iran",
+              "prob": 0.042
+            },
+            {
+              "team": "Scotland",
+              "prob": 0.041
+            },
+            {
+              "team": "Tunisia",
+              "prob": 0.036
+            }
+          ],
+          "label": "T 1 vs T 2"
+        },
+        {
+          "slot_index": 13,
+          "teams": [
+            {
+              "team": "Czechia",
+              "prob": 0.037
+            },
+            {
+              "team": "Tunisia",
+              "prob": 0.035
+            },
+            {
+              "team": "Iran",
+              "prob": 0.031
+            },
+            {
+              "team": "Algeria",
+              "prob": 0.031
+            }
+          ],
+          "label": "T 3 vs T 4"
+        },
+        {
+          "slot_index": 14,
+          "teams": [
+            {
+              "team": "Algeria",
+              "prob": 0.035
+            },
+            {
+              "team": "Czechia",
+              "prob": 0.034
+            },
+            {
+              "team": "South Africa",
+              "prob": 0.033
+            },
+            {
+              "team": "Croatia",
+              "prob": 0.032
+            }
+          ],
+          "label": "T 5 vs T 6"
+        },
+        {
+          "slot_index": 15,
+          "teams": [
+            {
+              "team": "Scotland",
+              "prob": 0.046
+            },
+            {
+              "team": "Sweden",
+              "prob": 0.04
+            },
+            {
+              "team": "Saudi Arabia",
+              "prob": 0.035
+            },
+            {
+              "team": "Senegal",
+              "prob": 0.035
+            }
+          ],
+          "label": "T 7 vs T 8"
+        }
+      ],
+      "feeds_from": []
+    },
+    {
+      "round_name": "r16",
+      "display": "Octavos",
+      "slots": [
+        {
+          "slot_index": 0,
+          "teams": [
+            {
+              "team": "Mexico",
+              "prob": 0.178
+            },
+            {
+              "team": "South Korea",
+              "prob": 0.127
+            },
+            {
+              "team": "Czechia",
+              "prob": 0.086
+            },
+            {
+              "team": "Canada",
+              "prob": 0.055
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 1,
+          "teams": [
+            {
+              "team": "South Korea",
+              "prob": 0.118
+            },
+            {
+              "team": "Czechia",
+              "prob": 0.114
+            },
+            {
+              "team": "Mexico",
+              "prob": 0.11
+            },
+            {
+              "team": "Switzerland",
+              "prob": 0.093
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 2,
+          "teams": [
+            {
+              "team": "Brazil",
+              "prob": 0.502
+            },
+            {
+              "team": "Morocco",
+              "prob": 0.198
+            },
+            {
+              "team": "Turkiye",
+              "prob": 0.086
+            },
+            {
+              "team": "Australia",
+              "prob": 0.064
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 3,
+          "teams": [
+            {
+              "team": "Germany",
+              "prob": 0.392
+            },
+            {
+              "team": "Netherlands",
+              "prob": 0.226
+            },
+            {
+              "team": "Japan",
+              "prob": 0.133
+            },
+            {
+              "team": "Sweden",
+              "prob": 0.082
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 4,
+          "teams": [
+            {
+              "team": "Uruguay",
+              "prob": 0.173
+            },
+            {
+              "team": "Belgium",
+              "prob": 0.149
+            },
+            {
+              "team": "Spain",
+              "prob": 0.096
+            },
+            {
+              "team": "Egypt",
+              "prob": 0.071
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 5,
+          "teams": [
+            {
+              "team": "Spain",
+              "prob": 0.366
+            },
+            {
+              "team": "Uruguay",
+              "prob": 0.083
+            },
+            {
+              "team": "Egypt",
+              "prob": 0.071
+            },
+            {
+              "team": "Iran",
+              "prob": 0.062
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 6,
+          "teams": [
+            {
+              "team": "Argentina",
+              "prob": 0.356
+            },
+            {
+              "team": "France",
+              "prob": 0.261
+            },
+            {
+              "team": "Austria",
+              "prob": 0.117
+            },
+            {
+              "team": "Algeria",
+              "prob": 0.109
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 7,
+          "teams": [
+            {
+              "team": "England",
+              "prob": 0.479
+            },
+            {
+              "team": "Croatia",
+              "prob": 0.176
+            },
+            {
+              "team": "Portugal",
+              "prob": 0.165
+            },
+            {
+              "team": "Colombia",
+              "prob": 0.088
+            }
+          ],
+          "label": null
+        }
+      ],
+      "feeds_from": [
+        [
+          0,
+          12
+        ],
+        [
+          1,
+          13
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          14
+        ],
+        [
+          7,
+          15
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          10,
+          11
+        ]
+      ]
+    },
+    {
+      "round_name": "qf",
+      "display": "Cuartos",
+      "slots": [
+        {
+          "slot_index": 0,
+          "teams": [
+            {
+              "team": "Mexico",
+              "prob": 0.168
+            },
+            {
+              "team": "South Korea",
+              "prob": 0.124
+            },
+            {
+              "team": "Czechia",
+              "prob": 0.123
+            },
+            {
+              "team": "Switzerland",
+              "prob": 0.05
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 1,
+          "teams": [
+            {
+              "team": "Brazil",
+              "prob": 0.329
+            },
+            {
+              "team": "Germany",
+              "prob": 0.211
+            },
+            {
+              "team": "Netherlands",
+              "prob": 0.116
+            },
+            {
+              "team": "Morocco",
+              "prob": 0.094
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 2,
+          "teams": [
+            {
+              "team": "Spain",
+              "prob": 0.317
+            },
+            {
+              "team": "Uruguay",
+              "prob": 0.113
+            },
+            {
+              "team": "Belgium",
+              "prob": 0.09
+            },
+            {
+              "team": "Egypt",
+              "prob": 0.062
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 3,
+          "teams": [
+            {
+              "team": "England",
+              "prob": 0.313
+            },
+            {
+              "team": "Argentina",
+              "prob": 0.187
+            },
+            {
+              "team": "France",
+              "prob": 0.128
+            },
+            {
+              "team": "Croatia",
+              "prob": 0.075
+            }
+          ],
+          "label": null
+        }
+      ],
+      "feeds_from": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ]
+      ]
+    },
+    {
+      "round_name": "sf",
+      "display": "Semifinales",
+      "slots": [
+        {
+          "slot_index": 0,
+          "teams": [
+            {
+              "team": "Brazil",
+              "prob": 0.234
+            },
+            {
+              "team": "Germany",
+              "prob": 0.134
+            },
+            {
+              "team": "Mexico",
+              "prob": 0.074
+            },
+            {
+              "team": "Morocco",
+              "prob": 0.064
+            }
+          ],
+          "label": null
+        },
+        {
+          "slot_index": 1,
+          "teams": [
+            {
+              "team": "England",
+              "prob": 0.213
+            },
+            {
+              "team": "Spain",
+              "prob": 0.173
+            },
+            {
+              "team": "Argentina",
+              "prob": 0.137
+            },
+            {
+              "team": "France",
+              "prob": 0.066
+            }
+          ],
+          "label": null
+        }
+      ],
+      "feeds_from": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ]
+    },
+    {
+      "round_name": "final",
+      "display": "Final",
+      "slots": [
+        {
+          "slot_index": 0,
+          "teams": [
+            {
+              "team": "Brazil",
+              "prob": 0.15
+            },
+            {
+              "team": "England",
+              "prob": 0.146
+            },
+            {
+              "team": "Spain",
+              "prob": 0.095
+            },
+            {
+              "team": "Argentina",
+              "prob": 0.089
+            }
+          ],
+          "label": null
+        }
+      ],
+      "feeds_from": [
+        [
+          0,
+          1
+        ]
+      ]
+    }
+  ]
+}

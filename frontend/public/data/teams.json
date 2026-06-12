@@ -1,0 +1,292 @@
+{
+  "teams": [
+    {
+      "name": "Algeria",
+      "group": "J",
+      "elo": 1772.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "Argentina",
+      "group": "J",
+      "elo": 2115.0,
+      "confederation": "CONMEBOL"
+    },
+    {
+      "name": "Australia",
+      "group": "D",
+      "elo": 1777.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Austria",
+      "group": "J",
+      "elo": 1830.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Belgium",
+      "group": "G",
+      "elo": 1894.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Bosnia and Herzegovina",
+      "group": "B",
+      "elo": 1595.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Brazil",
+      "group": "C",
+      "elo": 1991.0,
+      "confederation": "CONMEBOL"
+    },
+    {
+      "name": "Canada",
+      "group": "B",
+      "elo": 1788.0,
+      "confederation": "CONCACAF"
+    },
+    {
+      "name": "Cape Verde",
+      "group": "H",
+      "elo": 1640,
+      "confederation": "CAF"
+    },
+    {
+      "name": "Colombia",
+      "group": "K",
+      "elo": 1982.0,
+      "confederation": "CONMEBOL"
+    },
+    {
+      "name": "Cote d'Ivoire",
+      "group": "E",
+      "elo": 1695.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "Croatia",
+      "group": "L",
+      "elo": 1912.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Curacao",
+      "group": "E",
+      "elo": 1625,
+      "confederation": "CONCACAF"
+    },
+    {
+      "name": "Czechia",
+      "group": "A",
+      "elo": 1712.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "DR Congo",
+      "group": "K",
+      "elo": 1652.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "Ecuador",
+      "group": "E",
+      "elo": 1938.0,
+      "confederation": "CONMEBOL"
+    },
+    {
+      "name": "Egypt",
+      "group": "G",
+      "elo": 1696.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "England",
+      "group": "L",
+      "elo": 2024.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "France",
+      "group": "I",
+      "elo": 2063.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Germany",
+      "group": "E",
+      "elo": 1932.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Ghana",
+      "group": "L",
+      "elo": 1510.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "Haiti",
+      "group": "C",
+      "elo": 1548.0,
+      "confederation": "CONCACAF"
+    },
+    {
+      "name": "Iran",
+      "group": "G",
+      "elo": 1772.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Iraq",
+      "group": "I",
+      "elo": 1607.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Japan",
+      "group": "F",
+      "elo": 1906.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Jordan",
+      "group": "J",
+      "elo": 1680.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Mexico",
+      "group": "A",
+      "elo": 1881.0,
+      "confederation": "CONCACAF"
+    },
+    {
+      "name": "Morocco",
+      "group": "C",
+      "elo": 1827.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "Netherlands",
+      "group": "F",
+      "elo": 1948.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "New Zealand",
+      "group": "G",
+      "elo": 1562.0,
+      "confederation": "OFC"
+    },
+    {
+      "name": "Norway",
+      "group": "I",
+      "elo": 1914.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Panama",
+      "group": "L",
+      "elo": 1730.0,
+      "confederation": "CONCACAF"
+    },
+    {
+      "name": "Paraguay",
+      "group": "D",
+      "elo": 1834.0,
+      "confederation": "CONMEBOL"
+    },
+    {
+      "name": "Portugal",
+      "group": "K",
+      "elo": 1989.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Qatar",
+      "group": "B",
+      "elo": 1421.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Saudi Arabia",
+      "group": "H",
+      "elo": 1576.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Scotland",
+      "group": "C",
+      "elo": 853.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Senegal",
+      "group": "I",
+      "elo": 1860.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "South Africa",
+      "group": "A",
+      "elo": 1511.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "South Korea",
+      "group": "A",
+      "elo": 1786.0,
+      "confederation": "AFC"
+    },
+    {
+      "name": "Spain",
+      "group": "H",
+      "elo": 2157.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Sweden",
+      "group": "F",
+      "elo": 1712.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Switzerland",
+      "group": "B",
+      "elo": 1891.0,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "Tunisia",
+      "group": "F",
+      "elo": 1628.0,
+      "confederation": "CAF"
+    },
+    {
+      "name": "Turkiye",
+      "group": "D",
+      "elo": 1805,
+      "confederation": "UEFA"
+    },
+    {
+      "name": "United States",
+      "group": "D",
+      "elo": 1726.0,
+      "confederation": "CONCACAF"
+    },
+    {
+      "name": "Uruguay",
+      "group": "H",
+      "elo": 1892.0,
+      "confederation": "CONMEBOL"
+    },
+    {
+      "name": "Uzbekistan",
+      "group": "K",
+      "elo": 1714.0,
+      "confederation": "AFC"
+    }
+  ]
+}

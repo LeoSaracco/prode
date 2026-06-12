@@ -4,14 +4,13 @@ import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.dependencies import get_runtime
+from api.formatters import format_prediction, scoreline_tuple_to_schema
 from api.schemas import (
-    FeatureImpact,
     FixturePrediction,
     FixturesResponse,
     GroupsResponse,
     MatchResult,
     PredictRequest,
-    Scoreline,
     TeamInfo,
     TeamsResponse,
 )
@@ -21,50 +20,6 @@ from src.features.elo_features import get_elo_rating
 from src.runtime import PredictionRuntime, predict_match
 
 router = APIRouter()
-
-
-def _scoreline_tuple_to_schema(item) -> Scoreline:
-    goals_a, goals_b, probability = item
-    return Scoreline(goals_a=int(goals_a), goals_b=int(goals_b), probability=round(float(probability), 4))
-
-
-def _format_prediction(result: dict, shap_features: list[tuple[str, float]]) -> MatchResult:
-    scorelines = [_scoreline_tuple_to_schema(item) for item in result.get("top_scorelines", [])]
-    outcome_scoreline = result.get("outcome_scoreline")
-    exact_scoreline = result.get("exact_most_likely_scoreline")
-    team_a = result["team_a"]
-    team_b = result["team_b"]
-    top_features = [
-        FeatureImpact(
-            name=name,
-            value=round(float(value), 4),
-            direction=team_a if value >= 0 else team_b,
-        )
-        for name, value in shap_features[:5]
-    ]
-    return MatchResult(
-        team_a=team_a,
-        team_b=team_b,
-        probabilities={
-            "win_a": result["p_win_a"],
-            "draw": result["p_draw"],
-            "win_b": result["p_win_b"],
-        },
-        expected_goals={"team_a": result["xg_a"], "team_b": result["xg_b"]},
-        confidence=result["confidence"],
-        predicted_outcome=result.get("predicted_outcome", "draw"),
-        outcome_scoreline=_scoreline_tuple_to_schema(outcome_scoreline) if outcome_scoreline else None,
-        exact_most_likely_scoreline=_scoreline_tuple_to_schema(exact_scoreline) if exact_scoreline else None,
-        most_likely_scoreline=_scoreline_tuple_to_schema(outcome_scoreline) if outcome_scoreline else (scorelines[0] if scorelines else None),
-        top_scorelines=scorelines,
-        upset_risk=result["upset_risk"],
-        top_features=top_features,
-        elo={"team_a": result["elo_a"], "team_b": result["elo_b"], "diff": result["elo_diff"]},
-        model_breakdown={
-            key: [round(float(v), 4) for v in value]
-            for key, value in result.get("model_breakdown", {}).items()
-        },
-    )
 
 
 # ── Fixture helpers ──────────────────────────────────────────────────────────
@@ -125,7 +80,7 @@ def predict(payload: PredictRequest, runtime: PredictionRuntime = Depends(get_ru
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Prediction failed: {e}") from e
-    return _format_prediction(result, shap_features)
+    return format_prediction(result, shap_features)
 
 
 @router.get("/fixtures", response_model=FixturesResponse)
@@ -161,7 +116,7 @@ def fixtures(runtime: PredictionRuntime = Depends(get_runtime)) -> FixturesRespo
             team_b=row["team_b"],
             venue=row.get("venue"),
             predicted_outcome=p.get("predicted_outcome", "draw"),
-            outcome_scoreline=_scoreline_tuple_to_schema(scoreline) if scoreline else None,
+            outcome_scoreline=scoreline_tuple_to_schema(scoreline) if scoreline else None,
             win_a=round(float(p.get("p_win_a", 0)), 4),
             draw=round(float(p.get("p_draw", 0)), 4),
             win_b=round(float(p.get("p_win_b", 0)), 4),

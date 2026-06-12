@@ -1,0 +1,130 @@
+{
+  "group": "J",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "Argentina",
+      "group": "J",
+      "prob_1st": 0.4995,
+      "prob_2nd": 0.2745,
+      "prob_3rd": 0.1665,
+      "prob_4th": 0.0595,
+      "qualify_direct_prob": 0.774,
+      "avg_pts": 5.83,
+      "avg_gd": 2.07
+    },
+    {
+      "team": "Algeria",
+      "group": "J",
+      "prob_1st": 0.2325,
+      "prob_2nd": 0.324,
+      "prob_3rd": 0.3095,
+      "prob_4th": 0.134,
+      "qualify_direct_prob": 0.5565,
+      "avg_pts": 4.52,
+      "avg_gd": 0.37
+    },
+    {
+      "team": "Austria",
+      "group": "J",
+      "prob_1st": 0.2315,
+      "prob_2nd": 0.316,
+      "prob_3rd": 0.2855,
+      "prob_4th": 0.167,
+      "qualify_direct_prob": 0.5475,
+      "avg_pts": 4.33,
+      "avg_gd": 0.28
+    },
+    {
+      "team": "Jordan",
+      "group": "J",
+      "prob_1st": 0.0365,
+      "prob_2nd": 0.0855,
+      "prob_3rd": 0.2385,
+      "prob_4th": 0.6395,
+      "qualify_direct_prob": 0.122,
+      "avg_pts": 1.95,
+      "avg_gd": -2.73
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "Argentina",
+      "team_b": "Austria",
+      "expected_goals": {
+        "team_a": 1.38,
+        "team_b": 1.0
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1305
+      }
+    },
+    {
+      "team_a": "Argentina",
+      "team_b": "Algeria",
+      "expected_goals": {
+        "team_a": 0.95,
+        "team_b": 0.65
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2015
+      }
+    },
+    {
+      "team_a": "Argentina",
+      "team_b": "Jordan",
+      "expected_goals": {
+        "team_a": 1.41,
+        "team_b": 0.48
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.213
+      }
+    },
+    {
+      "team_a": "Austria",
+      "team_b": "Algeria",
+      "expected_goals": {
+        "team_a": 0.9,
+        "team_b": 0.93
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1585
+      }
+    },
+    {
+      "team_a": "Austria",
+      "team_b": "Jordan",
+      "expected_goals": {
+        "team_a": 1.35,
+        "team_b": 0.67
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1815
+      }
+    },
+    {
+      "team_a": "Algeria",
+      "team_b": "Jordan",
+      "expected_goals": {
+        "team_a": 0.9,
+        "team_b": 0.46
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.26
+      }
+    }
+  ]
+}

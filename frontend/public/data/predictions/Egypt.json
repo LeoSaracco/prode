@@ -1,0 +1,6864 @@
+{
+  "Algeria": {
+    "team_a": "Egypt",
+    "team_b": "Algeria",
+    "probabilities": {
+      "win_a": 0.1717,
+      "draw": 0.2794,
+      "win_b": 0.5489
+    },
+    "expected_goals": {
+      "team_a": 0.66,
+      "team_b": 0.63
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1519
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2969
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1519
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2969
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1611
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1519
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1354
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0602
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0543
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0378
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0359
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0133
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0118
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0113
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0083
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0075
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0026
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0025
+      }
+    ],
+    "upset_risk": 0.4023,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1772.0,
+      "diff": 76.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1554,
+        0.277,
+        0.5676
+      ],
+      "xgb": [
+        0.074,
+        0.2164,
+        0.7095
+      ],
+      "lgbm": [
+        0.1459,
+        0.3049,
+        0.5492
+      ],
+      "catboost": [
+        0.2127,
+        0.2858,
+        0.5015
+      ],
+      "elo": [
+        0.2768,
+        0.231,
+        0.4922
+      ],
+      "poisson": [
+        0.288,
+        0.4448,
+        0.2672
+      ]
+    }
+  },
+  "Argentina": {
+    "team_a": "Egypt",
+    "team_b": "Argentina",
+    "probabilities": {
+      "win_a": 0.1198,
+      "draw": 0.1272,
+      "win_b": 0.753
+    },
+    "expected_goals": {
+      "team_a": 0.69,
+      "team_b": 0.96
+    },
+    "confidence": "ALTO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1602
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.216
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1602
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.216
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1602
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1509
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1098
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0878
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0608
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0462
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0441
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0279
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0211
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0194
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0107
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0102
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0067
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 4,
+        "probability": 0.0067
+      }
+    ],
+    "upset_risk": 0.0923,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 2115.0,
+      "diff": 419.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.0955,
+        0.0941,
+        0.8104
+      ],
+      "xgb": [
+        0.0341,
+        0.0039,
+        0.9621
+      ],
+      "lgbm": [
+        0.1946,
+        0.1083,
+        0.6971
+      ],
+      "catboost": [
+        0.1893,
+        0.1974,
+        0.6132
+      ],
+      "elo": [
+        0.0096,
+        0.1452,
+        0.8451
+      ],
+      "poisson": [
+        0.2314,
+        0.3895,
+        0.3791
+      ]
+    }
+  },
+  "Australia": {
+    "team_a": "Egypt",
+    "team_b": "Australia",
+    "probabilities": {
+      "win_a": 0.2563,
+      "draw": 0.333,
+      "win_b": 0.4107
+    },
+    "expected_goals": {
+      "team_a": 0.74,
+      "team_b": 0.78
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1471
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2411
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1471
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2411
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1498
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1471
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1381
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0668
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0598
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0495
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0469
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0183
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0174
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0148
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0129
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0116
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0048
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0045
+      }
+    ],
+    "upset_risk": 0.3955,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1777.0,
+      "diff": 81.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2944,
+        0.3564,
+        0.3491
+      ],
+      "xgb": [
+        0.1445,
+        0.2212,
+        0.6342
+      ],
+      "lgbm": [
+        0.255,
+        0.4532,
+        0.2918
+      ],
+      "catboost": [
+        0.3043,
+        0.3138,
+        0.3819
+      ],
+      "elo": [
+        0.2706,
+        0.2298,
+        0.4996
+      ],
+      "poisson": [
+        0.2826,
+        0.4105,
+        0.3069
+      ]
+    }
+  },
+  "Austria": {
+    "team_a": "Egypt",
+    "team_b": "Austria",
+    "probabilities": {
+      "win_a": 0.189,
+      "draw": 0.2629,
+      "win_b": 0.5481
+    },
+    "expected_goals": {
+      "team_a": 0.95,
+      "team_b": 0.92
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1165
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.178
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1165
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.178
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1597
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.121
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1165
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0695
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0653
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0642
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0622
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0297
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0221
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0204
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0201
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0192
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0094
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0091
+      }
+    ],
+    "upset_risk": 0.3262,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1830.0,
+      "diff": 134.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1967,
+        0.343,
+        0.4603
+      ],
+      "xgb": [
+        0.1137,
+        0.0919,
+        0.7944
+      ],
+      "lgbm": [
+        0.1711,
+        0.2912,
+        0.5377
+      ],
+      "catboost": [
+        0.2199,
+        0.2935,
+        0.4866
+      ],
+      "elo": [
+        0.2079,
+        0.2165,
+        0.5756
+      ],
+      "poisson": [
+        0.3226,
+        0.3704,
+        0.307
+      ]
+    }
+  },
+  "Belgium": {
+    "team_a": "Egypt",
+    "team_b": "Belgium",
+    "probabilities": {
+      "win_a": 0.24,
+      "draw": 0.2529,
+      "win_b": 0.5071
+    },
+    "expected_goals": {
+      "team_a": 1.14,
+      "team_b": 0.9
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 2,
+      "probability": 0.0524
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 1,
+      "probability": 0.158
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 2,
+      "probability": 0.0524
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.158
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1551
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1241
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0923
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0848
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.076
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0598
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0524
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0341
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0322
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0289
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0179
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0157
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.013
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0102
+      }
+    ],
+    "upset_risk": 0.2524,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1894.0,
+      "diff": 198.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1977,
+        0.2956,
+        0.5068
+      ],
+      "xgb": [
+        0.3366,
+        0.3031,
+        0.3603
+      ],
+      "lgbm": [
+        0.2225,
+        0.1618,
+        0.6158
+      ],
+      "catboost": [
+        0.2347,
+        0.262,
+        0.5033
+      ],
+      "elo": [
+        0.1421,
+        0.2005,
+        0.6574
+      ],
+      "poisson": [
+        0.3875,
+        0.3513,
+        0.2612
+      ]
+    }
+  },
+  "Bosnia and Herzegovina": {
+    "team_a": "Egypt",
+    "team_b": "Bosnia and Herzegovina",
+    "probabilities": {
+      "win_a": 0.3462,
+      "draw": 0.3671,
+      "win_b": 0.2867
+    },
+    "expected_goals": {
+      "team_a": 1.13,
+      "team_b": 0.57
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "draw",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 1,
+      "probability": 0.1394
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2051
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 1,
+      "probability": 0.1394
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2051
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1848
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1394
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1164
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0827
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0663
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0437
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0335
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0297
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0249
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0189
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0123
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0071
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 1,
+        "probability": 0.007
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0064
+      }
+    ],
+    "upset_risk": 0.3686,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1595.0,
+      "diff": 101.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2955,
+        0.425,
+        0.2795
+      ],
+      "xgb": [
+        0.2269,
+        0.4579,
+        0.3152
+      ],
+      "lgbm": [
+        0.3504,
+        0.31,
+        0.3397
+      ],
+      "catboost": [
+        0.3399,
+        0.3628,
+        0.2972
+      ],
+      "elo": [
+        0.529,
+        0.2248,
+        0.2462
+      ],
+      "poisson": [
+        0.4709,
+        0.3648,
+        0.1643
+      ]
+    }
+  },
+  "Brazil": {
+    "team_a": "Egypt",
+    "team_b": "Brazil",
+    "probabilities": {
+      "win_a": 0.1007,
+      "draw": 0.1374,
+      "win_b": 0.7619
+    },
+    "expected_goals": {
+      "team_a": 0.59,
+      "team_b": 1.05
+    },
+    "confidence": "ALTO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1821
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2161
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1821
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2161
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1821
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1421
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.1076
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.0917
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0631
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0378
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0352
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0334
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0222
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0185
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 4,
+        "probability": 0.0099
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0069
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0065
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0065
+      }
+    ],
+    "upset_risk": 0.1647,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1991.0,
+      "diff": 295.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.0836,
+        0.0969,
+        0.8195
+      ],
+      "xgb": [
+        0.0645,
+        0.0162,
+        0.9193
+      ],
+      "lgbm": [
+        0.102,
+        0.1081,
+        0.7899
+      ],
+      "catboost": [
+        0.1622,
+        0.2213,
+        0.6165
+      ],
+      "elo": [
+        0.0666,
+        0.1763,
+        0.7572
+      ],
+      "poisson": [
+        0.1804,
+        0.378,
+        0.4416
+      ]
+    }
+  },
+  "Canada": {
+    "team_a": "Egypt",
+    "team_b": "Canada",
+    "probabilities": {
+      "win_a": 0.2229,
+      "draw": 0.462,
+      "win_b": 0.3151
+    },
+    "expected_goals": {
+      "team_a": 0.96,
+      "team_b": 0.54
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "draw",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2457
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2457
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2457
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2457
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1929
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.137
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1023
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0997
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0552
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0327
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0326
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0312
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0176
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0149
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0078
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0059
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0056
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0047
+      }
+    ],
+    "upset_risk": 0.3806,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1788.0,
+      "diff": 92.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2121,
+        0.4625,
+        0.3254
+      ],
+      "xgb": [
+        0.0888,
+        0.7331,
+        0.1782
+      ],
+      "lgbm": [
+        0.2091,
+        0.516,
+        0.2749
+      ],
+      "catboost": [
+        0.2778,
+        0.3219,
+        0.4003
+      ],
+      "elo": [
+        0.2571,
+        0.227,
+        0.5159
+      ],
+      "poisson": [
+        0.4216,
+        0.3984,
+        0.18
+      ]
+    }
+  },
+  "Cape Verde": {
+    "team_a": "Egypt",
+    "team_b": "Cape Verde",
+    "probabilities": {
+      "win_a": 0.5339,
+      "draw": 0.2629,
+      "win_b": 0.2032
+    },
+    "expected_goals": {
+      "team_a": 1.04,
+      "team_b": 0.56
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.189
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2233
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.189
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2233
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.189
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1389
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1101
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0905
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0612
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0383
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0326
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0312
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0213
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.017
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.01
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.006
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0059
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0058
+      }
+    ],
+    "upset_risk": 0.4301,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1640.0,
+      "diff": 56.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.4436,
+        0.3435,
+        0.2129
+      ],
+      "xgb": [
+        0.8488,
+        0.0479,
+        0.1033
+      ],
+      "lgbm": [
+        0.4642,
+        0.3015,
+        0.2342
+      ],
+      "catboost": [
+        0.4725,
+        0.304,
+        0.2235
+      ],
+      "elo": [
+        0.4619,
+        0.236,
+        0.3021
+      ],
+      "poisson": [
+        0.4478,
+        0.3804,
+        0.1718
+      ]
+    }
+  },
+  "Colombia": {
+    "team_a": "Egypt",
+    "team_b": "Colombia",
+    "probabilities": {
+      "win_a": 0.2198,
+      "draw": 0.2605,
+      "win_b": 0.5197
+    },
+    "expected_goals": {
+      "team_a": 0.81,
+      "team_b": 0.6
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1247
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2674
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1247
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2674
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1764
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1402
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1247
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.08
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0478
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0438
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0353
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0215
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0143
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0129
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0087
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.007
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0043
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0038
+      }
+    ],
+    "upset_risk": 0.1716,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1982.0,
+      "diff": 286.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.198,
+        0.2635,
+        0.5385
+      ],
+      "xgb": [
+        0.2927,
+        0.2192,
+        0.4882
+      ],
+      "lgbm": [
+        0.2238,
+        0.2746,
+        0.5016
+      ],
+      "catboost": [
+        0.228,
+        0.275,
+        0.4969
+      ],
+      "elo": [
+        0.0724,
+        0.1785,
+        0.7491
+      ],
+      "poisson": [
+        0.3517,
+        0.4226,
+        0.2256
+      ]
+    }
+  },
+  "Cote d'Ivoire": {
+    "team_a": "Egypt",
+    "team_b": "Cote d'Ivoire",
+    "probabilities": {
+      "win_a": 0.2935,
+      "draw": 0.2398,
+      "win_b": 0.4666
+    },
+    "expected_goals": {
+      "team_a": 0.77,
+      "team_b": 0.65
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1343
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2629
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1343
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2629
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1636
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1436
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1343
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0719
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0511
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0469
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0395
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0185
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0153
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0121
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0111
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0086
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0039
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0036
+      }
+    ],
+    "upset_risk": 0.48,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1695.0,
+      "diff": 1.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2568,
+        0.2628,
+        0.4804
+      ],
+      "xgb": [
+        0.2955,
+        0.1488,
+        0.5557
+      ],
+      "lgbm": [
+        0.2811,
+        0.1967,
+        0.5222
+      ],
+      "catboost": [
+        0.2918,
+        0.2714,
+        0.4368
+      ],
+      "elo": [
+        0.3766,
+        0.2497,
+        0.3737
+      ],
+      "poisson": [
+        0.325,
+        0.4226,
+        0.2523
+      ]
+    }
+  },
+  "Croatia": {
+    "team_a": "Egypt",
+    "team_b": "Croatia",
+    "probabilities": {
+      "win_a": 0.1882,
+      "draw": 0.3988,
+      "win_b": 0.413
+    },
+    "expected_goals": {
+      "team_a": 0.76,
+      "team_b": 0.75
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.143
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2447
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.143
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2447
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1491
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1444
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.143
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0634
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0624
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0476
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0472
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0179
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.016
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0156
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.012
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0118
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0045
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0045
+      }
+    ],
+    "upset_risk": 0.2338,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1912.0,
+      "diff": 216.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1871,
+        0.3812,
+        0.4316
+      ],
+      "xgb": [
+        0.083,
+        0.7256,
+        0.1915
+      ],
+      "lgbm": [
+        0.2572,
+        0.3541,
+        0.3887
+      ],
+      "catboost": [
+        0.2224,
+        0.2919,
+        0.4857
+      ],
+      "elo": [
+        0.1258,
+        0.196,
+        0.6782
+      ],
+      "poisson": [
+        0.2953,
+        0.4128,
+        0.2918
+      ]
+    }
+  },
+  "Curacao": {
+    "team_a": "Egypt",
+    "team_b": "Curacao",
+    "probabilities": {
+      "win_a": 0.6047,
+      "draw": 0.2211,
+      "win_b": 0.1743
+    },
+    "expected_goals": {
+      "team_a": 0.94,
+      "team_b": 0.7
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1587
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2176
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1587
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2176
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1587
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1512
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1123
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0856
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.06
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0476
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0447
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0268
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.021
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0188
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0111
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0104
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0066
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0063
+      }
+    ],
+    "upset_risk": 0.4092,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1625.0,
+      "diff": 71.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.6055,
+        0.2546,
+        0.14
+      ],
+      "xgb": [
+        0.9361,
+        0.0338,
+        0.0302
+      ],
+      "lgbm": [
+        0.516,
+        0.2383,
+        0.2458
+      ],
+      "catboost": [
+        0.5284,
+        0.273,
+        0.1985
+      ],
+      "elo": [
+        0.4847,
+        0.2323,
+        0.2831
+      ],
+      "poisson": [
+        0.3718,
+        0.3915,
+        0.2367
+      ]
+    }
+  },
+  "Czechia": {
+    "team_a": "Egypt",
+    "team_b": "Czechia",
+    "probabilities": {
+      "win_a": 0.2761,
+      "draw": 0.3373,
+      "win_b": 0.3866
+    },
+    "expected_goals": {
+      "team_a": 0.63,
+      "team_b": 0.87
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1709
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2457
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1709
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2457
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1709
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1451
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1186
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0839
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0531
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0447
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0387
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0243
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0168
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0154
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0094
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0082
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 4,
+        "probability": 0.0053
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0049
+      }
+    ],
+    "upset_risk": 0.48,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1712.0,
+      "diff": 16.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.3136,
+        0.309,
+        0.3774
+      ],
+      "xgb": [
+        0.1343,
+        0.3766,
+        0.4891
+      ],
+      "lgbm": [
+        0.2928,
+        0.3873,
+        0.3199
+      ],
+      "catboost": [
+        0.3228,
+        0.3091,
+        0.3682
+      ],
+      "elo": [
+        0.354,
+        0.246,
+        0.4
+      ],
+      "poisson": [
+        0.2271,
+        0.4087,
+        0.3642
+      ]
+    }
+  },
+  "DR Congo": {
+    "team_a": "Egypt",
+    "team_b": "DR Congo",
+    "probabilities": {
+      "win_a": 0.5111,
+      "draw": 0.2862,
+      "win_b": 0.2028
+    },
+    "expected_goals": {
+      "team_a": 0.87,
+      "team_b": 0.58
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1828
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.258
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1828
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.258
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1828
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1398
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1144
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0887
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0511
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0393
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.034
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0256
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0148
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0147
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0075
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0065
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0055
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0043
+      }
+    ],
+    "upset_risk": 0.447,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1652.0,
+      "diff": 44.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.4241,
+        0.358,
+        0.2179
+      ],
+      "xgb": [
+        0.8371,
+        0.1332,
+        0.0297
+      ],
+      "lgbm": [
+        0.4734,
+        0.2803,
+        0.2463
+      ],
+      "catboost": [
+        0.4268,
+        0.3314,
+        0.2417
+      ],
+      "elo": [
+        0.4435,
+        0.239,
+        0.3175
+      ],
+      "poisson": [
+        0.3791,
+        0.4134,
+        0.2075
+      ]
+    }
+  },
+  "Ecuador": {
+    "team_a": "Egypt",
+    "team_b": "Ecuador",
+    "probabilities": {
+      "win_a": 0.2686,
+      "draw": 0.3679,
+      "win_b": 0.3635
+    },
+    "expected_goals": {
+      "team_a": 1.14,
+      "team_b": 0.52
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "draw",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2113
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2113
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2113
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2113
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1952
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.134
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1227
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0787
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0642
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0464
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0296
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0261
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0243
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0168
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0132
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 1,
+        "probability": 0.0069
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0064
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0052
+      }
+    ],
+    "upset_risk": 0.2089,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1938.0,
+      "diff": 242.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2583,
+        0.4081,
+        0.3336
+      ],
+      "xgb": [
+        0.2952,
+        0.5221,
+        0.1827
+      ],
+      "lgbm": [
+        0.2633,
+        0.387,
+        0.3497
+      ],
+      "catboost": [
+        0.2792,
+        0.2788,
+        0.442
+      ],
+      "elo": [
+        0.1042,
+        0.1895,
+        0.7063
+      ],
+      "poisson": [
+        0.4876,
+        0.3633,
+        0.1491
+      ]
+    }
+  },
+  "England": {
+    "team_a": "Egypt",
+    "team_b": "England",
+    "probabilities": {
+      "win_a": 0.1785,
+      "draw": 0.1774,
+      "win_b": 0.6442
+    },
+    "expected_goals": {
+      "team_a": 0.68,
+      "team_b": 1.26
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 2,
+      "probability": 0.1134
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1667
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 2,
+      "probability": 0.1134
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1667
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1579
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1462
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.1134
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0775
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.0755
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0475
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0422
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0336
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0324
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0265
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 4,
+        "probability": 0.0149
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0111
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 4,
+        "probability": 0.0102
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0096
+      }
+    ],
+    "upset_risk": 0.1415,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 2024.0,
+      "diff": 328.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1416,
+        0.1728,
+        0.6856
+      ],
+      "xgb": [
+        0.2079,
+        0.0449,
+        0.7472
+      ],
+      "lgbm": [
+        0.2453,
+        0.1873,
+        0.5674
+      ],
+      "catboost": [
+        0.2252,
+        0.2473,
+        0.5275
+      ],
+      "elo": [
+        0.0475,
+        0.168,
+        0.7845
+      ],
+      "poisson": [
+        0.1796,
+        0.3421,
+        0.4783
+      ]
+    }
+  },
+  "France": {
+    "team_a": "Egypt",
+    "team_b": "France",
+    "probabilities": {
+      "win_a": 0.0972,
+      "draw": 0.1277,
+      "win_b": 0.7751
+    },
+    "expected_goals": {
+      "team_a": 1.01,
+      "team_b": 0.89
+    },
+    "confidence": "ALTO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1083
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1745
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1083
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1745
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1593
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1262
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1083
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0763
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0679
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0598
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0593
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0302
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0257
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0228
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0177
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0176
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0102
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.009
+      }
+    ],
+    "upset_risk": 0.1179,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 2063.0,
+      "diff": 367.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.0637,
+        0.1024,
+        0.8339
+      ],
+      "xgb": [
+        0.0022,
+        0.0027,
+        0.9951
+      ],
+      "lgbm": [
+        0.112,
+        0.099,
+        0.7889
+      ],
+      "catboost": [
+        0.1629,
+        0.2039,
+        0.6332
+      ],
+      "elo": [
+        0.0288,
+        0.1583,
+        0.813
+      ],
+      "poisson": [
+        0.3484,
+        0.3672,
+        0.2844
+      ]
+    }
+  },
+  "Germany": {
+    "team_a": "Egypt",
+    "team_b": "Germany",
+    "probabilities": {
+      "win_a": 0.1151,
+      "draw": 0.1296,
+      "win_b": 0.7552
+    },
+    "expected_goals": {
+      "team_a": 0.78,
+      "team_b": 1.07
+    },
+    "confidence": "ALTO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1447
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1828
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1447
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1828
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1554
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1447
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.0988
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.09
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0699
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0509
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0478
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.032
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0271
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0248
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0132
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0124
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0096
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 4,
+        "probability": 0.0085
+      }
+    ],
+    "upset_risk": 0.2145,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1932.0,
+      "diff": 236.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.0615,
+        0.0867,
+        0.8518
+      ],
+      "xgb": [
+        0.0019,
+        0.014,
+        0.9841
+      ],
+      "lgbm": [
+        0.1812,
+        0.0939,
+        0.7249
+      ],
+      "catboost": [
+        0.1832,
+        0.2055,
+        0.6114
+      ],
+      "elo": [
+        0.109,
+        0.191,
+        0.7
+      ],
+      "poisson": [
+        0.2381,
+        0.3679,
+        0.3941
+      ]
+    }
+  },
+  "Ghana": {
+    "team_a": "Egypt",
+    "team_b": "Ghana",
+    "probabilities": {
+      "win_a": 0.3805,
+      "draw": 0.3382,
+      "win_b": 0.2813
+    },
+    "expected_goals": {
+      "team_a": 0.7,
+      "team_b": 0.67
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1554
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2747
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1554
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2747
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1554
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.148
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1416
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0624
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0572
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.042
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0402
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0146
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0141
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0128
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0098
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.009
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0033
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0032
+      }
+    ],
+    "upset_risk": 0.2653,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1510.0,
+      "diff": 186.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2891,
+        0.4148,
+        0.2961
+      ],
+      "xgb": [
+        0.4081,
+        0.3676,
+        0.2243
+      ],
+      "lgbm": [
+        0.3972,
+        0.2294,
+        0.3734
+      ],
+      "catboost": [
+        0.3156,
+        0.3785,
+        0.3058
+      ],
+      "elo": [
+        0.643,
+        0.2035,
+        0.1535
+      ],
+      "poisson": [
+        0.2934,
+        0.4312,
+        0.2754
+      ]
+    }
+  },
+  "Haiti": {
+    "team_a": "Egypt",
+    "team_b": "Haiti",
+    "probabilities": {
+      "win_a": 0.5528,
+      "draw": 0.2804,
+      "win_b": 0.1668
+    },
+    "expected_goals": {
+      "team_a": 0.87,
+      "team_b": 0.62
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1744
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2495
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1744
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2495
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1744
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1436
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1174
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0853
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0525
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0431
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0373
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0246
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0162
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0152
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0088
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0077
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0053
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0047
+      }
+    ],
+    "upset_risk": 0.309,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1548.0,
+      "diff": 148.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.5223,
+        0.3218,
+        0.1558
+      ],
+      "xgb": [
+        0.7961,
+        0.1678,
+        0.0361
+      ],
+      "lgbm": [
+        0.4134,
+        0.3249,
+        0.2617
+      ],
+      "catboost": [
+        0.5289,
+        0.2887,
+        0.1824
+      ],
+      "elo": [
+        0.5945,
+        0.213,
+        0.1925
+      ],
+      "poisson": [
+        0.3685,
+        0.4102,
+        0.2213
+      ]
+    }
+  },
+  "Iran": {
+    "team_a": "Egypt",
+    "team_b": "Iran",
+    "probabilities": {
+      "win_a": 0.3411,
+      "draw": 0.3241,
+      "win_b": 0.3348
+    },
+    "expected_goals": {
+      "team_a": 0.66,
+      "team_b": 0.68
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1511
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2822
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1511
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2822
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1558
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1511
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1396
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0605
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0574
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0402
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0391
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0138
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0133
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0127
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0091
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0087
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.003
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0029
+      }
+    ],
+    "upset_risk": 0.4023,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1772.0,
+      "diff": 76.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2647,
+        0.3961,
+        0.3392
+      ],
+      "xgb": [
+        0.4733,
+        0.3294,
+        0.1973
+      ],
+      "lgbm": [
+        0.4027,
+        0.2995,
+        0.2977
+      ],
+      "catboost": [
+        0.3111,
+        0.2809,
+        0.408
+      ],
+      "elo": [
+        0.2768,
+        0.231,
+        0.4922
+      ],
+      "poisson": [
+        0.2766,
+        0.4358,
+        0.2876
+      ]
+    }
+  },
+  "Iraq": {
+    "team_a": "Egypt",
+    "team_b": "Iraq",
+    "probabilities": {
+      "win_a": 0.6123,
+      "draw": 0.2249,
+      "win_b": 0.1628
+    },
+    "expected_goals": {
+      "team_a": 0.62,
+      "team_b": 0.69
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1458
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2893
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1458
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2893
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1642
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1458
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1373
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0643
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0522
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0401
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0362
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0149
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0125
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0109
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0093
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0075
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0029
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0026
+      }
+    ],
+    "upset_risk": 0.3846,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1607.0,
+      "diff": 89.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.5398,
+        0.2963,
+        0.1639
+      ],
+      "xgb": [
+        0.9678,
+        0.0202,
+        0.0119
+      ],
+      "lgbm": [
+        0.6219,
+        0.1953,
+        0.1828
+      ],
+      "catboost": [
+        0.5317,
+        0.2847,
+        0.1836
+      ],
+      "elo": [
+        0.5115,
+        0.2278,
+        0.2608
+      ],
+      "poisson": [
+        0.259,
+        0.4398,
+        0.3013
+      ]
+    }
+  },
+  "Japan": {
+    "team_a": "Egypt",
+    "team_b": "Japan",
+    "probabilities": {
+      "win_a": 0.1961,
+      "draw": 0.3,
+      "win_b": 0.5038
+    },
+    "expected_goals": {
+      "team_a": 0.86,
+      "team_b": 0.62
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1189
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2504
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1189
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2504
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1733
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1438
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1189
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.084
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0521
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0438
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0376
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.024
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0162
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0149
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0091
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0078
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0052
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0046
+      }
+    ],
+    "upset_risk": 0.2399,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1906.0,
+      "diff": 210.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1876,
+        0.331,
+        0.4814
+      ],
+      "xgb": [
+        0.2275,
+        0.3945,
+        0.378
+      ],
+      "lgbm": [
+        0.1815,
+        0.2598,
+        0.5587
+      ],
+      "catboost": [
+        0.1854,
+        0.2539,
+        0.5607
+      ],
+      "elo": [
+        0.1312,
+        0.1975,
+        0.6713
+      ],
+      "poisson": [
+        0.3644,
+        0.4113,
+        0.2243
+      ]
+    }
+  },
+  "Jordan": {
+    "team_a": "Egypt",
+    "team_b": "Jordan",
+    "probabilities": {
+      "win_a": 0.369,
+      "draw": 0.3465,
+      "win_b": 0.2845
+    },
+    "expected_goals": {
+      "team_a": 0.97,
+      "team_b": 0.46
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.213
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2603
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.213
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2603
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.213
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1261
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1125
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0904
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0515
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0363
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0252
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0244
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0166
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0118
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0088
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 1,
+        "probability": 0.004
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0038
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0038
+      }
+    ],
+    "upset_risk": 0.48,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1680.0,
+      "diff": 16.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.3622,
+        0.4157,
+        0.2221
+      ],
+      "xgb": [
+        0.3548,
+        0.1785,
+        0.4666
+      ],
+      "lgbm": [
+        0.2791,
+        0.4354,
+        0.2855
+      ],
+      "catboost": [
+        0.418,
+        0.3614,
+        0.2206
+      ],
+      "elo": [
+        0.4,
+        0.246,
+        0.354
+      ],
+      "poisson": [
+        0.4506,
+        0.3988,
+        0.1506
+      ]
+    }
+  },
+  "Mexico": {
+    "team_a": "Egypt",
+    "team_b": "Mexico",
+    "probabilities": {
+      "win_a": 0.2303,
+      "draw": 0.2809,
+      "win_b": 0.4889
+    },
+    "expected_goals": {
+      "team_a": 0.74,
+      "team_b": 0.8
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1488
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2387
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1488
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2387
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1501
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1488
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.135
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0689
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0583
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0507
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0466
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0187
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0184
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0143
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0135
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0114
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.005
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0046
+      }
+    ],
+    "upset_risk": 0.2664,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1881.0,
+      "diff": 185.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2287,
+        0.2866,
+        0.4847
+      ],
+      "xgb": [
+        0.2773,
+        0.2849,
+        0.4378
+      ],
+      "lgbm": [
+        0.2641,
+        0.3116,
+        0.4243
+      ],
+      "catboost": [
+        0.2027,
+        0.2473,
+        0.55
+      ],
+      "elo": [
+        0.1545,
+        0.2037,
+        0.6418
+      ],
+      "poisson": [
+        0.2769,
+        0.4087,
+        0.3143
+      ]
+    }
+  },
+  "Morocco": {
+    "team_a": "Egypt",
+    "team_b": "Morocco",
+    "probabilities": {
+      "win_a": 0.1781,
+      "draw": 0.3073,
+      "win_b": 0.5145
+    },
+    "expected_goals": {
+      "team_a": 0.62,
+      "team_b": 0.64
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1613
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.3066
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1613
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.3066
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1613
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1553
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1327
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0579
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0542
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0357
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0345
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0123
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0111
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.011
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0076
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0071
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0023
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0023
+      }
+    ],
+    "upset_risk": 0.3299,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1827.0,
+      "diff": 131.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1555,
+        0.3515,
+        0.493
+      ],
+      "xgb": [
+        0.146,
+        0.3273,
+        0.5267
+      ],
+      "lgbm": [
+        0.1917,
+        0.2903,
+        0.518
+      ],
+      "catboost": [
+        0.184,
+        0.2666,
+        0.5494
+      ],
+      "elo": [
+        0.2113,
+        0.2172,
+        0.5714
+      ],
+      "poisson": [
+        0.268,
+        0.4508,
+        0.2812
+      ]
+    }
+  },
+  "Netherlands": {
+    "team_a": "Egypt",
+    "team_b": "Netherlands",
+    "probabilities": {
+      "win_a": 0.197,
+      "draw": 0.2826,
+      "win_b": 0.5203
+    },
+    "expected_goals": {
+      "team_a": 0.95,
+      "team_b": 1.0
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 2,
+      "probability": 0.0712
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1676
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 2,
+      "probability": 0.0712
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1676
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1601
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1175
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1103
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0712
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0675
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0642
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0641
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.032
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0237
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0225
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0203
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0203
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0107
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0101
+      }
+    ],
+    "upset_risk": 0.1999,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1948.0,
+      "diff": 252.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1835,
+        0.2957,
+        0.5208
+      ],
+      "xgb": [
+        0.2048,
+        0.4177,
+        0.3775
+      ],
+      "lgbm": [
+        0.2016,
+        0.1933,
+        0.6051
+      ],
+      "catboost": [
+        0.2347,
+        0.2788,
+        0.4866
+      ],
+      "elo": [
+        0.0964,
+        0.187,
+        0.7166
+      ],
+      "poisson": [
+        0.305,
+        0.3633,
+        0.3318
+      ]
+    }
+  },
+  "New Zealand": {
+    "team_a": "Egypt",
+    "team_b": "New Zealand",
+    "probabilities": {
+      "win_a": 0.5639,
+      "draw": 0.283,
+      "win_b": 0.153
+    },
+    "expected_goals": {
+      "team_a": 1.36,
+      "team_b": 0.58
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 2,
+      "goals_b": 0,
+      "probability": 0.1324
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1742
+    },
+    "most_likely_scoreline": {
+      "goals_a": 2,
+      "goals_b": 0,
+      "probability": 0.1324
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1742
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1648
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1346
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1324
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0771
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0627
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0599
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0349
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0331
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0244
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0224
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0203
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 1,
+        "probability": 0.0118
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0101
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0064
+      }
+    ],
+    "upset_risk": 0.3262,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1562.0,
+      "diff": 134.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.5261,
+        0.3211,
+        0.1528
+      ],
+      "xgb": [
+        0.6936,
+        0.2186,
+        0.0879
+      ],
+      "lgbm": [
+        0.4478,
+        0.354,
+        0.1981
+      ],
+      "catboost": [
+        0.5717,
+        0.2648,
+        0.1635
+      ],
+      "elo": [
+        0.5756,
+        0.2165,
+        0.2079
+      ],
+      "poisson": [
+        0.5375,
+        0.324,
+        0.1386
+      ]
+    }
+  },
+  "Norway": {
+    "team_a": "Egypt",
+    "team_b": "Norway",
+    "probabilities": {
+      "win_a": 0.3145,
+      "draw": 0.2892,
+      "win_b": 0.3962
+    },
+    "expected_goals": {
+      "team_a": 1.15,
+      "team_b": 0.71
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.0868
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1792
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.0868
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1792
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1558
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1505
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1032
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0868
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0731
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.045
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0396
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0391
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0281
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0259
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0114
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0106
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0099
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0092
+      }
+    ],
+    "upset_risk": 0.2319,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1914.0,
+      "diff": 218.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2957,
+        0.3202,
+        0.3841
+      ],
+      "xgb": [
+        0.5158,
+        0.1942,
+        0.29
+      ],
+      "lgbm": [
+        0.2614,
+        0.3543,
+        0.3843
+      ],
+      "catboost": [
+        0.2815,
+        0.3058,
+        0.4128
+      ],
+      "elo": [
+        0.1241,
+        0.1955,
+        0.6804
+      ],
+      "poisson": [
+        0.4394,
+        0.358,
+        0.2026
+      ]
+    }
+  },
+  "Panama": {
+    "team_a": "Egypt",
+    "team_b": "Panama",
+    "probabilities": {
+      "win_a": 0.543,
+      "draw": 0.2752,
+      "win_b": 0.1818
+    },
+    "expected_goals": {
+      "team_a": 1.19,
+      "team_b": 0.42
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.2183
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.2183
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.2183
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.2183
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.218
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1407
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1191
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0661
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0597
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0557
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0237
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0213
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.018
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0165
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0127
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 1,
+        "probability": 0.007
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.005
+      },
+      {
+        "goals_a": 5,
+        "goals_b": 0,
+        "probability": 0.0039
+      }
+    ],
+    "upset_risk": 0.4612,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1730.0,
+      "diff": 34.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.5186,
+        0.3245,
+        0.1568
+      ],
+      "xgb": [
+        0.6939,
+        0.2445,
+        0.0616
+      ],
+      "lgbm": [
+        0.5432,
+        0.2552,
+        0.2016
+      ],
+      "catboost": [
+        0.5275,
+        0.2733,
+        0.1992
+      ],
+      "elo": [
+        0.3305,
+        0.2415,
+        0.428
+      ],
+      "poisson": [
+        0.5358,
+        0.3505,
+        0.1137
+      ]
+    }
+  },
+  "Paraguay": {
+    "team_a": "Egypt",
+    "team_b": "Paraguay",
+    "probabilities": {
+      "win_a": 0.3485,
+      "draw": 0.274,
+      "win_b": 0.3775
+    },
+    "expected_goals": {
+      "team_a": 0.97,
+      "team_b": 0.62
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1031
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2259
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1031
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2259
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1755
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1452
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1031
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0966
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0597
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0389
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0379
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0314
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0194
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0185
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.008
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0078
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0076
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.006
+      }
+    ],
+    "upset_risk": 0.3212,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1834.0,
+      "diff": 138.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.3452,
+        0.3047,
+        0.3501
+      ],
+      "xgb": [
+        0.5149,
+        0.1825,
+        0.3027
+      ],
+      "lgbm": [
+        0.2908,
+        0.2939,
+        0.4153
+      ],
+      "catboost": [
+        0.3273,
+        0.2953,
+        0.3774
+      ],
+      "elo": [
+        0.2035,
+        0.2155,
+        0.581
+      ],
+      "poisson": [
+        0.406,
+        0.3908,
+        0.2032
+      ]
+    }
+  },
+  "Portugal": {
+    "team_a": "Egypt",
+    "team_b": "Portugal",
+    "probabilities": {
+      "win_a": 0.2702,
+      "draw": 0.2578,
+      "win_b": 0.472
+    },
+    "expected_goals": {
+      "team_a": 0.87,
+      "team_b": 0.68
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1209
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2351
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1209
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2351
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1615
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1488
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1209
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0805
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0547
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.049
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0427
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0234
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0186
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0159
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0111
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0097
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0054
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0051
+      }
+    ],
+    "upset_risk": 0.1662,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1989.0,
+      "diff": 293.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1584,
+        0.2633,
+        0.5782
+      ],
+      "xgb": [
+        0.6416,
+        0.2089,
+        0.1496
+      ],
+      "lgbm": [
+        0.2449,
+        0.2941,
+        0.461
+      ],
+      "catboost": [
+        0.1973,
+        0.2594,
+        0.5433
+      ],
+      "elo": [
+        0.0678,
+        0.1768,
+        0.7554
+      ],
+      "poisson": [
+        0.3535,
+        0.4038,
+        0.2427
+      ]
+    }
+  },
+  "Qatar": {
+    "team_a": "Egypt",
+    "team_b": "Qatar",
+    "probabilities": {
+      "win_a": 0.4504,
+      "draw": 0.3386,
+      "win_b": 0.211
+    },
+    "expected_goals": {
+      "team_a": 0.84,
+      "team_b": 0.51
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1967
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2789
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1967
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2789
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1967
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1319
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1118
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0914
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0468
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0339
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0285
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0256
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0131
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.012
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0058
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0054
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0049
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0034
+      }
+    ],
+    "upset_risk": 0.1804,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1421.0,
+      "diff": 275.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.4193,
+        0.3693,
+        0.2114
+      ],
+      "xgb": [
+        0.341,
+        0.4283,
+        0.2307
+      ],
+      "lgbm": [
+        0.4295,
+        0.3259,
+        0.2446
+      ],
+      "catboost": [
+        0.4356,
+        0.303,
+        0.2613
+      ],
+      "elo": [
+        0.739,
+        0.1812,
+        0.0797
+      ],
+      "poisson": [
+        0.3878,
+        0.4234,
+        0.1888
+      ]
+    }
+  },
+  "Saudi Arabia": {
+    "team_a": "Egypt",
+    "team_b": "Saudi Arabia",
+    "probabilities": {
+      "win_a": 0.4341,
+      "draw": 0.2755,
+      "win_b": 0.2903
+    },
+    "expected_goals": {
+      "team_a": 0.88,
+      "team_b": 0.63
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1713
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2419
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1713
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2419
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1713
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1454
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.116
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0858
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0543
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0439
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0388
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0253
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0172
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.016
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0093
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0082
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0056
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0051
+      }
+    ],
+    "upset_risk": 0.3439,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1576.0,
+      "diff": 120.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.3168,
+        0.3295,
+        0.3537
+      ],
+      "xgb": [
+        0.6881,
+        0.1337,
+        0.1782
+      ],
+      "lgbm": [
+        0.3423,
+        0.2766,
+        0.3811
+      ],
+      "catboost": [
+        0.3731,
+        0.3256,
+        0.3013
+      ],
+      "elo": [
+        0.5561,
+        0.22,
+        0.2239
+      ],
+      "poisson": [
+        0.3705,
+        0.4056,
+        0.2238
+      ]
+    }
+  },
+  "Scotland": {
+    "team_a": "Egypt",
+    "team_b": "Scotland",
+    "probabilities": {
+      "win_a": 0.3459,
+      "draw": 0.2968,
+      "win_b": 0.3573
+    },
+    "expected_goals": {
+      "team_a": 0.87,
+      "team_b": 0.77
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1256
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2173
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1256
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2173
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1542
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1439
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1256
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.073
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.058
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0565
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0504
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0219
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0211
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0164
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.015
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.013
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0063
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0057
+      }
+    ],
+    "upset_risk": 0.02,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 853.0,
+      "diff": 843.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2873,
+        0.3432,
+        0.3695
+      ],
+      "xgb": [
+        0.2165,
+        0.2772,
+        0.5063
+      ],
+      "lgbm": [
+        0.2153,
+        0.3418,
+        0.4429
+      ],
+      "catboost": [
+        0.306,
+        0.3105,
+        0.3834
+      ],
+      "elo": [
+        0.9523,
+        0.08,
+        -0.0323
+      ],
+      "poisson": [
+        0.3293,
+        0.395,
+        0.2757
+      ]
+    }
+  },
+  "Senegal": {
+    "team_a": "Egypt",
+    "team_b": "Senegal",
+    "probabilities": {
+      "win_a": 0.3302,
+      "draw": 0.3537,
+      "win_b": 0.3161
+    },
+    "expected_goals": {
+      "team_a": 0.68,
+      "team_b": 0.5
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "draw",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.3279
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.3279
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.3279
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.3279
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1905
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1339
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1233
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0712
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.038
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0353
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0258
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0161
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0088
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.008
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0063
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0043
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0027
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.002
+      }
+    ],
+    "upset_risk": 0.2901,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1860.0,
+      "diff": 164.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.3084,
+        0.3642,
+        0.3274
+      ],
+      "xgb": [
+        0.576,
+        0.2788,
+        0.1451
+      ],
+      "lgbm": [
+        0.2867,
+        0.484,
+        0.2293
+      ],
+      "catboost": [
+        0.2808,
+        0.3149,
+        0.4043
+      ],
+      "elo": [
+        0.1756,
+        0.209,
+        0.6154
+      ],
+      "poisson": [
+        0.3283,
+        0.4603,
+        0.2114
+      ]
+    }
+  },
+  "South Africa": {
+    "team_a": "Egypt",
+    "team_b": "South Africa",
+    "probabilities": {
+      "win_a": 0.4888,
+      "draw": 0.23,
+      "win_b": 0.2812
+    },
+    "expected_goals": {
+      "team_a": 0.98,
+      "team_b": 0.81
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1398
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1925
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1398
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1925
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1569
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1398
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.111
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0803
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0647
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0546
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0534
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0262
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0261
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0211
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0147
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0143
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0085
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.007
+      }
+    ],
+    "upset_risk": 0.2664,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1511.0,
+      "diff": 185.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.4714,
+        0.2379,
+        0.2906
+      ],
+      "xgb": [
+        0.6186,
+        0.0893,
+        0.2921
+      ],
+      "lgbm": [
+        0.4511,
+        0.2628,
+        0.2862
+      ],
+      "catboost": [
+        0.3761,
+        0.2794,
+        0.3445
+      ],
+      "elo": [
+        0.6418,
+        0.2037,
+        0.1545
+      ],
+      "poisson": [
+        0.3581,
+        0.3778,
+        0.2641
+      ]
+    }
+  },
+  "South Korea": {
+    "team_a": "Egypt",
+    "team_b": "South Korea",
+    "probabilities": {
+      "win_a": 0.2968,
+      "draw": 0.2881,
+      "win_b": 0.4151
+    },
+    "expected_goals": {
+      "team_a": 0.69,
+      "team_b": 0.69
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1507
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2743
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1507
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2743
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1525
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1507
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1417
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0605
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0592
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0414
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.041
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0142
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.014
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0135
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0096
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0094
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0033
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0032
+      }
+    ],
+    "upset_risk": 0.3833,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1786.0,
+      "diff": 90.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.309,
+        0.3129,
+        0.378
+      ],
+      "xgb": [
+        0.3056,
+        0.1744,
+        0.5201
+      ],
+      "lgbm": [
+        0.3423,
+        0.3243,
+        0.3334
+      ],
+      "catboost": [
+        0.2655,
+        0.3072,
+        0.4273
+      ],
+      "elo": [
+        0.2596,
+        0.2275,
+        0.5129
+      ],
+      "poisson": [
+        0.2868,
+        0.431,
+        0.2822
+      ]
+    }
+  },
+  "Spain": {
+    "team_a": "Egypt",
+    "team_b": "Spain",
+    "probabilities": {
+      "win_a": 0.1039,
+      "draw": 0.175,
+      "win_b": 0.7212
+    },
+    "expected_goals": {
+      "team_a": 0.66,
+      "team_b": 0.93
+    },
+    "confidence": "ALTO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1675
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2281
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1675
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2281
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1675
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1479
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1112
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0886
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.058
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.044
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0409
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0274
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.019
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.018
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0096
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0089
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 4,
+        "probability": 0.0064
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0059
+      }
+    ],
+    "upset_risk": 0.0758,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 2157.0,
+      "diff": 461.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1003,
+        0.163,
+        0.7367
+      ],
+      "xgb": [
+        0.0459,
+        0.0841,
+        0.87
+      ],
+      "lgbm": [
+        0.1341,
+        0.1832,
+        0.6827
+      ],
+      "catboost": [
+        0.165,
+        0.2195,
+        0.6155
+      ],
+      "elo": [
+        -0.0016,
+        0.1347,
+        0.8669
+      ],
+      "poisson": [
+        0.2233,
+        0.3963,
+        0.3803
+      ]
+    }
+  },
+  "Sweden": {
+    "team_a": "Egypt",
+    "team_b": "Sweden",
+    "probabilities": {
+      "win_a": 0.258,
+      "draw": 0.3985,
+      "win_b": 0.3435
+    },
+    "expected_goals": {
+      "team_a": 0.85,
+      "team_b": 0.97
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "draw",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 1,
+      "probability": 0.1583
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1872
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 1,
+      "probability": 0.1583
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1872
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1583
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1324
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1135
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.076
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0646
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0587
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0568
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0275
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0245
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0208
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0166
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0161
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0089
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0078
+      }
+    ],
+    "upset_risk": 0.48,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1712.0,
+      "diff": 16.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.321,
+        0.3198,
+        0.3592
+      ],
+      "xgb": [
+        0.1407,
+        0.6613,
+        0.198
+      ],
+      "lgbm": [
+        0.2514,
+        0.3773,
+        0.3714
+      ],
+      "catboost": [
+        0.2471,
+        0.3662,
+        0.3867
+      ],
+      "elo": [
+        0.354,
+        0.246,
+        0.4
+      ],
+      "poisson": [
+        0.2805,
+        0.3755,
+        0.344
+      ]
+    }
+  },
+  "Switzerland": {
+    "team_a": "Egypt",
+    "team_b": "Switzerland",
+    "probabilities": {
+      "win_a": 0.2182,
+      "draw": 0.2636,
+      "win_b": 0.5182
+    },
+    "expected_goals": {
+      "team_a": 1.17,
+      "team_b": 0.74
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.0864
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.1716
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.0864
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1716
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1522
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1488
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.1007
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0864
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0749
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0478
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.041
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0392
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0291
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0279
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0119
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0114
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0108
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0102
+      }
+    ],
+    "upset_risk": 0.2555,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1891.0,
+      "diff": 195.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.223,
+        0.3336,
+        0.4434
+      ],
+      "xgb": [
+        0.069,
+        0.1328,
+        0.7982
+      ],
+      "lgbm": [
+        0.2822,
+        0.3072,
+        0.4106
+      ],
+      "catboost": [
+        0.2494,
+        0.2714,
+        0.4793
+      ],
+      "elo": [
+        0.1449,
+        0.2012,
+        0.6538
+      ],
+      "poisson": [
+        0.4344,
+        0.3546,
+        0.211
+      ]
+    }
+  },
+  "Tunisia": {
+    "team_a": "Egypt",
+    "team_b": "Tunisia",
+    "probabilities": {
+      "win_a": 0.2584,
+      "draw": 0.3656,
+      "win_b": 0.376
+    },
+    "expected_goals": {
+      "team_a": 0.68,
+      "team_b": 0.59
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1452
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.3022
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1452
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.3022
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.17
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1452
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1334
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0647
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.049
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0382
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0332
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0146
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0113
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0096
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0086
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0065
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0025
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0025
+      }
+    ],
+    "upset_risk": 0.4134,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1628.0,
+      "diff": 68.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2949,
+        0.3616,
+        0.3435
+      ],
+      "xgb": [
+        0.134,
+        0.3598,
+        0.5062
+      ],
+      "lgbm": [
+        0.1983,
+        0.4775,
+        0.3242
+      ],
+      "catboost": [
+        0.253,
+        0.3047,
+        0.4423
+      ],
+      "elo": [
+        0.4801,
+        0.233,
+        0.2869
+      ],
+      "poisson": [
+        0.3038,
+        0.4473,
+        0.2489
+      ]
+    }
+  },
+  "Turkiye": {
+    "team_a": "Egypt",
+    "team_b": "Turkiye",
+    "probabilities": {
+      "win_a": 0.2462,
+      "draw": 0.3763,
+      "win_b": 0.3775
+    },
+    "expected_goals": {
+      "team_a": 0.86,
+      "team_b": 0.6
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1176
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2557
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1176
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2557
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1779
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1417
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1176
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0856
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0512
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0418
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0358
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0244
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0153
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0146
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0083
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0071
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0052
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0044
+      }
+    ],
+    "upset_risk": 0.3581,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1805.0,
+      "diff": 109.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2432,
+        0.3397,
+        0.4171
+      ],
+      "xgb": [
+        0.1884,
+        0.4817,
+        0.3299
+      ],
+      "lgbm": [
+        0.2535,
+        0.4683,
+        0.2783
+      ],
+      "catboost": [
+        0.2608,
+        0.3039,
+        0.4352
+      ],
+      "elo": [
+        0.2367,
+        0.2228,
+        0.5405
+      ],
+      "poisson": [
+        0.3695,
+        0.4136,
+        0.2169
+      ]
+    }
+  },
+  "United States": {
+    "team_a": "Egypt",
+    "team_b": "United States",
+    "probabilities": {
+      "win_a": 0.2638,
+      "draw": 0.2713,
+      "win_b": 0.4649
+    },
+    "expected_goals": {
+      "team_a": 1.0,
+      "team_b": 0.62
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.0998
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2204
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.0998
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2204
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1754
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1453
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.0998
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0992
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0614
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.038
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0379
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0331
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0205
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.019
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0083
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0078
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0078
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0064
+      }
+    ],
+    "upset_risk": 0.4669,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1726.0,
+      "diff": 30.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.2563,
+        0.2865,
+        0.4572
+      ],
+      "xgb": [
+        0.1879,
+        0.1967,
+        0.6154
+      ],
+      "lgbm": [
+        0.2721,
+        0.2915,
+        0.4364
+      ],
+      "catboost": [
+        0.2403,
+        0.2806,
+        0.4791
+      ],
+      "elo": [
+        0.3357,
+        0.2425,
+        0.4218
+      ],
+      "poisson": [
+        0.415,
+        0.3861,
+        0.199
+      ]
+    }
+  },
+  "Uruguay": {
+    "team_a": "Egypt",
+    "team_b": "Uruguay",
+    "probabilities": {
+      "win_a": 0.2089,
+      "draw": 0.3418,
+      "win_b": 0.4493
+    },
+    "expected_goals": {
+      "team_a": 0.83,
+      "team_b": 0.79
+    },
+    "confidence": "MEDIO",
+    "predicted_outcome": "win_b",
+    "outcome_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1327
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2216
+    },
+    "most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 1,
+      "probability": 0.1327
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2216
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1538
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1397
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1327
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0678
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0621
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0538
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0515
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0213
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0187
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0164
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0149
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0136
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0059
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 3,
+        "probability": 0.0056
+      }
+    ],
+    "upset_risk": 0.2545,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1892.0,
+      "diff": 196.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.1952,
+        0.3176,
+        0.4872
+      ],
+      "xgb": [
+        0.1538,
+        0.4789,
+        0.3673
+      ],
+      "lgbm": [
+        0.2844,
+        0.361,
+        0.3546
+      ],
+      "catboost": [
+        0.2111,
+        0.2936,
+        0.4954
+      ],
+      "elo": [
+        0.144,
+        0.201,
+        0.655
+      ],
+      "poisson": [
+        0.3109,
+        0.3984,
+        0.2907
+      ]
+    }
+  },
+  "Uzbekistan": {
+    "team_a": "Egypt",
+    "team_b": "Uzbekistan",
+    "probabilities": {
+      "win_a": 0.5953,
+      "draw": 0.2107,
+      "win_b": 0.194
+    },
+    "expected_goals": {
+      "team_a": 0.99,
+      "team_b": 0.73
+    },
+    "confidence": "BAJO",
+    "predicted_outcome": "win_a",
+    "outcome_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1529
+    },
+    "exact_most_likely_scoreline": {
+      "goals_a": 0,
+      "goals_b": 0,
+      "probability": 0.2025
+    },
+    "most_likely_scoreline": {
+      "goals_a": 1,
+      "goals_b": 0,
+      "probability": 0.1529
+    },
+    "top_scorelines": [
+      {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2025
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1535
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1529
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1069
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.0875
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 1,
+        "probability": 0.0641
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 2,
+        "probability": 0.0479
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 2,
+        "probability": 0.0475
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 0,
+        "probability": 0.0289
+      },
+      {
+        "goals_a": 2,
+        "goals_b": 2,
+        "probability": 0.0235
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 1,
+        "probability": 0.0212
+      },
+      {
+        "goals_a": 0,
+        "goals_b": 3,
+        "probability": 0.0117
+      },
+      {
+        "goals_a": 1,
+        "goals_b": 3,
+        "probability": 0.0116
+      },
+      {
+        "goals_a": 3,
+        "goals_b": 2,
+        "probability": 0.0078
+      },
+      {
+        "goals_a": 4,
+        "goals_b": 0,
+        "probability": 0.0072
+      }
+    ],
+    "upset_risk": 0.48,
+    "top_features": [],
+    "elo": {
+      "team_a": 1696.0,
+      "team_b": 1714.0,
+      "diff": 18.0
+    },
+    "model_breakdown": {
+      "rf": [
+        0.5336,
+        0.2663,
+        0.2001
+      ],
+      "xgb": [
+        0.9408,
+        0.0157,
+        0.0436
+      ],
+      "lgbm": [
+        0.6024,
+        0.1889,
+        0.2087
+      ],
+      "catboost": [
+        0.5412,
+        0.2708,
+        0.188
+      ],
+      "elo": [
+        0.3514,
+        0.2455,
+        0.4031
+      ],
+      "poisson": [
+        0.3806,
+        0.3815,
+        0.2379
+      ]
+    }
+  }
+}

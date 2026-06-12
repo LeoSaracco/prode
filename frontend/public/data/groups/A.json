@@ -1,0 +1,130 @@
+{
+  "group": "A",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "Mexico",
+      "group": "A",
+      "prob_1st": 0.4375,
+      "prob_2nd": 0.2875,
+      "prob_3rd": 0.1765,
+      "prob_4th": 0.0985,
+      "qualify_direct_prob": 0.725,
+      "avg_pts": 5.3,
+      "avg_gd": 1.22
+    },
+    {
+      "team": "South Korea",
+      "group": "A",
+      "prob_1st": 0.2915,
+      "prob_2nd": 0.289,
+      "prob_3rd": 0.248,
+      "prob_4th": 0.1715,
+      "qualify_direct_prob": 0.5805,
+      "avg_pts": 4.61,
+      "avg_gd": 0.5
+    },
+    {
+      "team": "Czechia",
+      "group": "A",
+      "prob_1st": 0.1705,
+      "prob_2nd": 0.2425,
+      "prob_3rd": 0.294,
+      "prob_4th": 0.293,
+      "qualify_direct_prob": 0.413,
+      "avg_pts": 3.6,
+      "avg_gd": -0.19
+    },
+    {
+      "team": "South Africa",
+      "group": "A",
+      "prob_1st": 0.1005,
+      "prob_2nd": 0.181,
+      "prob_3rd": 0.2815,
+      "prob_4th": 0.437,
+      "qualify_direct_prob": 0.2815,
+      "avg_pts": 2.87,
+      "avg_gd": -1.53
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "Mexico",
+      "team_b": "South Africa",
+      "expected_goals": {
+        "team_a": 1.19,
+        "team_b": 0.89
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1515
+      }
+    },
+    {
+      "team_a": "Mexico",
+      "team_b": "South Korea",
+      "expected_goals": {
+        "team_a": 0.83,
+        "team_b": 0.78
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1845
+      }
+    },
+    {
+      "team_a": "Mexico",
+      "team_b": "Czechia",
+      "expected_goals": {
+        "team_a": 0.76,
+        "team_b": 0.99
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1735
+      }
+    },
+    {
+      "team_a": "South Africa",
+      "team_b": "South Korea",
+      "expected_goals": {
+        "team_a": 0.87,
+        "team_b": 0.99
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1545
+      }
+    },
+    {
+      "team_a": "South Africa",
+      "team_b": "Czechia",
+      "expected_goals": {
+        "team_a": 0.78,
+        "team_b": 1.28
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1645
+      }
+    },
+    {
+      "team_a": "South Korea",
+      "team_b": "Czechia",
+      "expected_goals": {
+        "team_a": 0.63,
+        "team_b": 0.89
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.216
+      }
+    }
+  ]
+}

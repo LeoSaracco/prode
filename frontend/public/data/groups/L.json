@@ -1,0 +1,130 @@
+{
+  "group": "L",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "England",
+      "group": "L",
+      "prob_1st": 0.518,
+      "prob_2nd": 0.328,
+      "prob_3rd": 0.1185,
+      "prob_4th": 0.0355,
+      "qualify_direct_prob": 0.846,
+      "avg_pts": 5.99,
+      "avg_gd": 2.74
+    },
+    {
+      "team": "Croatia",
+      "group": "L",
+      "prob_1st": 0.386,
+      "prob_2nd": 0.386,
+      "prob_3rd": 0.1695,
+      "prob_4th": 0.0585,
+      "qualify_direct_prob": 0.772,
+      "avg_pts": 5.65,
+      "avg_gd": 1.47
+    },
+    {
+      "team": "Ghana",
+      "group": "L",
+      "prob_1st": 0.054,
+      "prob_2nd": 0.1645,
+      "prob_3rd": 0.4025,
+      "prob_4th": 0.379,
+      "qualify_direct_prob": 0.2185,
+      "avg_pts": 2.72,
+      "avg_gd": -1.43
+    },
+    {
+      "team": "Panama",
+      "group": "L",
+      "prob_1st": 0.042,
+      "prob_2nd": 0.1215,
+      "prob_3rd": 0.3095,
+      "prob_4th": 0.527,
+      "qualify_direct_prob": 0.1635,
+      "avg_pts": 2.34,
+      "avg_gd": -2.78
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "England",
+      "team_b": "Croatia",
+      "expected_goals": {
+        "team_a": 1.44,
+        "team_b": 0.78
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.163
+      }
+    },
+    {
+      "team_a": "England",
+      "team_b": "Ghana",
+      "expected_goals": {
+        "team_a": 1.32,
+        "team_b": 0.69
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.171
+      }
+    },
+    {
+      "team_a": "England",
+      "team_b": "Panama",
+      "expected_goals": {
+        "team_a": 2.26,
+        "team_b": 0.44
+      },
+      "most_likely_scoreline": {
+        "goals_a": 2,
+        "goals_b": 0,
+        "probability": 0.17
+      }
+    },
+    {
+      "team_a": "Croatia",
+      "team_b": "Ghana",
+      "expected_goals": {
+        "team_a": 0.82,
+        "team_b": 0.74
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.217
+      }
+    },
+    {
+      "team_a": "Croatia",
+      "team_b": "Panama",
+      "expected_goals": {
+        "team_a": 1.38,
+        "team_b": 0.5
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.215
+      }
+    },
+    {
+      "team_a": "Ghana",
+      "team_b": "Panama",
+      "expected_goals": {
+        "team_a": 1.19,
+        "team_b": 0.46
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.2165
+      }
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "group": "G",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "Belgium",
+      "group": "G",
+      "prob_1st": 0.5705,
+      "prob_2nd": 0.26,
+      "prob_3rd": 0.1165,
+      "prob_4th": 0.053,
+      "qualify_direct_prob": 0.8305,
+      "avg_pts": 6.08,
+      "avg_gd": 2.18
+    },
+    {
+      "team": "Egypt",
+      "group": "G",
+      "prob_1st": 0.243,
+      "prob_2nd": 0.346,
+      "prob_3rd": 0.262,
+      "prob_4th": 0.149,
+      "qualify_direct_prob": 0.589,
+      "avg_pts": 4.48,
+      "avg_gd": 0.57
+    },
+    {
+      "team": "Iran",
+      "group": "G",
+      "prob_1st": 0.139,
+      "prob_2nd": 0.266,
+      "prob_3rd": 0.3445,
+      "prob_4th": 0.2505,
+      "qualify_direct_prob": 0.405,
+      "avg_pts": 3.59,
+      "avg_gd": -0.22
+    },
+    {
+      "team": "New Zealand",
+      "group": "G",
+      "prob_1st": 0.0475,
+      "prob_2nd": 0.128,
+      "prob_3rd": 0.277,
+      "prob_4th": 0.5475,
+      "qualify_direct_prob": 0.1755,
+      "avg_pts": 2.33,
+      "avg_gd": -2.53
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "Belgium",
+      "team_b": "Egypt",
+      "expected_goals": {
+        "team_a": 0.89,
+        "team_b": 1.1
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1445
+      }
+    },
+    {
+      "team_a": "Belgium",
+      "team_b": "Iran",
+      "expected_goals": {
+        "team_a": 0.88,
+        "team_b": 1.2
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1625
+      }
+    },
+    {
+      "team_a": "Belgium",
+      "team_b": "New Zealand",
+      "expected_goals": {
+        "team_a": 1.82,
+        "team_b": 0.97
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.112
+      }
+    },
+    {
+      "team_a": "Egypt",
+      "team_b": "Iran",
+      "expected_goals": {
+        "team_a": 0.68,
+        "team_b": 0.69
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2485
+      }
+    },
+    {
+      "team_a": "Egypt",
+      "team_b": "New Zealand",
+      "expected_goals": {
+        "team_a": 1.33,
+        "team_b": 0.54
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.212
+      }
+    },
+    {
+      "team_a": "Iran",
+      "team_b": "New Zealand",
+      "expected_goals": {
+        "team_a": 1.37,
+        "team_b": 0.57
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.196
+      }
+    }
+  ]
+}

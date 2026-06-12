@@ -1,5 +1,8 @@
 export const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
 
+const STATIC_MODE = import.meta.env.VITE_STATIC_MODE === "true";
+const BASE = import.meta.env.BASE_URL;
+
 export type TeamInfo = {
   name: string;
   group: string | null;
@@ -129,15 +132,46 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function readStatic<T>(file: string): Promise<T> {
+  const url = `${BASE}data/${file}.json`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`static data not found: ${file}`);
+  }
+  return response.json() as Promise<T>;
+}
+
+// ── Prediction cache (static mode) ──────────────────────────────────────────
+
+const predictionsCache = new Map<string, Record<string, MatchResult>>();
+
+async function getPrediction(teamA: string, teamB: string): Promise<MatchResult> {
+  if (!predictionsCache.has(teamA)) {
+    const data = await readStatic<Record<string, MatchResult>>(`predictions/${teamA}`);
+    predictionsCache.set(teamA, data);
+  }
+  const entry = predictionsCache.get(teamA)!;
+  const result = entry[teamB];
+  if (!result) {
+    throw new Error(`no static prediction for ${teamA} vs ${teamB}`);
+  }
+  return result;
+}
+
+// ── Public API ───────────────────────────────────────────────────────────────
+
 export function fetchTeams() {
+  if (STATIC_MODE) return readStatic<{ teams: TeamInfo[] }>("teams");
   return request<{ teams: TeamInfo[] }>("/teams");
 }
 
 export function fetchGroups() {
+  if (STATIC_MODE) return readStatic<{ groups: Record<string, string[]> }>("groups");
   return request<{ groups: Record<string, string[]> }>("/groups");
 }
 
 export function predictMatch(teamA: string, teamB: string) {
+  if (STATIC_MODE) return getPrediction(teamA, teamB);
   return request<MatchResult>("/predict", {
     method: "POST",
     body: JSON.stringify({ team_a: teamA, team_b: teamB })
@@ -145,6 +179,14 @@ export function predictMatch(teamA: string, teamB: string) {
 }
 
 export function simulateGroup(group: string, nSims = 5000) {
+  if (STATIC_MODE) {
+    return readStatic<{
+      group: string;
+      n_sims: number;
+      results: GroupSimulationRow[];
+      fixtures: GroupFixturePrediction[];
+    }>(`groups/${group}`);
+  }
   return request<{
     group: string;
     n_sims: number;
@@ -156,16 +198,19 @@ export function simulateGroup(group: string, nSims = 5000) {
 }
 
 export function simulateTournament(nSims = 2500, topN = 20) {
+  if (STATIC_MODE) return readStatic<{ n_sims: number; results: TournamentRow[] }>("tournament");
   return request<{ n_sims: number; results: TournamentRow[] }>(
     `/simulate/tournament?n_sims=${nSims}&top_n=${topN}`
   );
 }
 
 export function fetchFixtures() {
+  if (STATIC_MODE) return readStatic<{ fixtures: FixturePrediction[] }>("fixtures");
   return request<{ fixtures: FixturePrediction[] }>("/fixtures");
 }
 
 export function simulateTournamentBracket(nSims = 5000) {
+  if (STATIC_MODE) return readStatic<BracketResponse>("tournament_bracket");
   return request<BracketResponse>(
     `/simulate/tournament?n_sims=${nSims}&output=bracket`
   );

@@ -1,0 +1,130 @@
+{
+  "group": "D",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "Turkiye",
+      "group": "D",
+      "prob_1st": 0.3715,
+      "prob_2nd": 0.2775,
+      "prob_3rd": 0.2015,
+      "prob_4th": 0.1495,
+      "qualify_direct_prob": 0.649,
+      "avg_pts": 5.0,
+      "avg_gd": 0.84
+    },
+    {
+      "team": "United States",
+      "group": "D",
+      "prob_1st": 0.245,
+      "prob_2nd": 0.2545,
+      "prob_3rd": 0.261,
+      "prob_4th": 0.2395,
+      "qualify_direct_prob": 0.4995,
+      "avg_pts": 4.04,
+      "avg_gd": -0.14
+    },
+    {
+      "team": "Australia",
+      "group": "D",
+      "prob_1st": 0.209,
+      "prob_2nd": 0.251,
+      "prob_3rd": 0.2735,
+      "prob_4th": 0.2665,
+      "qualify_direct_prob": 0.46,
+      "avg_pts": 3.78,
+      "avg_gd": 0.01
+    },
+    {
+      "team": "Paraguay",
+      "group": "D",
+      "prob_1st": 0.1745,
+      "prob_2nd": 0.217,
+      "prob_3rd": 0.264,
+      "prob_4th": 0.3445,
+      "qualify_direct_prob": 0.3915,
+      "avg_pts": 3.47,
+      "avg_gd": -0.71
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "United States",
+      "team_b": "Paraguay",
+      "expected_goals": {
+        "team_a": 0.93,
+        "team_b": 0.92
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1565
+      }
+    },
+    {
+      "team_a": "United States",
+      "team_b": "Australia",
+      "expected_goals": {
+        "team_a": 0.71,
+        "team_b": 1.19
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.174
+      }
+    },
+    {
+      "team_a": "United States",
+      "team_b": "Turkiye",
+      "expected_goals": {
+        "team_a": 0.82,
+        "team_b": 0.88
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1885
+      }
+    },
+    {
+      "team_a": "Paraguay",
+      "team_b": "Australia",
+      "expected_goals": {
+        "team_a": 0.68,
+        "team_b": 1.13
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.177
+      }
+    },
+    {
+      "team_a": "Paraguay",
+      "team_b": "Turkiye",
+      "expected_goals": {
+        "team_a": 0.79,
+        "team_b": 0.83
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.199
+      }
+    },
+    {
+      "team_a": "Australia",
+      "team_b": "Turkiye",
+      "expected_goals": {
+        "team_a": 1.02,
+        "team_b": 0.65
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.1975
+      }
+    }
+  ]
+}

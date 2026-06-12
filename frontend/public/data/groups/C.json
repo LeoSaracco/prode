@@ -1,0 +1,130 @@
+{
+  "group": "C",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "Brazil",
+      "group": "C",
+      "prob_1st": 0.6285,
+      "prob_2nd": 0.261,
+      "prob_3rd": 0.0815,
+      "prob_4th": 0.029,
+      "qualify_direct_prob": 0.8895,
+      "avg_pts": 6.51,
+      "avg_gd": 2.86
+    },
+    {
+      "team": "Morocco",
+      "group": "C",
+      "prob_1st": 0.281,
+      "prob_2nd": 0.451,
+      "prob_3rd": 0.2015,
+      "prob_4th": 0.0665,
+      "qualify_direct_prob": 0.732,
+      "avg_pts": 5.2,
+      "avg_gd": 0.98
+    },
+    {
+      "team": "Scotland",
+      "group": "C",
+      "prob_1st": 0.059,
+      "prob_2nd": 0.1765,
+      "prob_3rd": 0.403,
+      "prob_4th": 0.3615,
+      "qualify_direct_prob": 0.2355,
+      "avg_pts": 2.79,
+      "avg_gd": -1.48
+    },
+    {
+      "team": "Haiti",
+      "group": "C",
+      "prob_1st": 0.0315,
+      "prob_2nd": 0.1115,
+      "prob_3rd": 0.314,
+      "prob_4th": 0.543,
+      "qualify_direct_prob": 0.143,
+      "avg_pts": 2.13,
+      "avg_gd": -2.36
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "Brazil",
+      "team_b": "Morocco",
+      "expected_goals": {
+        "team_a": 0.97,
+        "team_b": 0.55
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2235
+      }
+    },
+    {
+      "team_a": "Brazil",
+      "team_b": "Scotland",
+      "expected_goals": {
+        "team_a": 1.35,
+        "team_b": 0.65
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.196
+      }
+    },
+    {
+      "team_a": "Brazil",
+      "team_b": "Haiti",
+      "expected_goals": {
+        "team_a": 1.35,
+        "team_b": 0.55
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.205
+      }
+    },
+    {
+      "team_a": "Morocco",
+      "team_b": "Scotland",
+      "expected_goals": {
+        "team_a": 0.8,
+        "team_b": 0.69
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2335
+      }
+    },
+    {
+      "team_a": "Morocco",
+      "team_b": "Haiti",
+      "expected_goals": {
+        "team_a": 0.89,
+        "team_b": 0.58
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.2235
+      }
+    },
+    {
+      "team_a": "Scotland",
+      "team_b": "Haiti",
+      "expected_goals": {
+        "team_a": 1.05,
+        "team_b": 0.79
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.1625
+      }
+    }
+  ]
+}

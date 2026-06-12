@@ -1,0 +1,130 @@
+{
+  "group": "I",
+  "n_sims": 2000,
+  "results": [
+    {
+      "team": "France",
+      "group": "I",
+      "prob_1st": 0.7615,
+      "prob_2nd": 0.16,
+      "prob_3rd": 0.0575,
+      "prob_4th": 0.021,
+      "qualify_direct_prob": 0.9215,
+      "avg_pts": 7.1,
+      "avg_gd": 3.07
+    },
+    {
+      "team": "Norway",
+      "group": "I",
+      "prob_1st": 0.104,
+      "prob_2nd": 0.3455,
+      "prob_3rd": 0.3055,
+      "prob_4th": 0.245,
+      "qualify_direct_prob": 0.4495,
+      "avg_pts": 3.7,
+      "avg_gd": -0.89
+    },
+    {
+      "team": "Senegal",
+      "group": "I",
+      "prob_1st": 0.0885,
+      "prob_2nd": 0.323,
+      "prob_3rd": 0.3305,
+      "prob_4th": 0.258,
+      "qualify_direct_prob": 0.4115,
+      "avg_pts": 3.46,
+      "avg_gd": -0.7
+    },
+    {
+      "team": "Iraq",
+      "group": "I",
+      "prob_1st": 0.046,
+      "prob_2nd": 0.1715,
+      "prob_3rd": 0.3065,
+      "prob_4th": 0.476,
+      "qualify_direct_prob": 0.2175,
+      "avg_pts": 2.38,
+      "avg_gd": -1.49
+    }
+  ],
+  "fixtures": [
+    {
+      "team_a": "France",
+      "team_b": "Senegal",
+      "expected_goals": {
+        "team_a": 0.91,
+        "team_b": 0.75
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 0,
+        "probability": 0.183
+      }
+    },
+    {
+      "team_a": "France",
+      "team_b": "Norway",
+      "expected_goals": {
+        "team_a": 1.55,
+        "team_b": 1.07
+      },
+      "most_likely_scoreline": {
+        "goals_a": 1,
+        "goals_b": 1,
+        "probability": 0.1195
+      }
+    },
+    {
+      "team_a": "France",
+      "team_b": "Iraq",
+      "expected_goals": {
+        "team_a": 0.88,
+        "team_b": 1.04
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1495
+      }
+    },
+    {
+      "team_a": "Senegal",
+      "team_b": "Norway",
+      "expected_goals": {
+        "team_a": 0.86,
+        "team_b": 0.72
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.208
+      }
+    },
+    {
+      "team_a": "Senegal",
+      "team_b": "Iraq",
+      "expected_goals": {
+        "team_a": 0.49,
+        "team_b": 0.73
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 0,
+        "probability": 0.289
+      }
+    },
+    {
+      "team_a": "Norway",
+      "team_b": "Iraq",
+      "expected_goals": {
+        "team_a": 0.67,
+        "team_b": 1.2
+      },
+      "most_likely_scoreline": {
+        "goals_a": 0,
+        "goals_b": 1,
+        "probability": 0.1855
+      }
+    }
+  ]
+}
