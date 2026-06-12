@@ -3,6 +3,7 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #101416;
   color: #eef2f1;
+  --accent: #d6f36c;
 }
 
 * {
@@ -27,12 +28,19 @@ button, select {
 }
 
 .topbar {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   gap: 24px;
   max-width: 1180px;
-  margin: 0 auto 22px;
+  margin: -24px auto 22px;
+  padding: 14px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: linear-gradient(180deg, rgba(16, 20, 22, 0.94), rgba(16, 20, 22, 0.88));
+  backdrop-filter: blur(8px);
+  border-radius: 0 0 16px 16px;
 }
 
 h1, h2, p {
@@ -47,6 +55,21 @@ h1 {
 .topbar p {
   margin-top: 4px;
   color: #b9c6c1;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+h1 .accent {
+  color: var(--accent);
 }
 
 .result-copy {
@@ -68,6 +91,7 @@ h1 {
   background: rgba(238, 242, 241, 0.08);
   border: 1px solid rgba(238, 242, 241, 0.12);
   border-radius: 8px;
+  justify-self: center;
 }
 
 .tabs button, .primary {
@@ -89,14 +113,51 @@ h1 {
 
 .tabs button.active {
   color: #0d1110;
-  background: #d6f36c;
+  background: var(--accent);
 }
 
 .primary {
   color: #0d1110;
-  background: #d6f36c;
+  background: var(--accent);
   padding: 0 18px;
   font-weight: 700;
+}
+
+/* ── Author badge ─────────────────────────────────────────────────────────── */
+.author-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.author-badge--header {
+  justify-self: end;
+  color: #cbd5d1;
+  background: rgba(238, 242, 241, 0.08);
+  border: 1px solid rgba(238, 242, 241, 0.12);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.author-badge--header:hover {
+  color: #0d1110;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.author-badge--footer {
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.author-badge--footer:hover {
+  color: #eef2f1;
 }
 
 .primary:disabled {
@@ -190,8 +251,8 @@ select {
 }
 
 .ring-outer {
-  border-top-color: #d6f36c;
-  border-right-color: #d6f36c;
+  border-top-color: var(--accent);
+  border-right-color: var(--accent);
   animation: spin 0.8s linear infinite;
 }
 
@@ -282,7 +343,7 @@ h2 {
 .bar span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #d6f36c, #8cc7ff);
+  background: linear-gradient(90deg, var(--accent), #8cc7ff);
   border-radius: inherit;
   transition: width 240ms ease;
 }
@@ -370,7 +431,7 @@ h2 {
 }
 
 .fixture-card strong {
-  color: #d6f36c;
+  color: var(--accent);
   font-size: 24px;
 }
 
@@ -406,7 +467,7 @@ th {
   padding: 2px 6px;
   border-radius: 6px;
   color: #101617;
-  background: #d6f36c;
+  background: var(--accent);
   font-size: 11px;
   font-weight: 700;
 }
@@ -462,7 +523,7 @@ th {
 
 .combobox-trigger:hover,
 .combobox-trigger[aria-expanded="true"] {
-  border-color: #d6f36c;
+  border-color: var(--accent);
 }
 
 .combobox-selected {
@@ -509,7 +570,7 @@ th {
 }
 
 .combobox-search input:focus {
-  border-color: #d6f36c;
+  border-color: var(--accent);
 }
 
 .combobox-dropdown ul {
@@ -539,11 +600,11 @@ th {
 
 .combobox-dropdown li.active {
   background: rgba(214, 243, 108, 0.12);
-  color: #d6f36c;
+  color: var(--accent);
 }
 
 .combobox-dropdown li.active .combobox-team-name {
-  color: #d6f36c;
+  color: var(--accent);
 }
 
 .combobox-team-name {
@@ -571,12 +632,36 @@ th {
   }
 
   .topbar {
-    align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "logo badge"
+      "nav nav";
+    align-items: center;
+    row-gap: 12px;
+    margin: -14px auto 22px;
+  }
+
+  .topbar > div:first-child {
+    grid-area: logo;
   }
 
   .tabs {
+    grid-area: nav;
+    justify-self: stretch;
     overflow-x: auto;
+  }
+
+  .author-badge--header {
+    grid-area: badge;
+    padding: 8px;
+  }
+
+  .author-badge--header .author-badge__label {
+    display: none;
+  }
+
+  .timeline-header {
+    top: 134px;
   }
 
   .control-strip, .control-strip.compact {
@@ -635,7 +720,7 @@ th {
 
 .toggle-group .secondary.active {
   color: #0d1110;
-  background: #d6f36c;
+  background: var(--accent);
 }
 
 .toggle-group .secondary + .secondary {
@@ -666,12 +751,12 @@ th {
 }
 
 .secondary:hover {
-  border-color: #d6f36c;
+  border-color: var(--accent);
 }
 
 .secondary.active {
-  border-color: #d6f36c;
-  color: #d6f36c;
+  border-color: var(--accent);
+  color: var(--accent);
   background: rgba(214, 243, 108, 0.1);
 }
 
@@ -721,7 +806,7 @@ th {
   top: 8px;
   width: 13px;
   height: 13px;
-  background: #d6f36c;
+  background: var(--accent);
   border-radius: 999px;
 }
 
@@ -731,7 +816,7 @@ th {
   font-weight: 750;
   color: #cbd5d1;
   position: sticky;
-  top: 0;
+  top: 86px;
   background: rgba(18, 25, 26, 0.95);
   padding: 6px 0;
   z-index: 5;
@@ -754,7 +839,7 @@ th {
 }
 
 .fixture-calendar-card:hover {
-  border-color: #d6f36c;
+  border-color: var(--accent);
   box-shadow: 0 4px 16px rgba(214, 243, 108, 0.06);
 }
 
@@ -818,7 +903,7 @@ th {
 .fcc-scoreline {
   font-size: 28px;
   font-weight: 800;
-  color: #d6f36c;
+  color: var(--accent);
   letter-spacing: 1px;
 }
 
@@ -1012,7 +1097,7 @@ th {
 }
 
 .bracket-team-row:hover {
-  border-color: #d6f36c;
+  border-color: var(--accent);
 }
 
 .bracket-team-row.favorite {
@@ -1046,7 +1131,7 @@ th {
 .bracket-team-prob {
   font-weight: 800;
   font-size: 10px;
-  color: #d6f36c;
+  color: var(--accent);
   flex-shrink: 0;
 }
 
@@ -1227,6 +1312,11 @@ th {
     font-size: 22px;
   }
 
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+  }
+
   .control-strip, .control-strip.compact {
     grid-template-columns: 1fr;
   }
@@ -1324,24 +1414,9 @@ button, select, .combobox-trigger, .combobox-dropdown li {
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */
 .app-footer {
-  text-align: center;
+  display: flex;
+  justify-content: center;
   padding: 24px 16px 28px;
   border-top: 1px solid #2d3a3d;
   margin-top: 24px;
-}
-
-.app-footer span {
-  color: #6a8080;
-  font-size: 13px;
-}
-
-.app-footer a {
-  color: #8cc7ff;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 120ms;
-}
-
-.app-footer a:hover {
-  color: #d6f36c;
 }

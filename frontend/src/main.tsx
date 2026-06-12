@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Activity, BarChart3, CalendarDays, Play, Trophy } from "lucide-react";
+import { Activity, BarChart3, CalendarDays, Linkedin, Play, Trophy } from "lucide-react";
 import {
   BracketResponse,
   BracketRound,
@@ -207,9 +207,12 @@ function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div>
-          <h1>prode-ML</h1>
-          <p>Predicciones del Mundial 2026</p>
+        <div className="brand">
+          <TrophyIcon />
+          <div>
+            <h1>Prode<span className="accent">IA</span></h1>
+            <p>Predicciones del Mundial 2026</p>
+          </div>
         </div>
         <nav className="tabs" aria-label="Vistas">
           <button className={view === "predict" ? "active" : ""} onClick={() => setView("predict")}>
@@ -225,6 +228,7 @@ function App() {
             <Trophy size={18} /> Torneo
           </button>
         </nav>
+        <AuthorBadge variant="header" />
       </header>
 
       {error && <div className="error">{error}</div>}
@@ -326,11 +330,7 @@ function App() {
       )}
 
       <footer className="app-footer">
-        <span>Developed by{" "}
-          <a href="https://www.linkedin.com/in/leandro-saracco/" target="_blank" rel="noopener noreferrer">
-            Leandro Saracco
-          </a>
-        </span>
+        <AuthorBadge variant="footer" />
       </footer>
     </main>
   );
@@ -775,6 +775,48 @@ function BracketTeamRow({ team, isFavorite }: {
       <span className="bracket-team-name">{es(team.team)}</span>
       <span className="bracket-team-prob">{percent(team.prob)}</span>
     </div>
+  );
+}
+
+function TrophyIcon({ size = 38 }: { size?: number }) {
+  return (
+    <svg
+      className="brand-icon"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M8 3h8v4a4 4 0 0 1-8 0V3z" />
+      <path d="M8 4H5a2 2 0 0 0 0 4h1.5" />
+      <path d="M16 4h3a2 2 0 0 1 0 4h-1.5" />
+      <path d="M10 11v3" />
+      <path d="M14 11v3" />
+      <path d="M7 21h10" />
+      <path d="M9 21v-3a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v3" />
+    </svg>
+  );
+}
+
+function AuthorBadge({ variant }: { variant: "header" | "footer" }) {
+  return (
+    <a
+      className={`author-badge author-badge--${variant}`}
+      href="https://www.linkedin.com/in/leandro-saracco/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Perfil de LinkedIn de Leandro Saracco"
+    >
+      <Linkedin size={variant === "header" ? 16 : 18} />
+      <span className="author-badge__label">
+        {variant === "header" ? "Dev by Leandro Saracco" : "Developed by Leandro Saracco"}
+      </span>
+    </a>
   );
 }
 
