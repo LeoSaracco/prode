@@ -324,6 +324,14 @@ function App() {
           {tournamentView === "bracket" && <BracketTree rounds={bracketRounds} />}
         </section>
       )}
+
+      <footer className="app-footer">
+        <span>Developed by{" "}
+          <a href="https://www.linkedin.com/in/leandro-saracco/" target="_blank" rel="noopener noreferrer">
+            Leandro Saracco
+          </a>
+        </span>
+      </footer>
     </main>
   );
 }

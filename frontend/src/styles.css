@@ -1321,3 +1321,27 @@ button, select, .combobox-trigger, .combobox-dropdown li {
 .team-combobox {
   min-width: 0;
 }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.app-footer {
+  text-align: center;
+  padding: 24px 16px 28px;
+  border-top: 1px solid #2d3a3d;
+  margin-top: 24px;
+}
+
+.app-footer span {
+  color: #6a8080;
+  font-size: 13px;
+}
+
+.app-footer a {
+  color: #8cc7ff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 120ms;
+}
+
+.app-footer a:hover {
+  color: #d6f36c;
+}
